@@ -727,6 +727,257 @@ This approach is being employed for the first time in a major network, enabling 
 In this model, without intervening in consensus, ATHENA uses the information from the Admission Request, the Host Protocol rules, and the Execution Permit to compare the final outcome of a transaction against the Expected Behavior. If any discrepancy is observed, it is reported to the Host Protocol.
 
 This approach not only enables full monitoring of the transaction lifecycle but also provides a valuable tool for error analysis, policy improvement, increased validation transparency, and facilitating the investigation of anomalous behavior. Consequently, anomalous behavior can be detected much faster than in conventional models and examined according to Host Protocol policies, without introducing any changes to the blockchain's consensus mechanism or security model.
+
+
+### Execution Permit–Based Transaction Admission
+Eliminating the Public Transaction Waiting Layer
+
+
+Transaction Admission in Conventional Blockchain Architectures
+
+In conventional blockchain architectures, regardless of the consensus algorithm employed, transaction admission generally follows a common architectural pattern.
+
+After a wallet signs a transaction, the signed transaction is immediately propagated throughout the network and placed into a shared public waiting layer, commonly referred to as the  mempool  or  transaction queue.
+
+This waiting layer temporarily stores incoming transactions until validators or block producers select them for execution.
+
+Consequently, transaction admission and transaction execution are decoupled.
+
+Transactions first become publicly visible to the network, and only afterwards compete for execution resources according to the current processing capacity of the blockchain.
+
+
+```
+
+Conventional Architecture
+
+
+
+      Wallet
+
+         │
+
+         │ Sign Transaction
+
+         ▼
+
+ ┌───────────────────────┐
+
+ │ Public Waiting Layer  │
+
+ │ (Mempool / Queue)     │
+
+ └───────────────────────┘
+
+         │
+
+         ▼
+
+     Validators
+
+         │
+
+         ▼
+
+      Consensus
+
+         │
+
+         ▼
+
+    Global Ledger
+
+```
+
+
+This architectural model introduces several inherent characteristics:
+
+. Signed transactions enter the network before execution resources are allocated.
+. All transactions compete within the same public waiting layer.
+. During periods of congestion, the waiting layer naturally grows.
+. The execution path of a transaction is unknown until validators eventually select it.
+. Every network participant can observe the signed transaction while it waits.
+. The public waiting layer therefore becomes an architectural component rather than merely an implementation detail.
+
+
+Transaction Admission in ATHENA
+
+ATHENA fundamentally redesigns transaction admission.
+
+Instead of allowing a signed transaction to enter the network immediately, the wallet first requests permission to execute the transaction.
+
+This request, referred to as an  Admission Request,  contains only the information required by the Host Protocol for admission decision-making.
+
+No signed transaction exists at this stage.
+
+After receiving the Admission Request, ATHENA evaluates the current operational state of the network together with the policies defined by the Host Protocol and generates an  Execution Permit.
+
+The Execution Permit completely defines the transaction lifecycle before the signed transaction is created.
+
+Depending on Host Protocol policy, the permit may specify:
+
+. validation path;
+. initial validator chain;
+. execution domain;
+.  execution engine;
+. scheduling policy;
+. execution constraints;
+. conflict-management policy;
+. expected behavior;
+. validator quorum;
+. and any additional execution parameters required by the Host Protocol.
+
+Only after receiving this permit does the wallet digitally sign the transaction.
+
+The signed transaction is then transmitted  directly  to the validator chain specified inside the Execution Permit.
+
+No public transaction waiting layer exists between the wallet and the designated validators.
+
+
+```
+
+ATHENA Architecture
+
+
+
+      Wallet
+
+         │
+
+         │ Admission Request
+
+         ▼
+
+ ┌────────────────────┐
+
+ │      ATHENA        │
+
+ │ Admission Layer    │
+
+ └────────────────────┘
+
+         │
+
+         │ Execution Permit
+
+         ▼
+
+      Wallet
+
+         │
+
+         │ Sign Transaction
+
+         ▼
+
+ Designated Validator Chain
+
+         │
+
+         ▼
+
+ Native Consensus
+
+         │
+
+         ▼
+
+  Global Ledger
+
+```
+
+
+Unlike conventional architectures, transaction admission in ATHENA is no longer based on placing signed transactions into a shared waiting pool.
+
+Instead, each transaction receives its execution path before entering the blockchain.
+
+From the moment an Execution Permit is issued, the wallet already knows:
+
+. where the transaction must be sent;
+. how it will be validated;
+. which execution policies apply;
+. and which validators are responsible for processing it.
+
+The transaction therefore follows its predefined execution path immediately after being signed.
+
+
+Architectural Consequences
+
+This architectural redesign introduces several important properties.
+
+1. Elimination of the Public Waiting Layer
+
+ATHENA removes the public transaction waiting layer from the transaction lifecycle.
+
+Transactions no longer wait inside a shared pool before execution.
+
+Execution resources are allocated first; transaction propagation occurs afterwards.
+
+2. Execution Path Determined Before Transaction Creation
+
+Unlike conventional architectures, ATHENA determines the execution path before the signed transaction is even created.
+
+The wallet receives the complete execution instructions in advance through the Execution Permit.
+
+3. Managed Transaction Admission
+
+ATHENA transforms transaction admission from an uncontrolled broadcast model into a managed admission model.
+
+Instead of allowing unlimited signed transactions to enter the network simultaneously, admission is coordinated according to the real processing capacity defined by the Host Protocol.
+
+4. No Global Competition Between Transactions
+
+Transactions no longer compete inside a common waiting layer.
+
+Each transaction follows only the execution path assigned by its own Execution Permit.
+
+5. Elimination of Unnecessary Public Disclosure
+
+Because signed transactions are not propagated before execution resources have already been assigned, unnecessary public disclosure of transaction information is eliminated.
+
+The signed transaction becomes visible only to the validator chain responsible for processing that specific transaction.
+
+
+Architectural Security Implications
+
+The elimination of the public waiting layer produces important architectural security consequences.
+
+In conventional blockchain systems, the public mempool represents an observation layer where signed transactions remain publicly accessible before execution.
+
+Researchers have discussed various attack scenarios that rely on observing transactions during this waiting period, including front-running, transaction-copying attacks, denial-of-service amplification, and long-term concerns regarding quantum-assisted cryptanalysis of publicly exposed signatures.
+
+ATHENA removes the architectural condition required for such attacks.
+
+Because signed transactions are never placed into a publicly accessible waiting layer:
+
+. there is no public transaction pool to observe;
+. there is no global transaction queue to monitor;
+. there is no architectural waiting period between public propagation and execution.
+
+Instead, transactions are signed only after execution authorization has already been granted and are delivered directly to the validator chain designated by the Execution Permit.
+
+Consequently, the public observation surface created by conventional mempool architectures no longer exists within ATHENA.
+
+This should not be interpreted as ATHENA replacing cryptographic security.
+
+Rather, ATHENA removes an entire architectural exposure layer while preserving the native consensus, execution engine, and security model of the Host Protocol.
+
+
+Native Compatibility
+
+Although ATHENA fundamentally redesigns transaction admission, it leaves the blockchain's native execution model completely unchanged.
+
+Consensus, block production, state transition, validator governance, and finality remain entirely under the authority of the Host Protocol.
+
+ATHENA modifies only the admission architecture—not the blockchain itself.
+
+
+Architectural Summary
+
+ATHENA replaces public transaction broadcasting with permission-based transaction admission.
+
+Transactions no longer wait inside a shared public pool; instead, each transaction receives its execution path before it is signed, allowing it to move directly from the wallet to its designated validator chain.
+
+By eliminating the public transaction waiting layer as an architectural component, ATHENA removes an entire class of exposure inherent to conventional mempool-based designs while remaining fully compatible with the Host Protocol's native consensus and execution model.
 ___
 ___
 # Compatibility with Validator Architectures and Processing Units
