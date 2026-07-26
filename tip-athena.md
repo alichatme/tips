@@ -1459,92 +1459,140 @@ ___
 ___
 # Threat Model
 
+The ATHENA threat model defines the security assumptions, scope of responsibility, and the types of threats this architecture is designed to manage or mitigate.
 
-### 1. Purpose
+ATHENA is a transaction lifecycle management, admission, scheduling, routing, and execution monitoring layer. It does not replace the Host Protocol's consensus algorithm, validation rules, or security model.
 
-ATHENA's threat model specifies the security assumptions, scope of responsibility, and types of threats this architecture is designed to address.
+Therefore, the ultimate security responsibility of the network remains with the Host Protocol.
 
-ATHENA is an admission, scheduling, and transaction processing assignment management layer and does not replace the consensus algorithm, validation rules, or basic network security mechanisms. Therefore, the ultimate security of the network remains the responsibility of the host protocol.
+### Security Assumptions
 
+This architecture is designed based on the following assumptions:
 
-### 2. Security Assumptions
-
-This architecture is based on the following assumptions:
-
-· The network consensus algorithm is correctly implemented.
+· The Host Protocol's consensus algorithm is correctly implemented.
 · The Finality mechanism is valid.
-· Validators operate according to protocol rules.
-· Cryptographic signatures are valid.
-· Authentication mechanisms and network access permissions are in place.
+· Validators operate according to Host Protocol rules.
+· Cryptographic algorithms and digital signatures are valid.
+· Authentication mechanisms and network access controls are in place.
 
-If any of these assumptions are violated, the responsibility for managing them lies with the host protocol.
+If any of these assumptions are violated, the responsibility for managing them falls to the Host Protocol.
 
+### Threats Addressed by ATHENA
 
-### 3. Threats Addressed
+1. Congestion Attacks
 
-ATHENA is designed to mitigate or manage the following threats.
+Sending a large volume of Admission Requests to reduce network efficiency.
 
+ATHENA mitigates these attacks through intelligent admission management, dynamic scheduling, and balanced load distribution among initial validators, execution domains, and parallel execution engines.
 
-Congestion Attacks:
+2. Mempool Observation Attacks
 
-Sending a large volume of transactions with the aim of causing congestion and reducing network efficiency.
+In many networks, signed transactions are placed in a public mempool before entering consensus, where they become observable.
 
-ATHENA attempts to reduce the impact of these attacks by distributing incoming transactions among validator groups operating in parallel.
+In the ATHENA architecture, there is no public mempool.
 
+Transactions are only sent directly to designated initial validators after the Execution Permit has been issued and the user has signed the transaction.
 
-Oscillation Attacks:
+Consequently, the attack surface arising from the public observation of pending transactions is significantly reduced, and the exploitable time window is completely eliminated.
 
-Attempts to create frequent changes in the number or composition of execution groups to increase network management overhead.
+3. Malicious Full Node Behavior
 
-If the hysteresis policy is active, continuous changes are controlled. The host protocol can also adjust the parameters of this policy according to network conditions.
+A malicious Full Node may attempt to:
 
+· Send the transaction through a different path.
+· Ignore the Execution Permit instructions.
+· Alter the order of execution stages.
+· Send incorrect information to other components.
+· Refuse to forward the transaction to the next network component.
 
-Malicious Validator Behavior
+Since all network components are required to verify the Execution Permit against the Canonical Copy, any deviation from the designated path is immediately detectable. The Canonical Copy mechanism, as an immutable reference, enables the detection of malicious behavior even when attempts are made to disregard the permit.
 
-Examples include:
+4. Malicious Initial Validator Behavior
+
+Examples of such behavior include:
 
 · Intentional delays
 · Non-responsiveness
-· Sending invalid information
-· Incomplete participation in the validation process
+· Submitting invalid results
+· Incomplete participation in validation
+· Failure to follow Execution Permit instructions
 
-Nodes in the group can monitor these behaviors and send reports to ATHENA and the network protocol. Final decisions regarding imposing restrictions or removing nodes are made according to the host protocol's rules.
+These behaviors are recorded during ATHENA's monitoring process and reported according to Host Protocol policies. Any deviation from the designated validation process is also detectable through full Execution Permit verification.
 
+5. Unauthorized Path Modification
 
-Attacks Based on Fixed Group Recognition:
+After the Execution Permit is issued, no network component is permitted to independently change:
 
-In many architectures, fixed validator groups can be targets of coordinated attacks.
+· The validation path,
+· The execution domain,
+· The execution engine,
+· Or the order of execution stages.
 
-In ATHENA, execution groups are formed dynamically, and there are no permanent memberships or pre-formed groups. This feature reduces the likelihood of stable coalitions forming or specific groups being targeted.
+Any independent modification will be detected during Execution Permit verification and will result in transaction rejection and a violation report.
 
+6. Unexpected Behavior or Outcome
 
-Mempool-Based Attacks:
+After the transaction is finally recorded in the global ledger, ATHENA compares the actual execution result with the "expected behavior or outcome" recorded in the Execution Permit.
 
-In networks with public mempools, transaction information is exposed before entering consensus.
+If any discrepancy is observed, ATHENA sends a report to the Host Protocol so that it can decide how to handle the situation according to its defined policies.
 
-Since ATHENA uses a mempool-free architecture, the attack surface related to public observation of pending transactions is reduced.
+7. Attacks Based on Fixed Structures
 
-### 4. Out-of-Scope Threats
+In many architectures, fixed validation structures can become targets of coordinated attacks.
 
-The following are outside ATHENA's scope of responsibility and are managed by the base protocol or network infrastructure:
+In ATHENA, the selection of initial validators, execution domains, and execution engines is performed dynamically for each transaction based on Host Protocol policies.
 
-· Consensus algorithm attacks
-· 51% attacks or similar attacks
-· Cryptographic algorithm failures
+This feature reduces the likelihood of forming predictable structures.
+
+### Threats Outside the Scope of ATHENA's Responsibility
+
+The following remain outside ATHENA's scope of responsibility and are managed by the Host Protocol or the network infrastructure:
+
+· Attacks against the consensus algorithm
+· 51% attacks or similar
+· Cryptographic algorithm weaknesses
 · Theft of user private keys
 · Compromise of user wallets
 · Network layer attacks
-· Physical attacks on node infrastructure
-· Attacks due to operating system or hardware defects
+· Physical attacks against node infrastructure
+· Operating system or hardware defects
 
-### 5. Separation of Responsibilities Principle
+### Separation of Responsibilities Principle
 
-ATHENA is solely responsible for admission management, scheduling, formation of execution groups, issuance of Execution Permits, and monitoring the transaction processing process.
+ATHENA is responsible for:
 
-Transaction validation, consensus algorithm execution, block finalization, global ledger management, and ensuring basic network security remain the responsibility of the host protocol.
+· Transaction admission management
+· Execution Permit issuance
+· Scheduling
+· Transaction routing
+· Initial validator selection
+· Execution domain selection
+· Execution engine selection
+· Exception management
+· Monitoring expected behavior or outcomes
+· Monitoring the correct execution of policies defined in the Execution Permit
+· Transaction lifecycle oversight
 
-### 6. Summary
+In contrast, the following responsibilities remain with the Host Protocol:
 
-The ATHENA architecture increases the network's operational security by reducing the attack surface at the admission layer, eliminating dependency on the mempool, dynamically forming execution groups, intelligently distributing processing load, and monitoring node behavior, without taking on the responsibility of the consensus algorithm or the network's basic security model.
-___
-___
+· Final validation
+· Consensus algorithm execution
+· Block production
+· Finality
+· Global ledger management
+· Fundamental network security
+
+### Summary
+
+ATHENA significantly reduces the attack surface at the transaction admission and processing layer by:
+
+· Eliminating the public mempool,
+· Implementing intelligent admission management,
+· Issuing Execution Permits,
+· Deterministically defining the transaction execution path,
+· Continuously verifying permits,
+· Managing exceptions,
+· Monitoring expected behavior or outcomes,
+· And overseeing the execution of defined policies.
+
+However, ATHENA is not responsible for the consensus algorithm or the fundamental security of the Host Protocol. It serves solely as a complementary layer that manages and controls the transaction lifecycle—from the initial admission request through to final monitoring after ledger recording.
