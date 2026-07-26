@@ -252,7 +252,7 @@ Assume a network has:
 
 Now assume the number of nodes increases to 20,000.
 
-In traditional architectures:
+In conventional architectures:
 
 · The number of validators increases.
 · Processing capacity remains approximately constant.
