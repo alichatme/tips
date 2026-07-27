@@ -416,45 +416,60 @@ ATHENA increases the network's operational capacity through intelligent lifecycl
 For this reason, ATHENA is designed as a complementary Layer 1 architecture that can coexist with future scalability technologies, provided they remain compatible with the policies and operational constraints defined by the Host Protocol.
 ___
 ___
-#  ATHENA Architecture Diagram
+# ATHENA Architecture Diagram
 
-The transaction admission process begins when the wallet sends an Admission Request to ATHENA.
+In the ATHENA architecture, the transaction lifecycle begins before the transaction enters the network. By receiving the Admission Request, analyzing the initial transaction information, evaluating the real-time network state, and applying Host Protocol policies, ATHENA determines the complete validation and execution path of the transaction before it enters the network. The result of this process is issued as an Execution Permit, which not only authorizes the transaction to enter the network but also defines its complete execution blueprint. From this point onward, all network components are required to process the transaction without making any independent decisions, strictly following the instructions recorded in the Execution Permit and the policies defined by the Host Protocol.
 
-This request, in accordance with Host Protocol policies and rules, includes the initial information required for transaction evaluation, such as the sender account identifier, receiver identifier, asset type, transaction amount, and other protocol-required information. At this stage, the final transaction signature is not sent to the network, and the wallet waits until it receives the Execution Permit from ATHENA.
+The transaction lifecycle in the ATHENA architecture proceeds as follows:
 
-Upon receiving the request, ATHENA collects any additional required information from the network and evaluates the real-time status of various network components according to Host Protocol policies. This evaluation may include parameters such as the number of incoming requests, available capacity of initial validator nodes, status of validation pipelines, load of execution engines in each domain, transactions currently being processed, and other protocol-defined metrics.
+### 1. Transaction Preparation in the Wallet
 
-Based on this information, ATHENA makes all necessary decisions for managing the transaction lifecycle. These decisions include:
+The user enters the required transaction information into the wallet and reaches the confirmation screen.
 
-· Dynamic selection of initial validator nodes and formation of initial validation pipelines;
-· Determination of the appropriate execution domain for the transaction;
-· Selection of the least-loaded parallel execution engine among the engines operating within that domain;
-· Determination of the validation and execution path for the transaction according to Host Protocol rules;
-· Generation and issuance of the Execution Permit, which contains all the information required to guide the transaction from the admission stage to final ledger recording.
+### 2. Admission Request Submission
 
-After the permit is issued, one copy of the Execution Permit is stored as the Canonical Copy in the ATHENA system to serve as the authoritative reference in subsequent stages, including verification, conflict management, and exceptional condition handling. The other copy is provided to the wallet.
+Before the user is allowed to sign the transaction, the wallet sends an Admission Request containing the information required by the Host Protocol to ATHENA.
 
-In the next step, the wallet sends the signed transaction along with the Execution Permit directly to the designated initial validator nodes. From this point onward, ATHENA is no longer in the normal path of transaction transmission or processing, and does not receive or transmit any copy of the transaction—except in cases where, according to Host Protocol policies, a conflict or exceptional condition requires ATHENA's intervention.
+### 3. Analysis and Decision-Making by ATHENA
 
-The initial validator nodes, before beginning validation, verify the Execution Permit against the Canonical Copy stored in ATHENA. After the permit's validity is confirmed, the initial validation pipeline is formed, and the transaction is directed to the designated execution domain and corresponding parallel execution engine according to the information recorded in the permit.
+ATHENA, by analyzing the request information, the current network state, and Host Protocol policies, determines the following:
 
-The execution engine processes the transaction according to Host Protocol rules. In the event of a conflict or any exceptional condition, the execution engine reports the issue to ATHENA. ATHENA re-verifies the Execution Permit, reviews the path taken to ensure process integrity, and then, in accordance with Host Protocol policies, manages the continuation of transaction execution, conflict resolution, redirection, re-execution, or any other necessary actions.
+· Dynamic selection of initial validator nodes
+· Formation of initial validation groups through dynamic node selection, resulting in the creation of parallel initial validation pipelines
+· Determination of the execution domain
+· Selection of the least-loaded execution engine from among the parallel engines within that domain
+· Determination of the minimum validation difficulty level
+· Registration of the Expected Behavior and Outcome
+· Issuance of the Execution Permit
+· Storage of the Canonical Copy of the permit
 
-Additionally, for each conflict or exceptional condition, ATHENA prepares an analytical report detailing the cause, the handling approach, and the final outcome, and provides it to the Host Protocol. This feedback can be used to refine admission policies, scheduling, node selection, domain selection, execution engine selection, or other Execution Permit issuance policies, with the aim of reducing the likelihood of similar conflicts recurring in the future.
+### 4. Receipt of Permit and Activation of Transaction Signing
 
-After the successful completion of validation, transaction execution, and reaching Finality, the transaction is recorded in the network's unified global ledger according to Host Protocol rules. In accordance with this architecture, the Execution Permit or its corresponding Cryptographic Commitment must be recorded alongside the transaction in the ledger according to Host Protocol policies, to enable auditing, independent verification, and complete reconstruction of the validation and execution path in the future.
+After the Execution Permit is issued, it is sent to the wallet, and only upon its receipt is the user enabled to sign the transaction.
 
-In this way, without making any changes to the consensus algorithm, ledger structure, account model, or native validation rules, ATHENA enhances the network's operational capacity and improves overall network efficiency through:
+### 5. Transaction Entry into the Network
 
-· Unified transaction lifecycle management,
-· Dynamic initial validator node selection,
-· Formation of parallel validation pipelines,
-· Intelligent execution domain selection,
-· Selection of the least-loaded parallel execution engine,
-· Innovative Execution Permit-based conflict management,
-· And continuous feedback to the Host Protocol.
+After the user signs the transaction, the wallet sends the signed transaction together with the Execution Permit directly to the designated initial validator nodes. The transaction never enters any public transaction queue (mempool).
 
-All of this is achieved without altering the base architecture.
+### 6. Execution Permit Verification and Initial Validation
+
+The initial validator nodes first verify the Execution Permit against the Canonical Copy stored in ATHENA. After the permit is confirmed, initial validation of the transaction is performed according to Host Protocol rules.
+
+### 7. Routing to the Execution Domain and Engine
+
+After successful completion of the initial validation, the transaction is routed according to the Execution Permit instructions to the designated execution domain, and from among the parallel execution engines within that domain, it is delivered precisely to the execution engine specified in the permit.
+
+### 8. Transaction Execution
+
+The designated execution engine executes the transaction according to Host Protocol rules. All state transitions, smart contract executions, and other native network logic are performed at this stage.
+
+### 9. Consensus and Final Recording
+
+After execution is complete, the transaction proceeds through the native consensus mechanism of the Host Protocol. Upon reaching Finality, the transaction is recorded in the global ledger together with the Execution Permit, enabling future verification, auditing, and complete reconstruction of the transaction lifecycle or its validation history.
+
+### 10. Expected Behavior or Outcome Monitoring
+
+In the final stage, ATHENA compares the recorded outcome with the Expected Behavior or Outcome that was defined at the time of Execution Permit issuance. If any discrepancy is observed, ATHENA prepares and sends an analytical report according to Host Protocol policies. The Host Protocol, using this feedback, can review and optimize its policies to reduce the likelihood of similar conflicts and exceptions recurring in the future.
 
 ### ATHENA Architecture Diagram
 
