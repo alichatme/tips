@@ -458,68 +458,94 @@ All of this is achieved without altering the base architecture.
 
 ### ATHENA Architecture Diagram
 
+
 ```
-                    ┌───────────────┐
-                    │    Wallet     │
-                    └───────┬───────┘
-                            │
-                            │ 1. Admission Request
-                            ▼
-        ┌───────────────────────────────────────────────────┐
-        │                   ATHENA                         │
-        │         Transaction Lifecycle Management         │
-        │                                                   │
-        │  • Dynamic Validator Selection                   │
-        │  • Initial Validation Group Formation            │
-        │  • Execution Domain Selection                    │
-        │  • Parallel Execution Engine Selection           │
-        │  • Execution Permit Generation                   │
-        └───────────────────────┬───────────────────────────┘
+                     ┌────────────────────────┐
+                     │         User           │
+                     └────────────┬───────────┘
+                                  │
+                                  │ Enter Transaction Details
+                                  ▼
+                     ┌────────────────────────┐
+                     │        Wallet          │
+                     │ Confirmation Screen    │
+                     └────────────┬───────────┘
+                                  │
+                                  │ 1. Admission Request
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                               ATHENA                                        │
+│                 Transaction Lifecycle Management Layer                       │
+│                                                                             │
+│ • Network Analysis                                                          │
+│ • Host Protocol Policy Evaluation                                           │
+│ • Dynamic Validator Selection                                               │
+│ • Validation Pipeline Formation                                             │
+│ • Execution Domain Selection                                                │
+│ • Least-loaded Parallel Engine Selection                                    │
+│ • Expected Behavior Registration                                            │
+│ • Execution Permit Generation                                               │
+│ • Canonical Copy Storage                                                    │
+└───────────────────────────────┬─────────────────────────────────────────────┘
                                 │
                                 │ 2. Execution Permit
                                 ▼
-                    ┌───────────────┐
-                    │    Wallet     │
-                    └───────┬───────┘
-                            │
-                            │ 3. Signed Transaction
-                            │    + Execution Permit
-                            ▼
-              ┌──────────────────────────────┐
-              │   Initial Validation Group   │
-              └──────────────┬───────────────┘
-                             │
-                             ▼
-              ┌──────────────────────────────┐
-              │   Parallel Execution Engine  │
-              │ (Selected Execution Domain)  │
-              └──────────────┬───────────────┘
-                             │
-                             │ Conflict / Exception
-                             ▼
-        ┌───────────────────────────────────────────────────┐
-        │                   ATHENA                         │
-        │            Conflict Management                   │
-        │                                                   │
-        │  • Permit Re-Verification                        │
-        │  • Conflict Resolution                           │
-        │  • Re-execution Coordination                     │
-        │  • Feedback to Host Protocol                     │
-        └───────────────────────┬───────────────────────────┘
-                                │
-                                ▼
-              ┌──────────────────────────────┐
-              │     Native Consensus         │
-              └──────────────┬───────────────┘
-                             │
-                             ▼
-              ┌──────────────────────────────────────────────┐
-              │         Unified Global Ledger               │
-              │  + Execution Permit or                       │
-              │    Cryptographic Commitment                   │
-              │    (Host Protocol Policy)                    │
-              └──────────────────────────────────────────────┘
+                     ┌────────────────────────┐
+                     │        Wallet          │
+                     │ Enable User Signature  │
+                     └────────────┬───────────┘
+                                  │
+                                  │ User Signature
+                                  ▼
+                     ┌────────────────────────┐
+                     │        Wallet          │
+                     └────────────┬───────────┘
+                                  │
+                                  │ 3. Signed Transaction
+                                  │    + Execution Permit
+                                  ▼
+              ┌──────────────────────────────────────┐
+              │ Initial Validation Nodes             │
+              │ • Permit Verification                │
+              │ • Initial Validation                 │
+              └────────────────┬─────────────────────┘
+                               │
+                               │ Forward According
+                               │ To Execution Permit
+                               ▼
+              ┌──────────────────────────────────────┐
+              │ Execution Domain                     │
+              │ Selected Parallel Execution Engine   │
+              │        (Least Loaded)                │
+              └────────────────┬─────────────────────┘
+                               │
+                               │ Execute Transaction
+                               ▼
+                     ┌────────────────────────┐
+                     │ Host Protocol          │
+                     │ Native Consensus       │
+                     └────────────┬───────────┘
+                                  │
+                                  ▼
+      ┌───────────────────────────────────────────────────────────────┐
+      │                  Unified Global Ledger                        │
+      │                                                               │
+      │ • Transaction                                                  │
+      │ • Execution Permit (Must be recorded)                         │
+      └───────────────────┬───────────────────────────────────────────┘
+                          │
+                          │ Expected Behavior Monitoring
+                          ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                               ATHENA                                        │
+│                                                                             │
+│ • Compare Expected vs Actual Result                                         │
+│ • Detect Exceptions                                                         │
+│ • Analytical Report                                                         │
+│ • Feedback to Host Protocol                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
+
 
 ___
 ___
