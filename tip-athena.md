@@ -597,6 +597,66 @@ The Execution Permit is not merely an admission authorization; it is the authori
 Furthermore, before the transaction enters the network, ATHENA analyzes the real‑time network state and leverages knowledge gained from past conflicts to select the most appropriate validation and execution path, thereby reducing the likelihood of conflicts from the outset. This feature transforms conflict management from a reactive process into a proactive one.
 
 For this reason, the ATHENA architecture can be regarded not only as a transaction lifecycle management system but also as the first known framework to introduce the concept of proactive conflict management—based on the Execution Permit and performed before the transaction enters the network—in a public blockchain.
+
+### Sequential Transaction Processing
+
+Preserving transaction order is one of the important security components of the TRON network. With the introduction of ATHENA into this network, this advantage remains fully intact.
+
+Based on this mechanism, ATHENA establishes a defined sequential relationship between consecutive transactions from the same account, according to Host Protocol policies. This ensures that a subsequent transaction or a reconstructed transaction cannot bypass the original transaction simply by modifying the fee, changing the submission path, or reaching a node earlier.
+
+The purpose of this mechanism is to create a deterministic and verifiable order for the admission of related transactions into the validation and processing pipeline.
+
+2. Enforcing Order at the Admission Layer
+
+In the ATHENA architecture, transaction ordering is enforced at the Admission Layer through the Execution Permit.
+
+When a transaction from a source account enters the admission process, ATHENA records the processing state of that account.
+
+Until the previous transaction reaches the required state for passing the Admission stage—according to Host Protocol policy—ATHENA will not issue a new permit for the next transaction from the same account.
+
+As a result, an account cannot bypass its previous transaction by submitting a new transaction, nor can it cause the new transaction to enter the validation path earlier.
+
+This rule applies to both individual transactions and Bundles.
+
+3. Independence from Submission Type
+
+Processing order is not determined by submission type.
+
+This means that:
+
+· An individual transaction cannot overtake a previous Bundle.
+· A new Bundle cannot overtake a previous individual transaction.
+· A Bundle cannot gain priority over a previous request from the same account simply because it contains more transactions or has a different fee.
+
+Therefore, the sequential relationship between requests from the same account is independent of whether the request is submitted individually or as a Bundle.
+
+4. Defense Against Transaction Reconstruction and Replacement
+
+This mechanism provides a defensive layer against scenarios where an attacker reconstructs a valid transaction and creates another version of it.
+
+Even if the reconstructed version is structurally acceptable, the attacker cannot simply submit it through a different path or node to get it ahead of the original transaction. This is because ATHENA will not issue a new permit for the source account until the required processing state of the previous transaction has been established.
+
+Thus, submission time or submission path cannot bypass the sequential relationship established at the Admission Layer.
+
+5. Benefits of Sequential Transaction Processing
+
+· Transparency and Predictability: The sequential relationship of transactions from the same account is clearly defined, making network behavior more predictable for users.
+· Reduced Race Conditions: Consecutive transactions from the same account cannot enter the processing path without respecting the defined order.
+· Reduced Transaction Reordering: A subsequent transaction cannot overtake a previous one simply by modifying the fee, path, or submission time.
+· Enhanced State Integrity: A defined processing order helps prevent inconsistent states and certain Double-Spend scenarios.
+· Easier Auditing: The sequential relationship of requests and their processing results can be reconstructed and verified.
+
+6. Relationship with Conflict Management
+
+Sequential Transaction Processing does not replace Conflict Management.
+
+Conflict Management is used to handle conflicts that arise during the processing phase, while Sequential Transaction Processing aims to prevent some of these conflicts from occurring in the first place—specifically those caused by improper order of transactions from the same account—at the Admission Layer.
+
+7. Foundational Principle
+
+Execution Permit issuance MUST respect the protocol-defined processing order of requests originating from the same account. A subsequent transaction or bundle MUST NOT become eligible for admission before the required processing state of its predecessor has been established according to Host Protocol policy.
+
+This principle ensures that the order of transactions from the same account cannot be bypassed simply by creating a new transaction, modifying the fee, changing the submission path, or reconstructing a previous transaction.
 ___
 ___
 # Transaction Lifecycle Management in ATHENA
