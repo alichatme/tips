@@ -206,10 +206,10 @@ In many blockchain networks, increasing the number of nodes beyond a certain thr
 
 Under such conditions:
 
-· Revenue from fees is distributed among a larger number of nodes.
-· The network's operational capacity remains approximately constant.
-· The economic return of each node gradually decreases.
-· Increased demand typically leads to longer queues and higher fees, rather than an increase in actual processing capacity.
+- Revenue from fees is distributed among a larger number of nodes.
+- The network's operational capacity remains approximately constant.
+- The economic return of each node gradually decreases.
+- Increased demand typically leads to longer queues and higher fees, rather than an increase in actual processing capacity.
 
 For this reason, in many networks, the growth in the number of validators does not necessarily result in a proportional growth in network capacity.
 
@@ -221,12 +221,12 @@ In the ATHENA architecture, increasing the number of nodes is not merely about a
 
 Through unified transaction lifecycle management, ATHENA:
 
-· Receives the required information from the wallet and the network.
-· Dynamically selects the initial validator nodes, resulting in the creation of parallel validation pipelines in the network.
-· Determines the appropriate execution domain.
-· Selects the least-loaded execution engine among those operating in parallel within that domain.
-· Issues the Execution Permit.
-· Manages the validation path according to Host Protocol policies until the transaction is finally recorded in the global ledger.
+- Receives the required information from the wallet and the network.
+- Dynamically selects the initial validator nodes, resulting in the creation of parallel validation pipelines in the network.
+- Determines the appropriate execution domain.
+- Selects the least-loaded execution engine among those operating in parallel within that domain.
+- Issues the Execution Permit.
+- Manages the validation path according to Host Protocol policies until the transaction is finally recorded in the global ledger.
 
 Therefore, the addition of new nodes can directly increase the transaction admission and initial validation capacity. Subsequently, the Host Protocol, in response to increased load, can increase the number of execution engines in each domain.
 
@@ -260,10 +260,10 @@ Now assume the number of nodes increases to 20,000.
 
 In conventional architectures:
 
-· The number of validators increases.
-· Processing capacity remains approximately constant.
-· Revenue is divided among a larger number of nodes.
-· The economic return of each node decreases.
+- The number of validators increases.
+- Processing capacity remains approximately constant.
+- Revenue is divided among a larger number of nodes.
+- The economic return of each node decreases.
 
 In the ATHENA architecture:
 
@@ -283,10 +283,10 @@ In ATHENA, revenue is not merely a function of the number of nodes—it is a fun
 
 The more transactions the network can process using parallel validation and parallel execution engines:
 
-· Total network revenue increases.
-· Distributable revenue among participating validators increases.
-· Economic incentive for investing in network infrastructure and joining new nodes increases.
-· Gradual network expansion becomes possible without changing the base architecture.
+- Total network revenue increases.
+- Distributable revenue among participating validators increases.
+- Economic incentive for investing in network infrastructure and joining new nodes increases.
+- Gradual network expansion becomes possible without changing the base architecture.
 
 Therefore, ATHENA transforms the increase in the number of nodes from a potential operational cost into an opportunity for operational capacity growth and economic network development.
 
@@ -296,27 +296,27 @@ The analysis presented in this section is conceptual and architectural in nature
 
 The actual performance of ATHENA will depend on multiple factors, including:
 
-· Real transaction demand
-· Host Protocol policies
-· Node hardware capacity
-· Execution capacity and the number of parallel engines in each domain
-· Network bandwidth
-· Implementation quality
-· Consensus algorithm overhead
-· Network economic policies
-· Reward distribution mechanisms
+- Real transaction demand
+- Host Protocol policies
+- Node hardware capacity
+- Execution capacity and the number of parallel engines in each domain
+- Network bandwidth
+- Implementation quality
+- Consensus algorithm overhead
+- Network economic policies
+- Reward distribution mechanisms
 
 Therefore, ATHENA does not guarantee a specific increase in TPS or validator revenue.
 
 Rather, it provides an architectural framework that, under favorable conditions, can utilize existing network resources more effectively and facilitate the simultaneous growth of:
 
-· Transaction admission capacity
-· Parallel validation
-· Parallel execution
-· Economic efficiency
-· Attraction of new nodes
-· Development of execution engines
-· Overall network operational throughput
+- Transaction admission capacity
+- Parallel validation
+- Parallel execution
+- Economic efficiency
+- Attraction of new nodes
+- Development of execution engines
+- Overall network operational throughput
 
 All of this is achieved without changing the consensus algorithm, account model, or the unified global ledger.
 ___
@@ -412,10 +412,10 @@ From an architectural perspective, ATHENA can be viewed as an **Integrated Trans
 
 Unlike other scalability approaches:
 
-. Sharding increases capacity by partitioning network state and ledger.
-. Layer 2  increases capacity by moving execution outside the main chain.
-. Block size scaling increases capacity by enlarging individual blocks.
-. Consensus optimization increases capacity by modifying the consensus mechanism.
+- Sharding increases capacity by partitioning network state and ledger.
+- Layer 2  increases capacity by moving execution outside the main chain.
+- Block size scaling increases capacity by enlarging individual blocks.
+- Consensus optimization increases capacity by modifying the consensus mechanism.
 
 ATHENA increases the network's operational capacity through intelligent lifecycle management, dynamic validator selection, parallel initial validation, execution domain classification, intelligent execution engine selection, Execution Permit–based validation management, and proactive conflict resolution, while leaving all fundamental components of the blockchain architecture unchanged.
 
@@ -440,14 +440,14 @@ Before the user is allowed to sign the transaction, the wallet sends an Admissio
 
 ATHENA, by analyzing the request information, the current network state, and Host Protocol policies, determines the following:
 
-· Dynamic selection of initial validator nodes
-· Formation of initial validation groups through dynamic node selection, resulting in the creation of parallel initial validation pipelines
-· Determination of the execution domain
-· Selection of the least-loaded execution engine from among the parallel engines within that domain
-· Determination of the minimum validation difficulty level
-· Registration of the Expected Behavior and Outcome
-· Issuance of the Execution Permit
-· Storage of the Canonical Copy of the permit
+- Dynamic selection of initial validator nodes
+- Formation of initial validation groups through dynamic node selection, resulting in the creation of parallel initial validation pipelines
+- Determination of the execution domain
+- Selection of the least-loaded execution engine from among the parallel engines within that domain
+- Determination of the minimum validation difficulty level
+- Registration of the Expected Behavior and Outcome
+- Issuance of the Execution Permit
+- Storage of the Canonical Copy of the permit
 
 ### 4. Receipt of Permit and Activation of Transaction Signing
 
@@ -630,9 +630,9 @@ Processing order is not determined by submission type.
 
 This means that:
 
-· An individual transaction cannot overtake a previous Bundle.
-· A new Bundle cannot overtake a previous individual transaction.
-· A Bundle cannot gain priority over a previous request from the same account simply because it contains more transactions or has a different fee.
+- An individual transaction cannot overtake a previous Bundle.
+- A new Bundle cannot overtake a previous individual transaction.
+- A Bundle cannot gain priority over a previous request from the same account simply because it contains more transactions or has a different fee.
 
 Therefore, the sequential relationship between requests from the same account is independent of whether the request is submitted individually or as a Bundle.
 
@@ -646,11 +646,11 @@ Thus, submission time or submission path cannot bypass the sequential relationsh
 
 4. Benefits of Sequential Transaction Processing
 
-· Transparency and Predictability: The sequential relationship of transactions from the same account is clearly defined, making network behavior more predictable for users.
-· Reduced Race Conditions: Consecutive transactions from the same account cannot enter the processing path without respecting the defined order.
-· Reduced Transaction Reordering: A subsequent transaction cannot overtake a previous one simply by modifying the fee, path, or submission time.
-· Enhanced State Integrity: A defined processing order helps prevent inconsistent states and certain Double-Spend scenarios.
-· Easier Auditing: The sequential relationship of requests and their processing results can be reconstructed and verified.
+- Transparency and Predictability: The sequential relationship of transactions from the same account is clearly defined, making network behavior more predictable for users.
+- Reduced Race Conditions: Consecutive transactions from the same account cannot enter the processing path without respecting the defined order.
+- Reduced Transaction Reordering: A subsequent transaction cannot overtake a previous one simply by modifying the fee, path, or submission time.
+- Enhanced State Integrity: A defined processing order helps prevent inconsistent states and certain Double-Spend scenarios.
+- Easier Auditing: The sequential relationship of requests and their processing results can be reconstructed and verified.
 
 5. Relationship with Conflict Management
 
@@ -683,15 +683,15 @@ Throughout this lifecycle, ATHENA is responsible for managing, in a unified mann
 
 These decisions may include:
 
-· Collecting required information from the wallet and the network
-· Assessing the real-time state of the network
-· Dynamically selecting initial validator nodes
-· Forming initial validation pipelines
-· Determining the appropriate execution domain
-· Selecting the least-loaded parallel execution engine
-· Issuing the Execution Permit
-· Managing conflicts
-· Providing analytical feedback to the Host Protocol
+- Collecting required information from the wallet and the network
+- Assessing the real-time state of the network
+- Dynamically selecting initial validator nodes
+- Forming initial validation pipelines
+- Determining the appropriate execution domain
+- Selecting the least-loaded parallel execution engine
+- Issuing the Execution Permit
+- Managing conflicts
+- Providing analytical feedback to the Host Protocol
 
 After the Execution Permit is issued, the validation and execution path of the transaction is determined, and other network components continue their operation according to the information recorded in the permit and the Host Protocol rules.
 
@@ -713,13 +713,13 @@ In practice, this permit serves as the Execution Blueprint for the transaction.
 
 The Execution Permit may contain information such as:
 
-· Responsible validators
-· Initial validation pipeline
-· Execution domain
-· Selected execution engine
-· Validation policies
-· Execution constraints
-· Other Host Protocol-required parameters
+- Responsible validators
+- Initial validation pipeline
+- Execution domain
+- Selected execution engine
+- Validation policies
+- Execution constraints
+- Other Host Protocol-required parameters
 
 As a result, all network components operate precisely according to this execution blueprint, and no component makes independent decisions outside the defined policies.
 
@@ -751,15 +751,15 @@ ATHENA does not impose any fixed policies on the Host Protocol.
 
 All operational parameters—such as:
 
-· Number of validators per pipeline
-· Number of validation pipelines
-· Number of execution domains
-· Number of execution engines
-· Validator selection policies
-· Engine selection policies
-· Scheduling policies
+- Number of validators per pipeline
+- Number of validation pipelines
+- Number of execution domains
+- Number of execution engines
+- Validator selection policies
+- Engine selection policies
+- Scheduling policies
 
-—remain entirely under the authority of the Host Protocol.
+remain entirely under the authority of the Host Protocol.
 
 Consequently, as the host protocol evolves or its rules change, ATHENA adapts accordingly without requiring any changes to its own architecture.
 ___
@@ -776,10 +776,10 @@ Expected Behavior refers to the set of outcomes that, based on the information c
 
 For example, if a wallet requests to transfer 10 TRX from account A to account B, the Expected Behavior of this transaction would include:
 
-· 10 TRX being deducted from account A's balance;
-· 10 TRX being added to account B's balance;
-· The transaction having been processed exactly according to the validation and execution path specified in the Execution Permit;
-· The final result conforming to the rules of the Host Protocol.
+- 10 TRX being deducted from account A's balance;
+- 10 TRX being added to account B's balance;
+- The transaction having been processed exactly according to the validation and execution path specified in the Execution Permit;
+- The final result conforming to the rules of the Host Protocol.
 
 For simple transactions, this behavior is usually highly predictable. Conversely, for more complex transactions—such as smart contract calls—the Expected Behavior may involve a set of state changes, outputs, or conditions defined by the contract itself.
 
@@ -789,8 +789,8 @@ Monitoring Expected Behavior
 
 As described in the ATHENA architecture, ATHENA's responsibility does not end with the issuance of the Execution Permit. ATHENA monitors the lifecycle of each transaction until its final recording in the global ledger. After a transaction reaches Finality, ATHENA compares the recorded outcome with the Expected Behavior.
 
-· If the observed outcome is consistent with the Expected Behavior, the transaction's lifecycle is considered complete.
-· However, if the recorded result deviates from the Expected Behavior, ATHENA registers this as an Exception and sends the necessary report to the Host Protocol.
+- If the observed outcome is consistent with the Expected Behavior, the transaction's lifecycle is considered complete.
+- However, if the recorded result deviates from the Expected Behavior, ATHENA registers this as an Exception and sends the necessary report to the Host Protocol.
 
 Investigating the cause of this deviation, determining its origin, and deciding on any subsequent actions remain entirely under the authority of the Host Protocol. ATHENA does not modify any consensus, security, or governance rules.
 
@@ -798,8 +798,8 @@ Impact on Resource Allocation
 
 One benefit of this model is that ATHENA can consider the certainty of the Expected Behavior when issuing the Execution Permit. In general:
 
-· Transactions whose Expected Behavior is simple, deterministic, and highly predictable can be scheduled with the minimum processing resources required by the Host Protocol.
-· Transactions whose Expected Behavior is more complex, more sensitive, or dependent on shared network state can be directed, according to Host Protocol policies, to stronger validation paths or allocated more resources.
+- Transactions whose Expected Behavior is simple, deterministic, and highly predictable can be scheduled with the minimum processing resources required by the Host Protocol.
+- Transactions whose Expected Behavior is more complex, more sensitive, or dependent on shared network state can be directed, according to Host Protocol policies, to stronger validation paths or allocated more resources.
 
 These decisions are fully governed by the Host Protocol's rules; ATHENA merely implements them through the Execution Permit.
 
@@ -809,11 +809,11 @@ Monitoring Expected Behavior can serve as an effective tool for detecting anomal
 
 If the final result recorded in the ledger deviates from the Expected Behavior, the Host Protocol may consider this event as an indicator for investigating issues such as:
 
-· Abnormal validator behavior;
-· Potential presence of a malicious Full Node;
-· Execution errors;
-· Synchronization issues;
-· Other exceptional conditions.
+- Abnormal validator behavior;
+- Potential presence of a malicious Full Node;
+- Execution errors;
+- Synchronization issues;
+- Other exceptional conditions.
 
 ATHENA only identifies and reports the deviation and makes no independent decisions regarding node maliciousness or the imposition of penalties.
 
@@ -922,16 +922,16 @@ The Execution Permit completely defines the transaction lifecycle before the sig
 
 Depending on Host Protocol policy, the permit may specify:
 
-. validation path;
-. initial validator chain;
-. execution domain;
-.  execution engine;
-. scheduling policy;
-. execution constraints;
-. conflict-management policy;
-. expected behavior;
-. validator quorum;
-. and any additional execution parameters required by the Host Protocol.
+- validation path;
+- initial validator chain;
+- execution domain;
+- execution engine;
+- scheduling policy;
+- execution constraints;
+- conflict-management policy;
+- expected behavior;
+- validator quorum;
+- and any additional execution parameters required by the Host Protocol.
 
 Only after receiving this permit does the wallet digitally sign the transaction.
 
@@ -999,10 +999,10 @@ Instead, each transaction receives its execution path before entering the blockc
 
 From the moment an Execution Permit is issued, the wallet already knows:
 
-. where the transaction must be sent;
-. how it will be validated;
-. which execution policies apply;
-. and which validators are responsible for processing it.
+- where the transaction must be sent;
+- how it will be validated;
+- which execution policies apply;
+- and which validators are responsible for processing it.
 
 The transaction therefore follows its predefined execution path immediately after being signed.
 
@@ -1056,9 +1056,9 @@ ATHENA removes the architectural condition required for such attacks.
 
 Because signed transactions are never placed into a publicly accessible waiting layer:
 
-. there is no public transaction pool to observe;
-. there is no global transaction queue to monitor;
-. there is no architectural waiting period between public propagation and execution.
+- there is no public transaction pool to observe;
+- there is no global transaction queue to monitor;
+- there is no architectural waiting period between public propagation and execution.
 
 Instead, transactions are signed only after execution authorization has already been granted and are delivered directly to the validator chain designated by the Execution Permit.
 
@@ -1093,16 +1093,16 @@ One of the fundamental principles of the ATHENA architecture is that the Executi
 
 At the time of issuance, the Execution Permit is generated based on the current state of the network and the policies defined by the Host Protocol. It records all decisions made by ATHENA for that transaction. Depending on Host Protocol policies, this information may include:
 
-· Transaction type;
-· Validation path;
-· Initial validator nodes;
-· Execution domain;
-· Selected execution engine;
-· Scheduling policies;
-· Permit validity period;
-· Security policies;
-· Expected behavior;
-· And any other parameters required by the Host Protocol.
+- Transaction type;
+- Validation path;
+- Initial validator nodes;
+- Execution domain;
+- Selected execution engine;
+- Scheduling policies;
+- Permit validity period;
+- Security policies;
+- Expected behavior;
+- And any other parameters required by the Host Protocol.
 
 Simultaneously with permit issuance, a Canonical Copy of the Execution Permit is recorded within ATHENA and serves as the sole authoritative reference for that transaction.
 
@@ -1115,14 +1115,14 @@ This verification is not limited to checking the Permit ID or the validity of th
 
 In other words, each validator node must verify that:
 
-· The transaction type exactly matches the type for which the permit was issued;
-· The validation path remains unchanged;
-· The execution domain is the one originally assigned;
-· The execution engine is the one originally selected;
-· The set of initial validator nodes exactly matches the permit;
-· The scheduling and security policies have not been altered;
-· The permit validity period has not expired;
-· And all parameters defined by the Host Protocol remain identical to the Canonical Copy.
+- The transaction type exactly matches the type for which the permit was issued;
+- The validation path remains unchanged;
+- The execution domain is the one originally assigned;
+- The execution engine is the one originally selected;
+- The set of initial validator nodes exactly matches the permit;
+- The scheduling and security policies have not been altered;
+- The permit validity period has not expired;
+- And all parameters defined by the Host Protocol remain identical to the Canonical Copy.
 
 Any discrepancy—even in a single parameter—invalidates the Execution Permit, and the transaction will be rejected before entering the validation and consensus process.
 
@@ -1144,12 +1144,12 @@ In contrast, ATHENA manages the transaction lifecycle before the transaction ent
 
 After receiving the Admission Request, ATHENA collects the required information from the wallet and the network according to Host Protocol policies. By analyzing the real-time state of the network—including:
 
-· Available processing capacity of initial validator nodes;
-· Status of execution domains;
-· Load of parallel execution engines within each domain;
-· Transactions currently being processed;
-· Execution status of transactions from the same account;
-· And other policies defined by the Host Protocol—
+- Available processing capacity of initial validator nodes;
+- Status of execution domains;
+- Load of parallel execution engines within each domain;
+- Transactions currently being processed;
+- Execution status of transactions from the same account;
+- And other policies defined by the Host Protocol—
 
 and based on the transaction type and the monitored information received from the network, ATHENA determines the most appropriate validation and execution path for the transaction and records all these decisions within the Execution Permit.
 
@@ -1166,19 +1166,19 @@ In this architecture, no validation pipeline, execution domain, or execution eng
 
 For each Admission Request, ATHENA independently decides—based on the current state of the network, the type and domain of the transaction, and the Admission Request sent by the wallet—the following:
 
-· Which initial validator nodes should be selected;
-· How many groups and, consequently, how many initial validation pipelines are required across the network for this volume of incoming transactions;
-· Which Execution Domain the transaction should enter after initial validation;
-· Which execution engine, among the parallel engines within that domain, has the lowest processing load.
+- Which initial validator nodes should be selected;
+- How many groups and, consequently, how many initial validation pipelines are required across the network for this volume of incoming transactions;
+- Which Execution Domain the transaction should enter after initial validation;
+- Which execution engine, among the parallel engines within that domain, has the lowest processing load.
 
 As a result, the execution path of each transaction may differ from the next, even if both belong to the same type of operation.
 
 This architecture ensures:
 
-· Balanced distribution of processing load across available resources;
-· Prevention of hot spots;
-· Scalability of operational capacity in proportion to resource growth;
-· Elimination of predictability regarding transaction execution paths by nodes or other network actors.
+- Balanced distribution of processing load across available resources;
+- Prevention of hot spots;
+- Scalability of operational capacity in proportion to resource growth;
+- Elimination of predictability regarding transaction execution paths by nodes or other network actors.
 
 In other words, ATHENA transforms the network from an architecture with unmanaged transaction admission into one with Managed Transaction Admission—an architecture in which transaction volume growth and processing capacity growth can be managed in a coordinated and balanced manner.
 
@@ -1213,16 +1213,16 @@ ATHENA continuously monitors the operational status of various network component
 
 This monitoring may include:
 
-· Load of initial validator nodes;
-· Load of execution domains;
-· Status of parallel execution engines;
-· Conflict rate;
-· Initial validation time;
-· Time to reach consensus;
-· Time to reach Finality;
-· Re-execution rate;
-· Load distribution quality;
-· And other performance indicators defined by the Host Protocol.
+- Load of initial validator nodes;
+- Load of execution domains;
+- Status of parallel execution engines;
+- Conflict rate;
+- Initial validation time;
+- Time to reach consensus;
+- Time to reach Finality;
+- Re-execution rate;
+- Load distribution quality;
+- And other performance indicators defined by the Host Protocol.
 
 The purpose of this monitoring is not merely to display network status, but to create a continuous learning cycle for performance improvement.
 
@@ -1252,16 +1252,16 @@ Modern blockchain networks are no longer limited to simple asset transfers.
 
 Depending on the Host Protocol, a network may support various types of operations, including:
 
-· Native coin transfers;
-· Token transfers;
-· Smart contract execution;
-· dApp interactions;
-· Staking operations;
-· Voting and governance;
-· Multi‑signature transactions;
-· State‑sensitive operations;
-· Cross‑module operations;
-· Any new operation type introduced by the Host Protocol in the future.
+- Native coin transfers;
+- Token transfers;
+- Smart contract execution;
+- dApp interactions;
+- Staking operations;
+- Voting and governance;
+- Multi‑signature transactions;
+- State‑sensitive operations;
+- Cross‑module operations;
+- Any new operation type introduced by the Host Protocol in the future.
 
 Clearly, not all of these transactions can be processed with a single validation policy.
 
@@ -1276,17 +1276,17 @@ The Execution Permit is, in effect, the Execution Blueprint for that transaction
 
 Depending on Host Protocol policies, this permit may specify:
 
-· The initial validation path;
-· The initial validators;
-· The Execution Domain;
-· The selected execution engine;
-· The minimum validation difficulty;
-· Scheduling policies;
-· Conflict management policies;
-· Exception handling policies;
-· Monitoring policies or expected behavior;
-· Execution constraints;
-· And any other parameters the Host Protocol deems necessary.
+- The initial validation path;
+- The initial validators;
+- The Execution Domain;
+- The selected execution engine;
+- The minimum validation difficulty;
+- Scheduling policies;
+- Conflict management policies;
+- Exception handling policies;
+- Monitoring policies or expected behavior;
+- Execution constraints;
+- And any other parameters the Host Protocol deems necessary.
 
 From this point onward, network components no longer make independent decisions about how to process the transaction; they simply follow the steps defined in the Execution Permit.
 
@@ -1313,13 +1313,13 @@ The Host Protocol may define different policies for different transaction types.
 
 For example, it may determine that:
 
-· A simple TRX transfer requires only minimal validation resources;
-· A specific token transfer requires a different execution domain;
-· Smart contract execution requires more validators;
-· Minimum validation difficulty varies by transaction type and category;
-· Some sensitive transactions should be validated through dedicated paths or with higher difficulty;
-· Certain operations should be routed to a specific execution engine;
-· Some transactions should be executed in parallel or sequentially and their results compared.
+- A simple TRX transfer requires only minimal validation resources;
+- A specific token transfer requires a different execution domain;
+- Smart contract execution requires more validators;
+- Minimum validation difficulty varies by transaction type and category;
+- Some sensitive transactions should be validated through dedicated paths or with higher difficulty;
+- Certain operations should be routed to a specific execution engine;
+- Some transactions should be executed in parallel or sequentially and their results compared.
 
 ATHENA does not define these policies; it merely communicates them to the network through the Execution Permit.
 
@@ -1334,12 +1334,12 @@ At this stage, ATHENA verifies whether the network has acted exactly according t
 
 This verification may include checking that:
 
-· The validation path was correctly followed;
-· All designated validators participated in the validation;
-· The execution domain was respected;
-· The designated execution engine performed the validation;
-· The expected behavior or outcome was correct and no exception occurred;
-· And all other policies defined by the Host Protocol were properly enforced.
+- The validation path was correctly followed;
+- All designated validators participated in the validation;
+- The execution domain was respected;
+- The designated execution engine performed the validation;
+- The expected behavior or outcome was correct and no exception occurred;
+- And all other policies defined by the Host Protocol were properly enforced.
 
 If any discrepancy is observed, ATHENA registers it as an Exception and sends the necessary report to the Host Protocol.
 
@@ -1381,11 +1381,11 @@ The primary purpose of the Batch Execution Permit is to support accounts that ne
 
 This capability is particularly suitable for:
 
-· Cryptocurrency exchanges
-· Payment platforms
-· Distribution services
-· High-volume payment systems
-· Professional users
+- Cryptocurrency exchanges
+- Payment platforms
+- Distribution services
+- High-volume payment systems
+- Professional users
 
 The goal is to reduce permit issuance overhead, reduce the number of messages required at the Admission Layer, and enable sending a large number of transactions as a single Bundle.
 
@@ -1400,14 +1400,14 @@ A source account may have only one active Batch Execution Permit at a time. Unti
 
 A batch request may include the following information:
 
-· Source account identifier
-· List of transactions
-· Recipient of each transaction
-· Amount of each transaction
-· Asset type
-· Operation type
-· Smart contract parameters, if applicable
-· Any other information required by Host Protocol policies
+- Source account identifier
+- List of transactions
+- Recipient of each transaction
+- Amount of each transaction
+- Asset type
+- Operation type
+- Smart contract parameters, if applicable
+- Any other information required by Host Protocol policies
 
 
 Transaction Review and Path Assignment
@@ -1429,16 +1429,16 @@ After reviewing the batch request, ATHENA issues a Batch Execution Permit.
 
 This permit may include:
 
-· Batch permit identifier
-· Bundle identifier
-· List of transactions
-· Assigned validation path for each transaction
-· Initial validator nodes
-· Execution domain
-· Execution engine or domain assigned for the Bundle
-· Permit validity period
-· Information regarding reserved resources or balance
-· Other details according to Host Protocol policies
+- Batch permit identifier
+- Bundle identifier
+- List of transactions
+- Assigned validation path for each transaction
+- Initial validator nodes
+- Execution domain
+- Execution engine or domain assigned for the Bundle
+- Permit validity period
+- Information regarding reserved resources or balance
+- Other details according to Host Protocol policies
 
 Upon issuance, one copy of the Batch Execution Permit is sent to the wallet, and another copy is stored in the Canonical Copy so that the relevant nodes can verify the authenticity and content of the permit.
 
@@ -1464,8 +1464,8 @@ After the permit and signature are confirmed valid, the transactions inside the 
 
 Each transaction may have an independent result:
 
-· Success: State changes related to the transaction are applied.
-· Failed Execution: State changes related to the failed operation are not applied, but the Failed result is recorded as a processing outcome.
+- Success: State changes related to the transaction are applied.
+- Failed Execution: State changes related to the failed operation are not applied, but the Failed result is recorded as a processing outcome.
 
 Therefore, the failure of a single transaction does not mean the failure of the entire Bundle.
 
@@ -1476,11 +1476,11 @@ Once all transactions within the Bundle have reached a determined processing res
 
 In this state:
 
-· No transaction within the Bundle remains in an undetermined processing state.
-· The result of each transaction is independently determined.
-· Successful transactions have their State Changes applied.
-· Failed transactions do not apply any State Changes for the failed operation.
-· The result of each transaction is visible and verifiable for accounting, reporting, and auditing purposes.
+- No transaction within the Bundle remains in an undetermined processing state.
+- The result of each transaction is independently determined.
+- Successful transactions have their State Changes applied.
+- Failed transactions do not apply any State Changes for the failed operation.
+- The result of each transaction is visible and verifiable for accounting, reporting, and auditing purposes.
 
 Therefore:
 
@@ -1496,8 +1496,8 @@ To avoid ambiguity, ATHENA distinguishes between two states:
 Invalid Transaction:
 A transaction that fails initial admission or validation stages—for example, due to invalid structure, incomplete data, incorrect address, or other issues defined by Host Protocol policies—is identified as an Invalid Transaction.
 
-· If the Bundle itself is identified as Invalid: The entire Bundle is rejected.
-· If one or more transactions within the Bundle are identified as Invalid: The Bundle continues its validation path without those transactions.
+- If the Bundle itself is identified as Invalid: The entire Bundle is rejected.
+- If one or more transactions within the Bundle are identified as Invalid: The Bundle continues its validation path without those transactions.
 
 A report of the Invalid Transaction is sent to the Host Protocol, and the source account is notified.
 
@@ -1531,8 +1531,8 @@ Relationship Between Batch Execution Permit and FBT
 
 The Batch Execution Permit and Finalized Bundle Transactions (FBT) are related but distinct concepts:
 
-· Batch Execution Permit: The mechanism for batch authorization and admission.
-· FBT: The mechanism for complete Bundle finalization.
+- Batch Execution Permit: The mechanism for batch authorization and admission.
+- FBT: The mechanism for complete Bundle finalization.
 
 The overall flow is as follows:
 
@@ -1566,13 +1566,13 @@ In this architecture, transaction admission, validation, execution, and monitori
 
 The user enters the required transaction information into the wallet. Depending on the operation type, this information may include:
 
-· Sender address
-· Receiver address
-· Asset amount
-· Asset type (TRX, TRC-20, NFT, etc.)
-· Smart contract invocation
-· Contract parameters
-· Any other information required by ATHENA in accordance with Host Protocol policies
+- Sender address
+- Receiver address
+- Asset amount
+- Asset type (TRX, TRC-20, NFT, etc.)
+- Smart contract invocation
+- Contract parameters
+- Any other information required by ATHENA in accordance with Host Protocol policies
 
 After the information is completed, the wallet displays a transaction summary on the confirmation screen for the user to review before signing.
 
@@ -1587,14 +1587,17 @@ Only after receiving a valid Execution Permit does the wallet enable the user to
 ATHENA simultaneously evaluates multiple sets of information:
 
 1. Information received from the wallet.
+
 2. Additional information required by the Host Protocol for each Admission Request.
+
 3. The current real-time state of the network, including:
-   · Number of incoming transactions at any given moment
-   · Available processing capacity of initial validators
-   · Available processing capacity of execution domains
-   · Load of parallel execution engines within each domain, individually
-   · Sender Consistency status
-   · Any other information required by Host Protocol policies
+
+- Number of incoming transactions at any given moment
+- Available processing capacity of initial validators
+- Available processing capacity of execution domains
+- Load of parallel execution engines within each domain, individually
+- Sender Consistency status
+- Any other information required by Host Protocol policies
 
 ### Phase 3: Execution Permit Generation
 
@@ -1604,20 +1607,20 @@ This permit serves as the complete execution blueprint for the transaction.
 
 The Execution Permit may include:
 
-· Permit validity
-· Dynamic selection of initial validators and the resulting formation of parallel validation pipelines based on real-time network load and Host Protocol policies
-· Minimum validation difficulty level
-· Execution domain
-· Selection of the least-loaded execution engine within that domain, from among the parallel engines
-· Application of conflict and exception management policies according to Host Protocol rules
-· Recording of expected behavior or outcome within the Execution Permit
-· Network behavior monitoring policies, expected transaction outcome, conflict management, and exception handling according to Host Protocol rules
-· Any other parameters defined by the Host Protocol
+- Permit validity
+- Dynamic selection of initial validators and the resulting formation of parallel validation pipelines based on real-time network load and Host Protocol policies
+- Minimum validation difficulty level
+- Execution domain
+- Selection of the least-loaded execution engine within that domain, from among the parallel engines
+- Application of conflict and exception management policies according to Host Protocol rules
+- Recording of expected behavior or outcome within the Execution Permit
+- Network behavior monitoring policies, expected transaction outcome, conflict management, and exception handling according to Host Protocol rules
+- Any other parameters defined by the Host Protocol
 
 Simultaneously:
 
-· A Canonical Copy of the permit is stored in ATHENA for future verification.
-· A copy of the Execution Permit is sent to the wallet for transaction submission to the initial validators.
+- A Canonical Copy of the permit is stored in ATHENA for future verification.
+- A copy of the Execution Permit is sent to the wallet for transaction submission to the initial validators.
 
 ### Phase 4: Completion of Both Network Entry Conditions
 
@@ -1633,8 +1636,8 @@ Neither condition can substitute for the other. Only after both conditions are s
 
 After both conditions are met, the wallet submits:
 
-· The signed transaction, along with
-· The Execution Permit
+- The signed transaction, along with
+- The Execution Permit
 
 Directly to the initial validators designated in the Execution Permit.
 
@@ -1652,11 +1655,11 @@ After successful Execution Permit verification and confirmation of its full alig
 
 The initial validator nodes selected by ATHENA, upon receiving the transaction along with the Execution Permit and after completing its full verification, perform the following preliminary checks:
 
-· Digital signature validity
-· Transaction structure
-· Account balance
-· Request validity
-· Any other checks defined by the network protocol
+- Digital signature validity
+- Transaction structure
+- Account balance
+- Request validity
+- Any other checks defined by the network protocol
 
 After successfully completing the initial validation, the designated nodes forward the transaction to the specified execution domain and, among the set of parallel execution engines within that domain, to the exact execution engine designated in the Execution Permit.
 
@@ -1682,10 +1685,10 @@ Throughout this process, no network component is permitted to select a new path 
 
 If an exception occurs at any stage of transaction validation:
 
-· ATHENA manages the exception according to the instructions and policies received from the Host Protocol and sends the relevant report to the Host Protocol.
-· All components re-verify the Execution Permit.
-· A report of the exception or incident is prepared and sent to the Host Protocol.
-· If necessary, actions such as transaction cancellation, retransmission, retransmission via a new path, continuation of validation from the same stage without rollback, and other measures are taken—all according to the pre-defined Host Protocol policies for ATHENA's exception handling.
+- ATHENA manages the exception according to the instructions and policies received from the Host Protocol and sends the relevant report to the Host Protocol.
+- All components re-verify the Execution Permit.
+- A report of the exception or incident is prepared and sent to the Host Protocol.
+- If necessary, actions such as transaction cancellation, retransmission, retransmission via a new path, continuation of validation from the same stage without rollback, and other measures are taken—all according to the pre-defined Host Protocol policies for ATHENA's exception handling.
 
 ### Phase 11: Consensus and Finality
 
@@ -1738,10 +1741,10 @@ Each network component is responsible solely for performing the stage assigned t
 
 Consequently:
 
-· The execution path of every transaction is deterministically defined from the very moment it enters the network.
-· Independent decision‑making by network components regarding the execution path is eliminated.
-· All stages of transaction validation and execution can be reconstructed and independently verified at any time.
-· The entire transaction lifecycle—from admission to final ledger recording—remains transparent, documented, and auditable.
+- The execution path of every transaction is deterministically defined from the very moment it enters the network.
+- Independent decision‑making by network components regarding the execution path is eliminated.
+- All stages of transaction validation and execution can be reconstructed and independently verified at any time.
+- The entire transaction lifecycle—from admission to final ledger recording—remains transparent, documented, and auditable.
 
 Accordingly, the behavior of each transaction is determined only once—at the admission stage, based on Host Protocol policies—and remains unchanged throughout the transaction lifecycle.
 
@@ -1766,11 +1769,11 @@ Therefore, the ultimate security responsibility of the network remains with the 
 
 This architecture is designed based on the following assumptions:
 
-· The Host Protocol's consensus algorithm is correctly implemented.
-· The Finality mechanism is valid.
-· Validators operate according to Host Protocol rules.
-· Cryptographic algorithms and digital signatures are valid.
-· Authentication mechanisms and network access controls are in place.
+- The Host Protocol's consensus algorithm is correctly implemented.
+- The Finality mechanism is valid.
+- Validators operate according to Host Protocol rules.
+- Cryptographic algorithms and digital signatures are valid.
+- Authentication mechanisms and network access controls are in place.
 
 If any of these assumptions are violated, the responsibility for managing them falls to the Host Protocol.
 
@@ -1796,11 +1799,11 @@ Consequently, the attack surface arising from the public observation of pending 
 
 A malicious Full Node may attempt to:
 
-· Send the transaction through a different path.
-· Ignore the Execution Permit instructions.
-· Alter the order of execution stages.
-· Send incorrect information to other components.
-· Refuse to forward the transaction to the next network component.
+- Send the transaction through a different path.
+- Ignore the Execution Permit instructions.
+- Alter the order of execution stages.
+- Send incorrect information to other components.
+- Refuse to forward the transaction to the next network component.
 
 Since all network components are required to verify the Execution Permit against the Canonical Copy, any deviation from the designated path is immediately detectable. The Canonical Copy mechanism, as an immutable reference, enables the detection of malicious behavior even when attempts are made to disregard the permit.
 
@@ -1808,11 +1811,11 @@ Since all network components are required to verify the Execution Permit against
 
 Examples of such behavior include:
 
-· Intentional delays
-· Non-responsiveness
-· Submitting invalid results
-· Incomplete participation in validation
-· Failure to follow Execution Permit instructions
+- Intentional delays
+- Non-responsiveness
+- Submitting invalid results
+- Incomplete participation in validation
+- Failure to follow Execution Permit instructions
 
 These behaviors are recorded during ATHENA's monitoring process and reported according to Host Protocol policies. Any deviation from the designated validation process is also detectable through full Execution Permit verification.
 
@@ -1820,10 +1823,10 @@ These behaviors are recorded during ATHENA's monitoring process and reported acc
 
 After the Execution Permit is issued, no network component is permitted to independently change:
 
-· The validation path,
-· The execution domain,
-· The execution engine,
-· Or the order of execution stages.
+- The validation path
+- The execution domain
+- The execution engine
+- Or the order of execution stages.
 
 Any independent modification will be detected during Execution Permit verification and will result in transaction rejection and a violation report.
 
@@ -1845,52 +1848,52 @@ This feature reduces the likelihood of forming predictable structures.
 
 The following remain outside ATHENA's scope of responsibility and are managed by the Host Protocol or the network infrastructure:
 
-· Attacks against the consensus algorithm
-· 51% attacks or similar
-· Cryptographic algorithm weaknesses
-· Theft of user private keys
-· Compromise of user wallets
-· Network layer attacks
-· Physical attacks against node infrastructure
-· Operating system or hardware defects
+- Attacks against the consensus algorithm
+- 51% attacks or similar
+- Cryptographic algorithm weaknesses
+- Theft of user private keys
+- Compromise of user wallets
+- Network layer attacks
+- Physical attacks against node infrastructure
+- Operating system or hardware defects
 
 ### Separation of Responsibilities Principle
 
 ATHENA is responsible for:
 
-· Transaction admission management
-· Execution Permit issuance
-· Scheduling
-· Transaction routing
-· Initial validator selection
-· Execution domain selection
-· Execution engine selection
-· Exception management
-· Monitoring expected behavior or outcomes
-· Monitoring the correct execution of policies defined in the Execution Permit
-· Transaction lifecycle oversight
+- Transaction admission management
+- Execution Permit issuance
+- Scheduling
+- Transaction routing
+- Initial validator selection
+- Execution domain selection
+- Execution engine selection
+- Exception management
+- Monitoring expected behavior or outcomes
+- Monitoring the correct execution of policies defined in the Execution Permit
+- Transaction lifecycle oversight
 
 In contrast, the following responsibilities remain with the Host Protocol:
 
-· Final validation
-· Consensus algorithm execution
-· Block production
-· Finality
-· Global ledger management
-· Fundamental network security
+- Final validation
+- Consensus algorithm execution
+- Block production
+- Finality
+- Global ledger management
+- Fundamental network security
 
 ### Summary
 
 ATHENA significantly reduces the attack surface at the transaction admission and processing layer by:
 
-· Eliminating the public mempool,
-· Implementing intelligent admission management,
-· Issuing Execution Permits,
-· Deterministically defining the transaction execution path,
-· Continuously verifying permits,
-· Managing exceptions,
-· Monitoring expected behavior or outcomes,
-· And overseeing the execution of defined policies.
+- Eliminating the public mempool,
+- Implementing intelligent admission management,
+- Issuing Execution Permits,
+- Deterministically defining the transaction execution path,
+- Continuously verifying permits,
+- Managing exceptions,
+- Monitoring expected behavior or outcomes,
+- And overseeing the execution of defined policies.
 
 However, ATHENA is not responsible for the consensus algorithm or the fundamental security of the Host Protocol. It serves solely as a complementary layer that manages and controls the transaction lifecycle—from the initial admission request through to final monitoring after ledger recording.
 ___
@@ -1918,10 +1921,10 @@ In this architecture, ATHENA creates an intelligent transaction management and r
 
 This layer, based on transaction information, real-time network state, and Host Protocol policies, decides:
 
-· Which initial validator nodes should perform the validation
-· Which execution domain the transaction should enter
-· Which parallel execution engine within that domain should execute the transaction
-· How the complete transaction lifecycle—from admission to final ledger registration—should proceed
+- Which initial validator nodes should perform the validation
+- Which execution domain the transaction should enter
+- Which parallel execution engine within that domain should execute the transaction
+- How the complete transaction lifecycle—from admission to final ledger registration—should proceed
 
 As a result, the transaction's path is determined before it enters the network, and all network components simply follow that path.
 
