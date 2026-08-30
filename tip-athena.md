@@ -63,14 +63,23 @@ In this unified architecture, ATHENA is no longer merely an admission layer—it
 ### ATHENA's responsibilities include:
 
 · Transaction Admission: Receiving the Admission Request and required information from the wallet according to Host Protocol rules.
+
 · Information Analysis: Analyzing the received information, Access List, and other required Metadata for decision-making.
+
 · Applying Network Policies: Applying admission policies and Sender Consistency.
+
 · Dynamic Validator Selection: Dynamically selecting validator nodes for each transaction based on real-time network policies and TRON protocols.
+
 · Creating Parallel Validation Pipelines: Assigning each transaction to a dedicated parallel validation pipeline resulting from dynamic node selection.
+
 · Execution Domain Classification: Determining the execution domain or category of the transaction (TRX, USDT, NFT, General, etc.).
+
 · Workload Monitoring and Engine Selection: Monitoring the load of execution engines in each domain operating in parallel and selecting the execution engine with the lowest processing load at the time of permit issuance.
+
 · Determining Conflict Management Policy: Selecting the appropriate conflict management strategy (Serialization, Optimistic, Locking, or Hybrid) based on transaction type, domain, and network status.
+
 · Issuing Execution Permit: Generating and issuing the Execution Permit containing all the information required for transaction validation, from the selected nodes for initial validation to transaction recording in the ledger, as well as the selected conflict management policy.
+
 · Canonical Copy Storage: Upon permit issuance, storing the Execution Permit in the Canonical Copy for subsequent verification.
 
 With the arrival of a transaction submission request from the wallet to ATHENA, ATHENA's responsibility begins and continues until the transaction's final status is determined according to the Host Protocol and the transaction is finally recorded in the network's global ledger.
@@ -139,11 +148,15 @@ In this unified architecture, conflict management is performed proactively, rely
 When an execution engine detects a conflict, execution error, or any other exceptional condition according to Host Protocol during transaction validation:
 
 1. The execution engine identifies the conflict and reports it to ATHENA.
+
 2. ATHENA first verifies the Execution Permit, and then based on Host Protocol policies, manages the conflict handling and continuation of transaction validation:
-   · It first verifies and validates the integrity and completed validation stages based on the Execution Permit to ensure the validation path has still followed the initial decision.
-   · After verification, ATHENA acts according to Host Protocol policies (e.g., redirecting to Fallback Engine, Retry, or Re-execution).
-   · If continuing transaction validation is impossible even with the above measures, ATHENA, due to lack of a solution, sends a report to the network, cancels the transaction according to Host Protocol rules, and sends a new permit for retransmission to the wallet.
+
+· It first verifies and validates the integrity and completed validation stages based on the Execution Permit to ensure the validation path has still followed the initial decision.
+· After verification, ATHENA acts according to Host Protocol policies (e.g., redirecting to Fallback Engine, Retry, or Re-execution).
+· If continuing transaction validation is impossible even with the above measures, ATHENA, due to lack of a solution, sends a report to the network, cancels the transaction according to Host Protocol rules, and sends a new permit for retransmission to the wallet.
+
 3. ATHENA prepares an analytical report of each occurred conflict and its management approach and sends it to the Host Protocol to prevent conflict repetition by improving network policies in subsequent permit issuance for future transactions.
+
 4. The network protocol, upon receiving these reports, uses them to improve admission policies, scheduling, and Execution Permit issuance for subsequent transactions, preventing the repetition of the same type of conflict, and accordingly updates permit issuance policies for ATHENA.
 
 When a conflict is detected in a transaction, the transaction is never returned to ATHENA, and conflict resolution policies are pursued from the same stage.
@@ -606,7 +619,7 @@ Based on this mechanism, ATHENA establishes a defined sequential relationship be
 
 The purpose of this mechanism is to create a deterministic and verifiable order for the admission of related transactions into the validation and processing pipeline.
 
-2. Enforcing Order at the Admission Layer
+1. Enforcing Order at the Admission Layer
 
 In the ATHENA architecture, transaction ordering is enforced at the Admission Layer through the Execution Permit.
 
@@ -618,7 +631,7 @@ As a result, an account cannot bypass its previous transaction by submitting a n
 
 This rule applies to both individual transactions and Bundles.
 
-3. Independence from Submission Type
+2. Independence from Submission Type
 
 Processing order is not determined by submission type.
 
@@ -630,7 +643,7 @@ This means that:
 
 Therefore, the sequential relationship between requests from the same account is independent of whether the request is submitted individually or as a Bundle.
 
-4. Defense Against Transaction Reconstruction and Replacement
+3. Defense Against Transaction Reconstruction and Replacement
 
 This mechanism provides a defensive layer against scenarios where an attacker reconstructs a valid transaction and creates another version of it.
 
@@ -638,7 +651,7 @@ Even if the reconstructed version is structurally acceptable, the attacker canno
 
 Thus, submission time or submission path cannot bypass the sequential relationship established at the Admission Layer.
 
-5. Benefits of Sequential Transaction Processing
+4. Benefits of Sequential Transaction Processing
 
 · Transparency and Predictability: The sequential relationship of transactions from the same account is clearly defined, making network behavior more predictable for users.
 · Reduced Race Conditions: Consecutive transactions from the same account cannot enter the processing path without respecting the defined order.
@@ -646,13 +659,13 @@ Thus, submission time or submission path cannot bypass the sequential relationsh
 · Enhanced State Integrity: A defined processing order helps prevent inconsistent states and certain Double-Spend scenarios.
 · Easier Auditing: The sequential relationship of requests and their processing results can be reconstructed and verified.
 
-6. Relationship with Conflict Management
+5. Relationship with Conflict Management
 
 Sequential Transaction Processing does not replace Conflict Management.
 
 Conflict Management is used to handle conflicts that arise during the processing phase, while Sequential Transaction Processing aims to prevent some of these conflicts from occurring in the first place—specifically those caused by improper order of transactions from the same account—at the Admission Layer.
 
-7. Foundational Principle
+6. Foundational Principle
 
 Execution Permit issuance MUST respect the protocol-defined processing order of requests originating from the same account. A subsequent transaction or bundle MUST NOT become eligible for admission before the required processing state of its predecessor has been established according to Host Protocol policy.
 
