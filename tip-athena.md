@@ -62,25 +62,16 @@ In this unified architecture, ATHENA is no longer merely an admission layer—it
 
 ### ATHENA's responsibilities include:
 
-· Transaction Admission: Receiving the Admission Request and required information from the wallet according to Host Protocol rules.
-
-· Information Analysis: Analyzing the received information, Access List, and other required Metadata for decision-making.
-
-· Applying Network Policies: Applying admission policies and Sender Consistency.
-
-· Dynamic Validator Selection: Dynamically selecting validator nodes for each transaction based on real-time network policies and TRON protocols.
-
-· Creating Parallel Validation Pipelines: Assigning each transaction to a dedicated parallel validation pipeline resulting from dynamic node selection.
-
-· Execution Domain Classification: Determining the execution domain or category of the transaction (TRX, USDT, NFT, General, etc.).
-
-· Workload Monitoring and Engine Selection: Monitoring the load of execution engines in each domain operating in parallel and selecting the execution engine with the lowest processing load at the time of permit issuance.
-
-· Determining Conflict Management Policy: Selecting the appropriate conflict management strategy (Serialization, Optimistic, Locking, or Hybrid) based on transaction type, domain, and network status.
-
-· Issuing Execution Permit: Generating and issuing the Execution Permit containing all the information required for transaction validation, from the selected nodes for initial validation to transaction recording in the ledger, as well as the selected conflict management policy.
-
-· Canonical Copy Storage: Upon permit issuance, storing the Execution Permit in the Canonical Copy for subsequent verification.
+- Transaction Admission: Receiving the Admission Request and required information from the wallet according to Host Protocol rules.
+- Information Analysis: Analyzing the received information, Access List, and other required Metadata for decision-making.
+- Applying Network Policies: Applying admission policies and Sender Consistency.
+- Dynamic Validator Selection: Dynamically selecting validator nodes for each transaction based on real-time network policies and TRON protocols.
+- Creating Parallel Validation Pipelines: Assigning each transaction to a dedicated parallel validation pipeline resulting from dynamic node selection.
+- Execution Domain Classification: Determining the execution domain or category of the transaction (TRX, USDT, NFT, General, etc.).
+- Workload Monitoring and Engine Selection: Monitoring the load of execution engines in each domain operating in parallel and selecting the execution engine with the lowest processing load at the time of permit issuance.
+- Determining Conflict Management Policy: Selecting the appropriate conflict management strategy (Serialization, Optimistic, Locking, or Hybrid) based on transaction type, domain, and network status.
+- Issuing Execution Permit: Generating and issuing the Execution Permit containing all the information required for transaction validation, from the selected nodes for initial validation to transaction recording in the ledger, as well as the selected conflict management policy.
+- Canonical Copy Storage: Upon permit issuance, storing the Execution Permit in the Canonical Copy for subsequent verification.
 
 With the arrival of a transaction submission request from the wallet to ATHENA, ATHENA's responsibility begins and continues until the transaction's final status is determined according to the Host Protocol and the transaction is finally recorded in the network's global ledger.
 
@@ -106,16 +97,18 @@ ATHENA's core innovation lies in the fact that all stages of a transaction's val
 
 The Execution Permit includes the following information:
 
-· Permit ID and validity period
-· Validator nodes selected for initial validation
-· Determined execution domain
-· Selected execution engine with the lowest load from each domain
-· Other protocol parameters required for the transaction to progress from admission to final recording
+- Permit ID and validity period
+- Validator nodes selected for initial validation
+- Determined execution domain
+- Selected execution engine with the lowest load from each domain
+- Other protocol parameters required for the transaction to progress from admission to final recording
 
 After the Execution Permit is issued:
 
 1. Based on the permit, the wallet sends the signed transaction to the designated nodes.
+
 2. After performing initial validation, the nodes send the transaction to the designated domain and execution engine without any new decision-making and solely based on the information in the Execution Permit.
+
 3. The execution engine processes the transaction according to the designated path.
 
 No secondary scheduling decisions, no new execution queues, and no additional routing layers are created at runtime.
@@ -132,13 +125,13 @@ In these cases, ATHENA does not make new decisions regarding the initial path or
 
 ATHENA's main responsibilities in such cases include:
 
-· Managing conflicts detected by execution engines according to Host Protocol policies.
-· Re-verifying the Execution Permit in case of interference detection, as a first step and according to Host Protocol rules.
-· Determining the most suitable path for continuing transaction execution after a conflict occurs.
-· Redirecting the transaction to the same engine, another engine from the same domain, or the General Engine according to Host Protocol policies.
-· Executing Retry or Re-execution in cases where Host Protocol deems it mandatory.
-· In exceptional circumstances, returning the transaction for issuance of a new Execution Permit, only if such a process is defined by the Host Protocol.
-· Preparing analytical reports of occurred conflicts and sending them to the Host Protocol as feedback, with the aim of preventing repeated conflicts to improve or change admission policies, scheduling, and Execution Permit issuance for subsequent network transactions.
+- Managing conflicts detected by execution engines according to Host Protocol policies.
+- Re-verifying the Execution Permit in case of interference detection, as a first step and according to Host Protocol rules.
+- Determining the most suitable path for continuing transaction execution after a conflict occurs.
+- Redirecting the transaction to the same engine, another engine from the same domain, or the General Engine according to Host Protocol policies.
+- Executing Retry or Re-execution in cases where Host Protocol deems it mandatory.
+- In exceptional circumstances, returning the transaction for issuance of a new Execution Permit, only if such a process is defined by the Host Protocol.
+- Preparing analytical reports of occurred conflicts and sending them to the Host Protocol as feedback, with the aim of preventing repeated conflicts to improve or change admission policies, scheduling, and Execution Permit issuance for subsequent network transactions.
 
 
 ### Conflict Management in ATHENA Architecture
@@ -151,9 +144,9 @@ When an execution engine detects a conflict, execution error, or any other excep
 
 2. ATHENA first verifies the Execution Permit, and then based on Host Protocol policies, manages the conflict handling and continuation of transaction validation:
 
-· It first verifies and validates the integrity and completed validation stages based on the Execution Permit to ensure the validation path has still followed the initial decision.
-· After verification, ATHENA acts according to Host Protocol policies (e.g., redirecting to Fallback Engine, Retry, or Re-execution).
-· If continuing transaction validation is impossible even with the above measures, ATHENA, due to lack of a solution, sends a report to the network, cancels the transaction according to Host Protocol rules, and sends a new permit for retransmission to the wallet.
+- It first verifies and validates the integrity and completed validation stages based on the Execution Permit to ensure the validation path has still followed the initial decision.
+- After verification, ATHENA acts according to Host Protocol policies (e.g., redirecting to Fallback Engine, Retry, or Re-execution).
+- If continuing transaction validation is impossible even with the above measures, ATHENA, due to lack of a solution, sends a report to the network, cancels the transaction according to Host Protocol rules, and sends a new permit for retransmission to the wallet.
 
 3. ATHENA prepares an analytical report of each occurred conflict and its management approach and sends it to the Host Protocol to prevent conflict repetition by improving network policies in subsequent permit issuance for future transactions.
 
@@ -168,9 +161,9 @@ For example, if a conflict is detected in an execution engine, the transaction i
 
 This architecture is based on a fundamental principle:
 
-· Planning is done once: ATHENA makes all decisions related to the validation path, domain, engine, and conflict management policy before the transaction enters the network and records them in the Execution Permit.
-· Execution follows the recorded plan: All network components (nodes, engines, and Host Protocol) follow the designated path in the Execution Permit without new decision-making.
-· Exception management: In case of conflict or any exception, ATHENA manages the continuation of validation from the same stage without transaction return or retransmission, relying on re-verification of the Execution Permit and Host Protocol policies, and sends feedback to the Host Protocol.
+- Planning is done once: ATHENA makes all decisions related to the validation path, domain, engine, and conflict management policy before the transaction enters the network and records them in the Execution Permit.
+- Execution follows the recorded plan: All network components (nodes, engines, and Host Protocol) follow the designated path in the Execution Permit without new decision-making.
+- Exception management: In case of conflict or any exception, ATHENA manages the continuation of validation from the same stage without transaction return or retransmission, relying on re-verification of the Execution Permit and Host Protocol policies, and sends feedback to the Host Protocol.
 
 This principle reduces unnecessary validation work, minimizes repeated admission processing, and enables conflict management during execution without rebuilding the entire transaction lifecycle.
 
@@ -181,17 +174,17 @@ With this unified approach, the philosophy of "separating decision-making from e
 
 ATHENA decides:
 
-· When a transaction should enter the network.
-· Which nodes should perform initial validation.
-· How initial parallel validation pipelines should be created through dynamic node selection.
-· Which execution domain the transaction should be sent to after initial validation.
-· Which execution engine (with the lowest load) should validate the transaction.
-· What approach should be taken if a conflict is detected at any stage based on Host Protocol policies.
-· ATHENA's responsibilities in case of conflict or exceptions, and their resolution, follow the policies defined in the Host Protocol, which are predetermined for ATHENA.
-· Implementing conflict management policies by ATHENA to guide the transaction to the correct path according to the network protocol and Host Protocol policies.
-· Managing conflict at runtime without transaction return, managing the transaction from the exact stage where the conflict was identified.
-· Sending analytical feedback from ATHENA to the network for continuous improvement in preventing potential conflicts by identifying and addressing them during Execution Permit issuance.
-· The Execution Permit is the sole authoritative validation reference in the network, and all network components are required to act solely according to its provisions without independent decision-making.
+- When a transaction should enter the network.
+- Which nodes should perform initial validation.
+- How initial parallel validation pipelines should be created through dynamic node selection.
+- Which execution domain the transaction should be sent to after initial validation.
+- Which execution engine (with the lowest load) should validate the transaction.
+- What approach should be taken if a conflict is detected at any stage based on Host Protocol policies.
+- ATHENA's responsibilities in case of conflict or exceptions, and their resolution, follow the policies defined in the Host Protocol, which are predetermined for ATHENA.
+- Implementing conflict management policies by ATHENA to guide the transaction to the correct path according to the network protocol and Host Protocol policies.
+- Managing conflict at runtime without transaction return, managing the transaction from the exact stage where the conflict was identified.
+- Sending analytical feedback from ATHENA to the network for continuous improvement in preventing potential conflicts by identifying and addressing them during Execution Permit issuance.
+- The Execution Permit is the sole authoritative validation reference in the network, and all network components are required to act solely according to its provisions without independent decision-making.
 
 As a result, ATHENA is a complete and unified layer that manages all decisions related to transaction validation from beginning to end and also serves as the executor for resolving exceptions and conflicts if detected.
 
