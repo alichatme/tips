@@ -18,23 +18,18 @@ The owner may configure an inheritance delay period and assign an Inheritance Ke
 
 ### The Owner Key always remains the ultimate authority of the account. At any time, including after inheritance activation, the owner may:
 
-. Disable the Inheritance Key
-
-. Modify or reset the inheritance delay
-
-. Replace the existing Inheritance Key with a completely new one
+- Disable the Inheritance Key
+- Modify or reset the inheritance delay
+- Replace the existing Inheritance Key with a completely new one
 
 Activation of the Inheritance Key never disables, replaces, or reduces the authority of the Owner Key.
 
 ### The inheritance mechanism operates:
 
-. Without exposing or sharing the Owner Key
-
-. Without relying on smart contracts
-
-. Without dependency on any specific wallet implementation
-
-. Without dependency on off-chain services
+- Without exposing or sharing the Owner Key
+- Without relying on smart contracts
+- Without dependency on any specific wallet implementation
+- Without dependency on off-chain services
 
 Configuration, activation, deactivation, and replacement of the Inheritance Key are native protocol-level account operations and do not require deployment of smart contracts or any inheritance-specific fees.
 
@@ -51,23 +46,19 @@ Designing a native inheritance mechanism at the protocol level, rather than rely
 
 Smart contract–based inheritance solutions suffer from fundamental limitations:
 
-. Vulnerability to bugs and upgrades:
+- Vulnerability to bugs and upgrades:
 Smart contracts can be hacked, and malicious upgrades can bypass inheritance logic.
-
-· Gas dependency: Activation requires the beneficiary to pay gas – which may be impossible if the beneficiary lacks sufficient TRX.
-
-· No native permission integration:
+- Gas dependency: Activation requires the beneficiary to pay gas – which may be impossible if the beneficiary lacks sufficient TRX.
+- No native permission integration:
 Smart contracts cannot distinguish between true Owner Key inactivity versus simple non-use of a specific contract.
-
-· Incomplete access to consensus truth: Smart contracts intentionally do not have access to the full, consensus-verifiable history of Owner Key activity (votes, freezes, permission updates, governance actions). This is a deliberate VM security property, not an implementation flaw.
+- Incomplete access to consensus truth: Smart contracts intentionally do not have access to the full, consensus-verifiable history of Owner Key activity (votes, freezes, permission updates, governance actions). This is a deliberate VM security property, not an implementation flaw.
 
 By implementing inheritance natively in the TRON protocol, all accounts automatically possess the potential for inheritance, and activation carries zero additional gas overhead.
 
 ## 2. Why Not Key Sharing or Multi-Signature?
 
-· Sharing Seed Phrase: Irreversibly compromises security. A trusted party could access assets at any time without delay.
-
-· Multi-signature: This is a mechanism for simultaneous trust distribution, not time-based recovery. The owner must permanently grant signing power to other parties from day one, which means loss of exclusive control.
+- Sharing Seed Phrase: Irreversibly compromises security. A trusted party could access assets at any time without delay.
+- Multi-signature: This is a mechanism for simultaneous trust distribution, not time-based recovery. The owner must permanently grant signing power to other parties from day one, which means loss of exclusive control.
 
 The proposed model ensures that during the owner's active lifetime, the Inheritance Key provides zero access, preserving full unilateral control.
 
@@ -75,9 +66,8 @@ The proposed model ensures that during the owner's active lifetime, the Inherita
 
 The delay period (minimum 1 month, maximum 20 years) serves two critical security functions:
 
-. Detection window: If the Inheritance Key Seed Phrase is compromised, the delay gives the owner time to react before any theft can occur.
-
-. Proof of true inactivity: Short delays risk premature activation during travel or temporary disengagement, causing false inheritance events.
+- Detection window: If the Inheritance Key Seed Phrase is compromised, the delay gives the owner time to react before any theft can occur.
+- Proof of true inactivity: Short delays risk premature activation during travel or temporary disengagement, causing false inheritance events.
 The 1-month minimum balances practical usability (beneficiaries do not wait indefinitely) with security (no immediate post-loss exploitation).
 
 ## 4. Delayed Security Layer Against Inheritance Key Seed Exposure
@@ -88,8 +78,8 @@ Even if the Inheritance Key Seed Phrase is exposed, no operational access is pos
 
 Restricting the Inheritance Key from modifying Owner permissions or account structure is a deliberate design choice to preserve Owner Sovereignty. Even after the Inheritance Key becomes active:
 
-· The owner retains full ability to disable inheritance.
-· The owner can reclaim exclusive control at any time.
+- The owner retains full ability to disable inheritance.
+- The owner can reclaim exclusive control at any time.
 
 This prevents a "hostile inheritance" scenario where a beneficiary could lock out a returning owner.
 
@@ -103,29 +93,23 @@ This TIP positions TRON as a first mover in solving the permanent asset loss pro
 
 If the Inheritance Key were derived from the Owner Key, compromising the Owner Key would simultaneously compromise inheritance security. By maintaining fully independent seed phrases:
 
-· No mathematical relationship exists between the two keys.
-
-· The owner can rotate or replace the Inheritance Key without changing the Owner Key.
-
-· Even if the Inheritance Key is leaked, the owner's day-to-day assets remain safe during the delay period.
+- No mathematical relationship exists between the two keys.
+- The owner can rotate or replace the Inheritance Key without changing the Owner Key.
+- Even if the Inheritance Key is leaked, the owner's day-to-day assets remain safe during the delay period.
 
 ## 8. Protocol Necessity (Response to "Why Must This Be at Protocol Layer")
 
 The necessity lies in this reality: "The last valid activity of the Owner Key is a consensus fact, not a reliable application-level signal." No smart contract can deterministically and safely verify:
 
-· Whether the Owner Key has truly been inactive
-
-· Whether activity occurred outside the contract (vote, freeze, permission update)
-
-· Whether a transaction was actually signed by the Owner Key or by another Active Permission
+- Whether the Owner Key has truly been inactive
+- Whether activity occurred outside the contract (vote, freeze, permission update)
+- Whether a transaction was actually signed by the Owner Key or by another Active Permission
 
 Smart contracts intentionally lack access to this level of information – this is a VM security feature, not a flaw. Consequently, any smart contract–based solution will inevitably suffer from either:
 
-· False positives (incorrect activation),
-
-· False negatives (failure to activate when needed),
-
-· Or reliance on off-chain assumptions.
+- False positives (incorrect activation),
+- False negatives (failure to activate when needed),
+- Or reliance on off-chain assumptions.
 
 Therefore, this capability sits exactly at the boundary of what the protocol must define – neither above nor below.
 
@@ -133,13 +117,10 @@ Therefore, this capability sits exactly at the boundary of what the protocol mus
 
 This proposal:
 
-· Introduces no new signature paths
-
-· Grants no new power to any key
-
-· Adds only a conditional check inside existing signature validation
-
-· Is fully optional and disabled by default
+- Introduces no new signature paths
+- Grants no new power to any key
+- Adds only a conditional check inside existing signature validation
+- Is fully optional and disabled by default
 
 Its maintenance and complexity profile remains at the level of existing permission primitives (Owner/Active, multi-signature), not at the level of behavioral policy systems.
 
@@ -147,11 +128,9 @@ Its maintenance and complexity profile remains at the level of existing permissi
 
 The specification explicitly allows the owner to:
 
-· Disable the Inheritance Key
-
-· Reconfigure the delay period
-
-· Replace the Inheritance Key entirely
+- Disable the Inheritance Key
+- Reconfigure the delay period
+- Replace the Inheritance Key entirely
 
 No irreversible state is created – even after activation.
 
@@ -159,29 +138,23 @@ No irreversible state is created – even after activation.
 
 The "last_owner_activity_timestamp" is updated only when a transaction meets all of the following criteria:
 
-. Successfully authorized through the account's Owner Permission,
-. Successfully passes protocol validation requirements,
-. Executes successfully and results in a committed on-chain state change.
+- Successfully authorized through the account's Owner Permission,
+- Successfully passes protocol validation requirements,
+- Executes successfully and results in a committed on-chain state change.
 
 This definition intentionally excludes:
 
-· Failed or reverted transactions, even when authorized through the Owner Permission, because they do not produce a committed state change.
-
-· Execution failures, VM exceptions, contract reverts, resource exhaustion failures (e.g., OUT_OF_ENERGY), insufficient balance failures, and any other transactions that do not result in a committed state change.
-
-· Read-only calls (e.g., view/pure functions), because they do not alter state.
-
-· Transactions rejected during protocol validation, including invalid signatures, malformed transactions, or authorization failures.
-
-· Passive events, such as receiving assets, because they do not demonstrate owner intent or awareness.
+- Failed or reverted transactions, even when authorized through the Owner Permission, because they do not produce a committed state change.
+- Execution failures, VM exceptions, contract reverts, resource exhaustion failures (e.g., OUT_OF_ENERGY), insufficient balance failures, and any other transactions that do not result in a committed state change.
+- Read-only calls (e.g., view/pure functions), because they do not alter state.
+- Transactions rejected during protocol validation, including invalid signatures, malformed transactions, or authorization failures.
+- Passive events, such as receiving assets, because they do not demonstrate owner intent or awareness.
 
 Rationale for this strict definition:
 
-· Preventing trivial resets: If failed transactions, passive receipts, or non-state-changing operations updated the timestamp, inheritance could be postponed indefinitely, defeating the mechanism's purpose.
-
-· Consensus alignment: Only successful state-changing transactions provide an unambiguous, verifiable proof of owner activity that all consensus participants can independently verify.
-
-· Security: This ensures that the inactivity condition reflects genuine owner absence rather than accidental activity, failed execution attempts, or automated interactions that do not represent meaningful owner participation.
+- Preventing trivial resets: If failed transactions, passive receipts, or non-state-changing operations updated the timestamp, inheritance could be postponed indefinitely, defeating the mechanism's purpose.
+- Consensus alignment: Only successful state-changing transactions provide an unambiguous, verifiable proof of owner activity that all consensus participants can independently verify.
+- Security: This ensures that the inactivity condition reflects genuine owner absence rather than accidental activity, failed execution attempts, or automated interactions that do not represent meaningful owner participation.
 
 By keeping the definition narrow and deterministic, the protocol maintains a clear, auditable, and consensus-safe boundary for what constitutes "Owner activity."
 
@@ -189,11 +162,9 @@ By keeping the definition narrow and deterministic, the protocol maintains a cle
 
 The Inheritance Key is designed as a time-conditioned Active Permission and is fully integrated into TRON's existing permission architecture.
 
-· Active Permissions: The Inheritance Key reuses the existing Active Permission structure. No new PermissionType is introduced.
-
-· Multi-Signature Compatibility: Existing multi-signature behavior and validation rules remain unchanged. The inheritance mechanism does not modify or bypass any existing multisig security model.
-
-· Owner Supremacy: Owner Permission always remains the highest authority. The Owner may disable, reconfigure, or replace the Inheritance Key at any time, including after activation.
+- Active Permissions: The Inheritance Key reuses the existing Active Permission structure. No new PermissionType is introduced.
+- Multi-Signature Compatibility: Existing multi-signature behavior and validation rules remain unchanged. The inheritance mechanism does not modify or bypass any existing multisig security model.
+- Owner Supremacy: Owner Permission always remains the highest authority. The Owner may disable, reconfigure, or replace the Inheritance Key at any time, including after activation.
 
 This design ensures that the inheritance mechanism remains fully compatible with TRON's existing permission framework while preserving all current security guarantees.
 
@@ -201,11 +172,9 @@ This design ensures that the inheritance mechanism remains fully compatible with
 
 This proposal does not introduce a separate account-control path.
 
-· Structurally, the Inheritance Key is implemented as a standard Active Permission already supported by TRON accounts.
-
-· The only addition occurs at the protocol validation layer, where a time-based condition determines whether this specific Active Permission is currently authorized.
-
-· Existing permission attributes, including weights, thresholds, and operation scopes, remain fully applicable.
+- Structurally, the Inheritance Key is implemented as a standard Active Permission already supported by TRON accounts.
+- The only addition occurs at the protocol validation layer, where a time-based condition determines whether this specific Active Permission is currently authorized.
+- Existing permission attributes, including weights, thresholds, and operation scopes, remain fully applicable.
 
 As a result, the inheritance mechanism extends the existing permission architecture rather than introducing a parallel authorization model.
 
@@ -213,11 +182,9 @@ As a result, the inheritance mechanism extends the existing permission architect
 
 If Owner-authorized and Inheritance-authorized transactions appear within the same block:
 
-· Standard deterministic transaction execution rules defined by the TRON protocol apply.
-
-· The transaction processed first determines the resulting account state for subsequent transactions within that block.
-
-· No inheritance-specific ordering rules are introduced.
+- Standard deterministic transaction execution rules defined by the TRON protocol apply.
+- The transaction processed first determines the resulting account state for subsequent transactions within that block.
+- No inheritance-specific ordering rules are introduced.
 
 This approach preserves protocol simplicity, predictability, and compatibility with existing multi-key account behavior.
 
@@ -225,9 +192,8 @@ This approach preserves protocol simplicity, predictability, and compatibility w
 
 A distinction must be made between inheritance configuration and transaction execution.
 
-· Configuration, activation, deactivation, replacement, or delay-period updates of the Inheritance Key are native account-management operations and do not require any inheritance-specific fees, smart-contract deployment costs, or additional protocol charges beyond standard protocol account-management behavior.
-
-· However, any transaction submitted through an active Inheritance Key consumes normal TRON resources, including bandwidth, energy, and applicable transaction fees, exactly as any other Active Permission transaction.
+- Configuration, activation, deactivation, replacement, or delay-period updates of the Inheritance Key are native account-management operations and do not require any inheritance-specific fees, smart-contract deployment costs, or additional protocol charges beyond standard protocol account-management behavior.
+- However, any transaction submitted through an active Inheritance Key consumes normal TRON resources, including bandwidth, energy, and applicable transaction fees, exactly as any other Active Permission transaction.
 
 This distinction is important: the inheritance mechanism itself introduces no additional operational cost, while all on-chain actions performed through the Inheritance Key continue to follow TRON's standard resource and fee model.
 ___
@@ -238,26 +204,26 @@ In current blockchain architectures, ownership and access to assets are entirely
 
 If any of the following conditions occur:
 
-. Death of the owner
-. Long-term unconsciousness or coma
-. Memory-related illnesses such as Alzheimer’s
-. Permanent loss, theft, or destruction of the private key or Seed Phrase
+- Death of the owner
+- Long-term unconsciousness or coma
+- Memory-related illnesses such as Alzheimer’s
+- Permanent loss, theft, or destruction of the private key or Seed Phrase
 
 the associated digital assets become permanently and irreversibly inaccessible.
 
 Existing solutions suffer from significant drawbacks:
 
-. Sharing a Seed Phrase severely weakens security
-. Smart contract–based inheritance mechanisms are vulnerable to bugs and exploits
-. Wallet-based solutions are often centralized, non-standard, and unreliable
-. Entrusting recovery phrases even to close relatives carries substantial risk
+- Sharing a Seed Phrase severely weakens security
+- Smart contract–based inheritance mechanisms are vulnerable to bugs and exploits
+- Wallet-based solutions are often centralized, non-standard, and unreliable
+- Entrusting recovery phrases even to close relatives carries substantial risk
 
 Therefore, the network requires a native protocol-level solution that:
 
-. Fully preserves owner security during their lifetime while guaranteeing asset availability for beneficiaries
-. Prevents irreversible loss of assets
-. Avoids legal complexity, technical fragility, and poor user experience
-. Does not rely on smart contracts or trust in third parties
+- Fully preserves owner security during their lifetime while guaranteeing asset availability for beneficiaries
+- Prevents irreversible loss of assets
+- Avoids legal complexity, technical fragility, and poor user experience
+- Does not rely on smart contracts or trust in third parties
 ___
 ___
 # Specification
@@ -266,18 +232,18 @@ ___
 
 ### Every TRON account has an Owner Permission that:
 
-· Acts as the primary authority of the account
-· Is always valid and active
+- Acts as the primary authority of the account
+- Is always valid and active
 
 This TIP introduces an additional key role:
 
 ## Inheritance Key
 
-· Can only be enabled, disabled, or replaced through the Owner Permission
-· Is displayed in a dedicated Inheritance Key slot
-· Exists for all accounts, but is initially disabled and unconfigured
-· Has an independent Seed Phrase distinct from the Owner Key
-· Structurally functions as a time‑based Active Permission
+- Can only be enabled, disabled, or replaced through the Owner Permission
+- Is displayed in a dedicated Inheritance Key slot
+- Exists for all accounts, but is initially disabled and unconfigured
+- Has an independent Seed Phrase distinct from the Owner Key
+- Structurally functions as a time‑based Active Permission
 
 After implementation of this proposal, every TRON account natively supports a dedicated Inheritance Key slot. This slot is disabled by default and remains unconfigured until explicitly configured through the Owner Permission.
 
@@ -289,25 +255,25 @@ The Inheritance Key can exist in one of the following three states:
 
 ### 1. Disabled
 
-· No delay is configured
-· The key is completely inactive at the protocol level
+- No delay is configured
+- The key is completely inactive at the protocol level
 
 ### 2. Configured
 
-· An inactivity delay period is defined and confirmed through the Owner Permission
-· Immediately after configuration, the Owner inactivity countdown begins
-· The key is not yet authorized to sign transactions until the configured delay period expires
-· After any valid Owner activity (successful state‑changing transactions confirmed through the Owner Permission), the countdown timer resets to the full configured delay period
+- An inactivity delay period is defined and confirmed through the Owner Permission
+- Immediately after configuration, the Owner inactivity countdown begins
+- The key is not yet authorized to sign transactions until the configured delay period expires
+- After any valid Owner activity (successful state‑changing transactions confirmed through the Owner Permission), the countdown timer resets to the full configured delay period
 
 ### 3. Active
 
-· The Owner inactivity condition for the configured delay has been satisfied
-· The Inheritance Key is authorized to sign transactions with Active Key scope
-· Activation of the Inheritance Key never disables or restricts the Owner Permission
-· At any time – even after activation – the Owner can, through the Owner Key, perform the following actions:
-  · Disable the Inheritance Key
-  · Reconfigure the delay period (and thereby reset the timer)
-  · Replace the existing Inheritance Key with a completely new key
+- The Owner inactivity condition for the configured delay has been satisfied
+- The Inheritance Key is authorized to sign transactions with Active Key scope
+- Activation of the Inheritance Key never disables or restricts the Owner Permission
+- At any time – even after activation – the Owner can, through the Owner Key, perform the following actions:
+  - Disable the Inheritance Key
+  - Reconfigure the delay period (and thereby reset the timer)
+  - Replace the existing Inheritance Key with a completely new key
 
 Note: Replacing the Inheritance Key automatically cancels and replaces the previous Inheritance Key configuration. The account always has exactly one Inheritance Key slot, which can be disabled, configured, or active.
 
@@ -315,13 +281,13 @@ Note: Replacing the Inheritance Key automatically cancels and replaces the previ
 
 ## Behavior After Activation
 
-· The Owner Key retains full control over account assets and Inheritance Key settings.
+- The Owner Key retains full control over account assets and Inheritance Key settings.
 
 ### The Owner may at any time:
 
-· Disable the Inheritance Key
-· Reconfigure the inactivity delay and reconfigure the Inheritance Key
-· Replace the existing Inheritance Key with a new key, regardless of its current state
+- Disable the Inheritance Key
+- Reconfigure the inactivity delay and reconfigure the Inheritance Key
+- Replace the existing Inheritance Key with a new key, regardless of its current state
 
 After replacement, the new Inheritance Key is disabled by default until configured again.
 
@@ -335,11 +301,11 @@ Once activated, the Inheritance Key is authorized to perform any operation permi
 
 ### The Inheritance Key is NOT authorized to:
 
-· Modify Owner permissions
-· Change the account permission structure
-· Replace or revoke the Owner Key
-· Access or recover any Seed Phrase
-· Change its own inheritance state, delay configuration, activation status, or replacement settings
+- Modify Owner permissions
+- Change the account permission structure
+- Replace or revoke the Owner Key
+- Access or recover any Seed Phrase
+- Change its own inheritance state, delay configuration, activation status, or replacement settings
 
 All inheritance-related configuration operations remain exclusively under the control of the Owner Key.
 ___
@@ -594,9 +560,9 @@ There is no shared material between the Owner Key and the Inheritance Key or the
 
 ## If an account is accessed via the Inheritance Key
 
-. it remains bound to all Owner-defined account settings
-. No smart contracts are involved
-. All logic is enforced at the consensus / protocol layer
+- it remains bound to all Owner-defined account settings
+- No smart contracts are involved
+- All logic is enforced at the consensus / protocol layer
 
 ## Delayed Security Layer
 
@@ -606,8 +572,8 @@ No operational access is possible before the Owner inactivity delay expires
 
 ### This protocol-level delay:
 
-. Prevents immediate asset theft
-. Gives the Owner sufficient time to react and replace the Inheritance Key
+- Prevents immediate asset theft
+- Gives the Owner sufficient time to react and replace the Inheritance Key
 
 This security model is not natively implemented in any existing blockchain.
 
@@ -627,17 +593,17 @@ Enabling, disabling, configuring delay
 Deleting and replacing the Inheritance Key
 And display:
 
-. Inheritance Key status (Disabled / Configured / Active)
-. Configured delay period
-. Remaining time until activation
-. Automatic timer reset after each Owner Key activity
+- Inheritance Key status (Disabled / Configured / Active)
+- Configured delay period
+- Remaining time until activation
+- Automatic timer reset after each Owner Key activity
 
 ## Backwards Compatibility
 
-. Fully optional
-. No behavior changes for existing accounts
-. No smart contract dependency
-. Fully compatible with TRON’s existing permission architecture
+- Fully optional
+- No behavior changes for existing accounts
+- No smart contract dependency
+- Fully compatible with TRON’s existing permission architecture
 
 ## Conclusion
 
