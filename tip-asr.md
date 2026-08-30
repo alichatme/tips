@@ -272,14 +272,14 @@ To prevent adaptive online brute-force attacks and any attempt to bypass network
 
 This identifier must have the following characteristics:
 
-· Derived deterministically and ONLY from the raw ASR-REC data
-· Completely independent of:
-  · ASR-VAR
-  · ASR-CRC outputs
-  · Recovery Proof
-  · Wallet version, client, IP, or network conditions
-· Remains constant for all recovery attempts associated with a fixed, unchanging ASR-REC
-· Generated before any user interaction with the cryptographic process
+- Derived deterministically and ONLY from the raw ASR-REC data
+- Completely independent of:
+  - ASR-VAR
+  - ASR-CRC outputs
+  - Recovery Proof
+  - Wallet version, client, IP, or network conditions
+- Remains constant for all recovery attempts associated with a fixed, unchanging ASR-REC
+- Generated before any user interaction with the cryptographic process
 
 To state it more explicitly:
 
