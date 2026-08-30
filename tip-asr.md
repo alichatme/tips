@@ -31,9 +31,9 @@ ___
 # Overall ASR Architecture
 ASR consists of three main components:
 
-. ASR-REC: Recovery Numbers
-. ASR-VAR: Variable Secret
-. ASR-CRC: Cyclic Reduction Core
+- ASR-REC: Recovery Numbers
+- ASR-VAR: Variable Secret
+- ASR-CRC: Cyclic Reduction Core
 
 
 ## Component One: ASR-REC (Recovery Numbers)
@@ -47,9 +47,9 @@ ASR-REC-1185-7517-7217-1362-1364-1388-4765-6867-7966-6765-2678-6765
 
 ### Display Requirements
 
-· Mandatory Left-to-Right
-· Mandatory ASCII
-· Mandatory uniform formatting using "-" and displaying ASR-REC to the left of the numerical variable to prevent homography attacks
+- Mandatory Left-to-Right
+- Mandatory ASCII
+- Mandatory uniform formatting using "-" and displaying ASR-REC to the left of the numerical variable to prevent homography attacks
 
 In the ASR standard, the user can store the ASR-REC digits without concern, because the recovery process, in addition to having ASR-REC, also requires a private lexical variable called ASR-VAR.
 
@@ -60,12 +60,12 @@ ASR-VAR is not stored on the network or in the wallet.
 This variable is considered the access key to the assets, and without ASR-VAR, neither the network nor the wallet can map ASR-REC to an account.
 
 ### Display Requirements
-. Uppercase letters A–Z only
-. ASCII encoding only
-. No spaces
-. Left-to-Right display
-. Uniform formatting with "-" with ASR-VAR displayed to the left of the variable to prevent homography attacks
-. A maximum of two consecutive repeated letters is allowed
+- Uppercase letters A–Z only
+- ASCII encoding only
+- No spaces
+- Left-to-Right display
+- Uniform formatting with "-" with ASR-VAR displayed to the left of the variable to prevent homography attacks
+- A maximum of two consecutive repeated letters is allowed
 
 The repetition restriction is applied to prevent the selection of extremely low-entropy variables (e.g., AAAAAAAAAAAA) and is comparable to password policy standards in secure systems.
 Allowing up to two consecutive repeated letters ensures linguistic compatibility with natural English language structures.
@@ -79,9 +79,9 @@ Each ASR-VAR lexical character, after entering the cryptographic cycle specific 
 This system structurally increases the cost of each guess or attack attempt by creating exponential growth in computational states.
 
 The cyclic cryptographic core is responsible for:
-. Converting letters to numbers
-. Executing cryptographic cycles via additive variable aggregation to expand numerical digit ranges
-. Ensuring full coverage of the numerical range 0000 to 9999 in the default ASR configuration
+- Converting letters to numbers
+- Executing cryptographic cycles via additive variable aggregation to expand numerical digit ranges
+- Ensuring full coverage of the numerical range 0000 to 9999 in the default ASR configuration
 
 ### Letter-to-Number Mapping
 The ASR-VAR vocabulary consists exclusively of uppercase English letters A–Z in ASCII.
@@ -193,9 +193,9 @@ Without ASR-VAR, ASR-REC cannot be reconstructed
 Even with ASR-REC and ASR-VAR, recovery cannot be completed without network authorization
 
 Recovery requires the simultaneous presence of three independent factors
-. ASR-REC
-. ASR-VAR
-. Network-issued Recovery Authorization
+- ASR-REC
+- ASR-VAR
+- Network-issued Recovery Authorization
 
 This design transforms recovery from a static operation into a controlled, network-dependent, abuse-resistant process.
 
@@ -209,9 +209,9 @@ The final degree of mathematical freedom required to determine the Seed is provi
 2. Explicit Separation of Local Computation and Final Recovery Control
 
 All cryptographic operations
-. ASR-CRC execution
-. Recovery Proof generation
-. ASR-VAR processing
+- ASR-CRC execution
+- Recovery Proof generation
+- ASR-VAR processing
 are performed locally in the wallet.
 However, these computations alone never produce the Seed or private key.
 
@@ -221,10 +221,10 @@ Final recovery control depends exclusively on the issuance of Network Recovery A
 
 Completion of the recovery process in ASR is subject to receiving a Network Recovery Authorization (NRA), which:
 
-. Without owner signature
-. Without smart contracts
-. Without fees or gas
-. Only while online
+- Without owner signature
+- Without smart contracts
+- Without fees or gas
+- Only while online
 
 Without NRA, Seed reconstruction is cryptographically and engineering-wise 
 impossible.
@@ -235,26 +235,26 @@ To prevent adaptive online brute-force attacks, the wallet is required to genera
 
 This identifier:
 
-· Is independent of ASR-VAR
-· Is independent of variable cryptographic outputs
-· Remains constant for all recovery attempts of a single account
+- Is independent of ASR-VAR
+- Is independent of variable cryptographic outputs
+- Remains constant for all recovery attempts of a single account
 
 Network policies such as rate limits, delays, and attempt counters are applied based on this identifier, not based on the Proof or cryptographic variables.
 
 5. Ineffectiveness of Attacker Variable Changes Changing any of the following does not create a new recovery context:
 
-. ASR-VAR
-. Wallet client or version
-. IP, VPN, Tor, or network source
-. Recovery Proof
+- ASR-VAR
+- Wallet client or version
+- IP, VPN, Tor, or network source
+- Recovery Proof
 
 All these attempts are mapped to a single Recovery Context and will be subject to network restrictions.
 
 6. Minimum Disclosure Principle During recovery The network, during the recovery process
 
-. Has no access to ASR-VAR
-. Does not store Seeds or private keys
-. Does not interpret Recovery Proof contents
+- Has no access to ASR-VAR
+- Does not store Seeds or private keys
+- Does not interpret Recovery Proof contents
 
 The network only issues or denies recovery authorization based on account state and security policies.
 
@@ -291,19 +291,19 @@ The wallet is required to send the generated RCID along with the Network Recover
 
 The network applies all security policies, including:
 
-· Rate Limit
-· Delay
-· Attempt counters
-· Progressive time-based restrictions
+- Rate Limit
+- Delay
+- Attempt counters
+- Progressive time-based restrictions
 
 based on the RCID, not on cryptographic variables, Proof, or user inputs.
 
 Consequently, changing any of the following by an attacker:
 
-· Changing ASR-VAR
-· Changing Recovery Proof
-· Changing IP, VPN, Tor, or network source
-· Changing wallet/client version or type
+- Changing ASR-VAR
+- Changing Recovery Proof
+- Changing IP, VPN, Tor, or network source
+- Changing wallet/client version or type
 
 will not create a new recovery context.
 
@@ -325,8 +325,8 @@ Implementation MUST
 
 In wallet implementation:
 
-· RCID generation must be performed before receiving any user input and before any cryptographic processing.
-· Any dependency of RCID on ASR-VAR, CRC output, Proof, or execution conditions is considered a violation of ASR security requirements.
+- RCID generation must be performed before receiving any user input and before any cryptographic processing.
+- Any dependency of RCID on ASR-VAR, CRC output, Proof, or execution conditions is considered a violation of ASR security requirements.
 
 ## Responsibilities
 
@@ -336,19 +336,19 @@ Maintain ASR-VAR and ASR-REC separately
 ### Wallet Responsibilities
 The wallet performs all local cryptographic recovery computations
 
-. Storing ASR-REC
-. Receiving and processing ASR-VAR
-. Executing ASR-CRC
-. Generating Recovery Proof
+- Storing ASR-REC
+- Receiving and processing ASR-VAR
+- Executing ASR-CRC
+- Generating Recovery Proof
 
 However, the wallet is deliberately designed to lack the ability to independently reconstruct the Seed or derive the private key.
 Even with correct and complete execution of all local steps, the recovery process will not converge to a single value without receiving the additional data issued by the Core network.
 
 The wallet:
 
-· Is not the owner of the Seed
-· Does not have final control over the account
-· Cannot complete recovery offline or unilaterally
+- Is not the owner of the Seed
+- Does not have final control over the account
+- Cannot complete recovery offline or unilaterally
 
 This limitation is a fundamental security constraint in the ASR design, not an implementation flaw.
 
@@ -358,27 +358,27 @@ The Core network in ASR does not act as a "computing engine" or "Seed holder". I
 
 Network responsibilities are limited to the following:
 
-· Evaluating account status and active security policies
-· Applying rate limits, delays, and attempt counters based on the Recovery Context
-· Issuing or denying the Network Recovery Authorization (NRA)
+- Evaluating account status and active security policies
+- Applying rate limits, delays, and attempt counters based on the Recovery Context
+- Issuing or denying the Network Recovery Authorization (NRA)
 
 The network:
 
-· Has no access to ASR-VAR
-· Does not store or reconstruct the Seed or private key
-· Does not participate in the wallet's local cryptographic computations
+- Has no access to ASR-VAR
+- Does not store or reconstruct the Seed or private key
+- Does not participate in the wallet's local cryptographic computations
 
 However, without issuing the NRA, the Seed reconstruction process is cryptographically and engineering-wise impossible to complete.
 This dependency is not an ownership control mechanism, but a network‑centric security constraint to prevent unauthorized recovery and adaptive attacks.
 
 ### ASR Network Layer Responsibilities
 
-. No smart contracts
-. No gas or fees
-. Core logic level
-· First block of 3 unsuccessful attempts → Apply a 24-hour restriction.
-· Each subsequent block of 3 unsuccessful attempts → Apply a time restriction double the previous one (e.g., 24h → 48h → 96h → ...).
-· Mandatory: When a restriction is applied, a countdown timer must be displayed to the user, indicating the remaining waiting time.
+- No smart contracts
+- No gas or fees
+- Core logic level
+- First block of 3 unsuccessful attempts → Apply a 24-hour restriction.
+- Each subsequent block of 3 unsuccessful attempts → Apply a time restriction double the previous one (e.g., 24h → 48h → 96h → ...).
+- Mandatory: When a restriction is applied, a countdown timer must be displayed to the user, indicating the remaining waiting time.
 ___
 ___
 # Delayed Account Activation Option
@@ -406,12 +406,12 @@ If the owner still has access to a previously active wallet, they can, upon dete
 ### Definition of “Owner Activity”
 Any valid on-chain transaction signed by the owner that changes network state, including but not limited to
 
-. Asset transfers
-. Voting
-. Freeze/unfreeze
-. Stake/unstake
-. Reward withdrawal
-. Direct smart contract calls
+- Asset transfers
+- Voting
+- Freeze/unfreeze
+- Stake/unstake
+- Reward withdrawal
+- Direct smart contract calls
 
 Receiving assets without owner signature is not considered activity.
 
@@ -437,12 +437,12 @@ Where ASR Fits in This Chain
 
 The ASR standard does not change any of the following processes:
 
-· Entropy generation
-· Seed generation
-· Key Derivation Functions (KDF)
-· Private and public key generation
-· HD Wallet structure
-· Network cryptographic algorithms
+- Entropy generation
+- Seed generation
+- Key Derivation Functions (KDF)
+- Private and public key generation
+- HD Wallet structure
+- Network cryptographic algorithms
 
 All of the above steps remain exactly as before, following existing cryptographic standards.
 
@@ -487,17 +487,17 @@ The Checksum in the ASR standard is used solely to detect typographical errors i
 
 The Checksum is generated as a value derived from the ASR-REC data using the SHA-512/256 function, but this value:
 
-· Does not by itself indicate the correctness of ASR-REC
-· Does not enable full or definitive validation of the recovery data
-· Does not reduce the cryptographic search space
+- Does not by itself indicate the correctness of ASR-REC
+- Does not enable full or definitive validation of the recovery data
+- Does not reduce the cryptographic search space
 
 Final validation of recovery data in ASR is inherently network‑dependent and occurs only within the framework of the online recovery process, after verification of account status and Core network security policies.
 
 Consequently:
 
-· The Checksum in ASR is merely a user‑experience aid
-· It provides no valid path for offline verification of recovery data
-· It does not enable recovery or validation independent of the network in any way
+- The Checksum in ASR is merely a user‑experience aid
+- It provides no valid path for offline verification of recovery data
+- It does not enable recovery or validation independent of the network in any way
 
 ## Role of KDF and Seed in ASR
 
@@ -517,10 +517,10 @@ ASR is not a key generation standard.
 
 ASR is a Secure Recovery Standard that:
 
-· Without changing core network cryptography
-· Without changing key algorithms
-· Without relying on smart contracts
-· Without fees
+- Without changing core network cryptography
+- Without changing key algorithms
+- Without relying on smart contracts
+- Without fees
 
 transforms the recovery layer from a single point of failure into a multi-stage, network-dependent process.
 
@@ -544,23 +544,23 @@ The ASR standard is designed to protect the account recovery process against thr
 
 1. ASR is resilient against:
 
-· Partial or full disclosure of recovery data (ASR-REC)
-· Disclosure of the user's private variable (ASR-VAR)
-· Theft of physical or digital backups
-· Offline brute‑force attacks (fundamentally impossible)
-· Adaptive online brute‑force attacks (using Recovery Context and rate limiting)
-· Phishing attacks targeting the recovery process
-· Shoulder surfing
-· Attempts to recover without network authorization
-· Malicious delayed recovery, even in the event of simultaneous theft of all recovery data
+- Partial or full disclosure of recovery data (ASR-REC)
+- Disclosure of the user's private variable (ASR-VAR)
+- Theft of physical or digital backups
+- Offline brute‑force attacks (fundamentally impossible)
+- Adaptive online brute‑force attacks (using Recovery Context and rate limiting)
+- Phishing attacks targeting the recovery process
+- Shoulder surfing
+- Attempts to recover without network authorization
+- Malicious delayed recovery, even in the event of simultaneous theft of all recovery data
     (using Recovery Delay, network notifications, and account‑state dependency)
 
 2. Out of Scope:
 
-· Active malware with simultaneous access to the user's execution environment
-· Compromise of operating system, firmware, or runtime
-· Attacks based on full device control at the time of owner signing
-· Non‑cryptographic attacks such as physical coercion or in‑person social engineering
+- Active malware with simultaneous access to the user's execution environment
+- Compromise of operating system, firmware, or runtime
+- Attacks based on full device control at the time of owner signing
+- Non‑cryptographic attacks such as physical coercion or in‑person social engineering
 ___
 ___
 # Why ASR Is a Recovery Alternative to BIP-39 (Design Rationale)
@@ -573,15 +573,15 @@ Instead, it transforms the recovery process into a conditional, multi‑stage, n
 
 The key differences are:
 
-· In BIP‑39, full disclosure of the Mnemonic directly leads to loss of assets.
+- In BIP‑39, full disclosure of the Mnemonic directly leads to loss of assets.
     In ASR, the recovery data alone is incapable of recovery and is useless without network approval.
-· BIP‑39 enables offline brute‑force attacks and unlimited attempts without rate limiting.
+- BIP‑39 enables offline brute‑force attacks and unlimited attempts without rate limiting.
     ASR fundamentally makes this class of attacks impossible by eliminating offline recovery.
-· BIP‑39 has no native concept of "recovery control, suspension, or rejection."
+- BIP‑39 has no native concept of "recovery control, suspension, or rejection."
     ASR turns recovery into an observable, rate‑limit‑able, and policy‑governable event at the network level.
-· BIP‑39 reduces recovery to a single point of failure.
+- BIP‑39 reduces recovery to a single point of failure.
     ASR eliminates this single point of failure by separating ASR‑REC, ASR‑VAR, and network verification cycles.
-· In BIP‑39, the network is unaware of the recovery process.
+- In BIP‑39, the network is unaware of the recovery process.
     In ASR, the network is part of the recovery security model.
 
 As a result, ASR enhances security not by replacing basic cryptography, but by completely redesigning the concept of digital asset recovery.
