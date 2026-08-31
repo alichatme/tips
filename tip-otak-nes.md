@@ -1,6 +1,6 @@
 ---
 tip: XXXX
-title: OTAK-NES: A Blockchain Security Architecture for Non-Exposure of Long-Term Authorization Keys
+title: "OTAK-NES: A Blockchain Security Architecture for Non-Exposure of Long-Term Authorization Keys"
 author: Ali (@alichatme)
 status: Draft
 type: Standards Track
