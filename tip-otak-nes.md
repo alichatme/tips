@@ -675,6 +675,49 @@ Important Note: The core security principles of the OTAK-NES architecture are no
 They are not founded on this; although this information is not publicly available to everyone, and designing a mechanism whereby the attacker cannot access any public information about the Merkle Tree or consumed Child Keys can be part of the architectural approach in the future.
 ___
 ___
+# The Role of Chain Code in the Security of Child Key Derivation in the OTAK-NES Architecture
+
+In the OTAK-NES architecture, Child Keys are generated using the standard Hierarchical Deterministic (HD) Key Derivation mechanism. In this mechanism, the private key alone is not sufficient to generate a Child Key; rather, the parent key — which in OTAK-NES plays the role of the Access Key — is used in the derivation process in the form of an Extended Key that includes at minimum the Private Key and the Chain Code.
+
+The Chain Code is a 32-byte value that, in the BIP32/TRC-102 derivation process, serves as a cryptographic input to HMAC-SHA512. Therefore, the Chain Code is not merely a simple "Salt"; it is part of the Extended Key structure and one of the essential components for deriving Child Keys.
+
+For this reason, possessing a private key alone does not mean possessing the information required to construct a Child Key.
+
+The conceptual structure of the derivation path is as follows:
+
+```text
+Seed → Extended Master Key → Parent Key + Chain Code → Child Key → Signature ✅
+Private Key → Seed ❌
+```
+
+The Seed, private key, and Chain Code play distinct roles in this structure, and possessing a private key recovered from a signature by an attacker does not, by itself, enable the recovery of the Seed. In other words, the standard derivation path from the Seed to the private key is a one-way function, designed in such a way that its reversal is not possible.
+
+This point becomes particularly significant in the OTAK-NES quantum threat scenario.
+
+Let us assume that an old TRON account has previously conducted transactions with ECDSA and has neither started nor completed the migration process to the OTAK-NES architecture or post-quantum signatures on the network.
+
+Upon reaching Quantum Zero Hour, an attacker can use a historical ECDSA signature and Shor's algorithm to recover the ECDSA private key corresponding to that signature.
+
+In this case, the attacker may gain access to the following:
+
+- The historical ECDSA signature
+- The account's public key
+- The recovered ECDSA private key
+
+However, this information does not automatically include the following:
+
+- The account's Seed
+- The Chain Code related to the Child Key derivation structure from the private key, based on the OTAK-NES architecture
+- The complete Extended Private Key
+- Future Child Keys — as the only method for submitting transactions to the network under the OTAK-NES architecture
+
+Therefore, as explained, given the one-way nature of the Hierarchical Deterministic (HD) Key Derivation functions, the construction path from the Seed to the private key — based on the blockchain's original design and not on the requirements of the OTAK-NES architecture — is designed to be one-way, and this design is such that reversing this process is not possible.
+
+Consequently, by recovering the signature and obtaining the private key, the attacker cannot obtain the Seed — and thus the items required for constructing a Child Key, including but not limited to the Chain Code.
+
+In this model, only the legitimate owner of the account — who possesses the Seed and, consequently, the Chain Code and Extended Private Key required for derivation — can create the key hierarchy (or key tree structure) in their wallet and derive a new valid Child Key from the account's private key; whereas an attacker who merely possesses the private key will not have such a capability.
+___
+___
 # Identified Signature-Related Attacks in Blockchain Systems
 
 Throughout the history of blockchain systems, numerous attacks have exploited weaknesses in digital signature generation, cryptographic implementations, or signature verification mechanisms. The following summarizes the most relevant categories of signature-related attacks.
