@@ -623,6 +623,58 @@ In OTAK-NES, the architectural goal is that:
 This is the philosophy of multi-layered defense in a network with the help of the OTAK-NES architecture.
 ___
 ___
+# Core Security Principles of the OTAK-NES Architecture
+
+The core security principles of the OTAK-NES architecture are founded on the following pillars:
+
+### 1. Non-Exposure of Direct Access Key Signatures on the Network
+
+Under the OTAK-NES architecture, nodes validate exclusively transactions signed with a Child Key. Any transaction sent directly from an account's Access Keys to the network is returned to the origin with the CHILD_KEY_REQUIRED error. As a result, the Access Key signature is never recorded in the blockchain history.
+
+### 2. Restricting All Submitted Transactions to Child Keys
+
+After migration to OTAK-NES, all transactions submitted to the network are sent only with Child Keys that are derived from one of the account's Access Keys, in accordance with the TRC-102 standard and compatible with the network's intended post-quantum signature algorithm.
+
+Under the principles of the OTAK-NES architecture, after the network's full migration, transaction acceptance is restricted exclusively to transactions signed with a Child Key, and any other transaction — including those sent with an Access Key — is rejected with the CHILD_KEY_REQUIRED error.
+
+### 3. Seed Ownership and Child Key Derivation from Access Keys
+
+Only the legitimate owner of the account who possesses the Seed can derive Child Keys from the Access Keys.
+
+The process of deriving a Child Key from the account's Access Key depends not only on the private key, but also on two other fundamental components — Seed (as the ultimate root) and Chain Code (as the inseparable component of the Extended Private Key).
+
+The importance of the Seed and Chain Code becomes evident when we recognize that an attacker, even by recovering a signature and obtaining the private key, cannot extract the Seed and Chain Code from the private key through reversing the derivation process. The standard derivation path from the Seed to the private key is a one-way function, designed in such a way that its reversal is not possible.
+
+The private key alone is not sufficient to generate a Child Key. The Chain Code is the inseparable component of this equation, derived solely from the Seed and held by the wallet and the owner.
+
+Under the requirements of the OTAK-NES security architecture — and even under normal network conditions — the Chain Code is never stored, exposed, or transmitted in transactions, blocks, or network state. It is obtained solely from the Seed and held by the owner and the wallet.
+
+"This is because Child Key generation, under the TRC-102 standard, depends on the Chain Code."
+
+### 4. The Attacker's Inability to Obtain the Information Required for Child Key Derivation
+
+In other words, even if the attacker has access to all public network information (including the Merkle Tree, consumed Child Key information, and Account State), they still cannot construct a Child Key in accordance with the OTAK-NES architectural requirements and send a valid transaction to the network, because they do not possess the Child Key derivation material — including, but not limited to, the Chain Code and Extended Private Key. And even if the attacker sends a transaction directly with the recovered private key to the network, under the requirements of the OTAK-NES architecture, the transaction is rejected by the network and returned to the origin with the CHILD_KEY_REQUIRED error.
+
+### This distinction is critically important:
+
+- The attacker's recovery of a signature and acquisition of the ECDSA private key does not expose the account's Seed.
+- Without the Seed, the attacker cannot access the Chain Code and Extended Private Key components to construct a Child Key.
+- Under the OTAK-NES architecture, the attacker cannot send a transaction to the network using the private key in the form of an Access Key.
+
+Consequently, even if an attacker in the future can recover the ECDSA private key of an old account from its historical signature, this recovery cannot automatically provide them with the information required to generate Child Keys under the OTAK-NES architecture; provided that the network has fully migrated to the OTAK-NES architecture.
+
+This is the very barrier that OTAK-NES has erected between "account signature recovery" and "obtaining the material required for Child Key derivation to submit a transaction" for the attacker.
+
+Important Note: The core security principles of the OTAK-NES architecture are not founded on the classification, encryption, or concealment of information such as:
+
+- Chain Code
+- The Merkle Tree or consumed Child Key information
+- Concealment of the network's Account State information
+- And other components forming the architecture
+
+They are not founded on this; although this information is not publicly available to everyone, and designing a mechanism whereby the attacker cannot access any public information about the Merkle Tree or consumed Child Keys can be part of the architectural approach in the future.
+___
+___
 # Identified Signature-Related Attacks in Blockchain Systems
 
 Throughout the history of blockchain systems, numerous attacks have exploited weaknesses in digital signature generation, cryptographic implementations, or signature verification mechanisms. The following summarizes the most relevant categories of signature-related attacks.
