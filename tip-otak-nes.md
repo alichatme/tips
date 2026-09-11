@@ -718,6 +718,68 @@ Consequently, by recovering the signature and obtaining the private key, the att
 In this model, only the legitimate owner of the account — who possesses the Seed and, consequently, the Chain Code and Extended Private Key required for derivation — can create the key hierarchy (or key tree structure) in their wallet and derive a new valid Child Key from the account's private key; whereas an attacker who merely possesses the private key will not have such a capability.
 ___
 ___
+# Practical and Decentralized Solution of the OTAK-NES Security Architecture for Quantum Day Zero
+
+A practical solution for networks with accounts that have not completed the migration process; when the quantum threat materializes.
+
+In the worst-case scenario, the quantum threat has materialized and the network has halted the confirmation of ECDSA transactions. A quantum attacker, by recovering the signature of a non-migrated account, possesses the public and private keys of that account. Let us assume that an old account has previously conducted transactions with ECDSA and has neither started nor completed the migration process to the OTAK-NES architecture or post-quantum signatures on the network.
+
+Upon reaching Quantum Zero Hour, an attacker can use a historical ECDSA signature and signature-analysis algorithms — including Shor's algorithm — to recover the ECDSA private key corresponding to that signature.
+
+In this case, the attacker may gain access to the following:
+
+- The ECDSA signature from the account's recorded transaction history on the network
+- The account's public key
+- The recovered ECDSA private key
+
+However, this information does not automatically include the following:
+
+- The account's Seed
+- The Chain Code related to the Child Key derivation structure from the private key, based on the OTAK-NES architecture
+- The complete Extended Private Key
+- Future Child Keys — as the only method for submitting transactions to the network under the OTAK-NES architecture
+
+Therefore, as explained, given the one-way nature of Hierarchical Deterministic (HD) Key Derivation Functions, the construction path from the Seed to the private key — based on the blockchain's original design and not on the requirements of the OTAK-NES architecture — is designed to be one-way, and this design is such that reversing this process is not possible.
+
+Consequently, by recovering the signature and obtaining the private key, the attacker cannot obtain the Seed — and thus the items required for constructing a Child Key, including but not limited to the Chain Code.
+
+"In this model, only the legitimate owner of the account — who possesses the Seed and, consequently, the Chain Code and Extended Private Key required for derivation — can create the key hierarchy (or key tree structure) in their wallet and derive a new valid Child Key from the account's private key; whereas an attacker who merely possesses the private key will not have such a capability."
+
+Under the OTAK-NES architecture, only Child Keys derived from an Access Key are authorized to submit transactions to the network; consequently, only the wallet that holds the original Seed can reproduce the required Extended Private Key and Chain Code locally and securely, derive a Child Key compatible with the network's post-quantum signature algorithm from the account's Access Key, and successfully send the asset transfer transaction to a secure destination account.
+
+
+The Attacker's Defeat at Two Levels, Along with Two Achievements for the Account Owner, on "Quantum Day Zero" Under the OTAK-NES Security Architecture
+
+In the worst-case scenario, when the quantum threat has materialized and the account owner has neither started nor completed the migration process to OTAK-NES or the post-quantum signature algorithm, the OTAK-NES architecture guarantees two achievements for the account owner while simultaneously defeating the attacker at two levels:
+
+### First: The two levels at which the OTAK-NES architecture defeats the attacker in spending the assets of the account whose signature they have recovered.
+
+Level One: The Attacker's Inability to Access the Derivation Material (Seed, Chain Code, and Extended Private Key)
+
+Even with possession of the recovered private key, the attacker cannot access the Seed; because the Hierarchical Deterministic (HD) Key Derivation process is designed to be one-way (this limitation is based on the fundamental principles of blockchain, and not on the requirements of the OTAK-NES architecture), and its reversal is mathematically and cryptographically impossible.
+
+Consequently, the attacker cannot obtain the account's Seed by creating a reverse process from the recovered private key.
+
+The essential components for constructing a Child Key — such as the Chain Code and Extended Private Key — are held solely by the owner and the owner's wallet, and are also necessary and essential for deriving a Child Key from the private key; the attacker, even assuming signature recovery, remains deprived of access to the components required for Child Key derivation.
+
+Result: At the very first step, even with possession of the account's private and public keys, the attacker still lacks the information required to construct a Child Key and, consequently, is still unable to send any valid transaction to the network.
+
+Level Two: The Network's Rejection of Access Key Transactions, Under the OTAK-NES Security Architecture
+
+Given the recovery of the signature and the acquisition of the account's private and public keys, the attacker cannot send a transaction directly to the network; because the network, due to its full migration to OTAK-NES, does not confirm transactions sent directly with an Access Key and returns them to the origin with the CHILD_KEY_REQUIRED error.
+
+Under this architecture, all transactions submitted after the network's migration to OTAK-NES are restricted to Child Key transactions, and the network returns transactions sent directly by Access Keys to the origin with an error.
+
+Result: Under the requirements of the OTAK-NES architecture, the attacker remains deprived of sending a valid direct transaction to the network.
+
+### Second: The two achievements that OTAK-NES guarantees for account owners on "Quantum Zero Day."
+
+1. The legitimate account owner still has the ability to transfer assets to a secure account.
+In the described scenario, the network has migrated to post-quantum signatures and no longer validates ECDSA transactions. At this stage, the account owner and wallet possess all the material required to construct a Child Key. The source account generates a Child Key from its Access Keys — and, of course, compatible with the network's post-quantum signature algorithm — and by sending this transaction, transfers the assets to a secure account belonging to the owner.
+
+2. The attacker — even with possession of the private key and public key that they have recovered through the analysis of ECDSA signatures recorded in the account's transaction history and now hold — still cannot spend the assets of the account belonging to the recovered signature.
+___
+___
 # Identified Signature-Related Attacks in Blockchain Systems
 
 Throughout the history of blockchain systems, numerous attacks have exploited weaknesses in digital signature generation, cryptographic implementations, or signature verification mechanisms. The following summarizes the most relevant categories of signature-related attacks.
