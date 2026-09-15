@@ -810,7 +810,410 @@ Quantum Zero-Day is not the first challenge for blockchain, and it will likely n
   
 ### Solution for Transferring the Owner's Assets to a Secure Account, When the Network Supports OTAK-NES
 
+1. Problem Statement
 
+In the "Quantum Zero Day" scenario, the network has migrated to the OTAK-NES architecture, and confirmation of ECDSA-signed transactions has been halted. Under these conditions, there exist accounts that:
+
+- Have not started or completed the migration to post-quantum signatures or OTAK-NES.
+- Their owners possess the original Seed.
+- To protect user assets, the network has stopped confirming ECDSA transactions.
+- To protect user assets, the network has also halted incoming transfers to accounts that have not completed migration to OTAK-NES or post-quantum signatures.
+- Consequently, the assets of these legacy accounts can be considered locked or frozen in the network.
+- A quantum attacker has recovered the ECDSA private and public keys from historical signatures.
+
+Key Question: How can these accounts transfer their assets to a secure account?
+
+2. Key Insight: Account Address as Inherent Commitment
+
+Critical point:
+
+```
+Account Address = Hash(ECDSA Public Key)
+```
+
+This Address:
+
+- Is already recorded in the State.
+- Is publicly visible to everyone.
+- Acts as a public commitment to the account's ECDSA Public Key.
+
+However, matching the Public Key to the Account Address alone is not proof of ownership; because in the Zero-Day scenario, the attacker may also possess the ECDSA Private Key and Public Key.
+
+Therefore, the ZK Proof must, in addition to matching the ECDSA Public Key with the Account Address, prove that the ECDSA Key and the presented PQ Child Key are derived — according to the protocol's derivation rules — from the same valid Secret Derivation Material.
+
+Thus:
+
+- No separate Commitment is needed.
+- No Pre-Registration is required.
+- The Account Address is the public connection point of the account.
+- The ZK Proof proves the cryptographic relationship between the Secret Derivation Material, the ECDSA Account Key, and the PQ Child Key.
+
+3. New Account Model: Legacy-Inactive
+
+After Quantum Zero Day, all accounts with bootstrap_completed = false enter the Legacy-Inactive state.
+
+At the moment of Quantum Zero-Day activation, only accounts that existed before the activation of this mechanism and have bootstrap_completed == false are transferred to the Legacy-Inactive state. New accounts created after Quantum Zero-Day must follow the mandatory OTAK-NES and PQ creation/activation path, and are not subject to the Legacy-Inactive emergency path.
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Legacy-Inactive Account                          │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Status: bootstrap_completed = false                                │
+│                                                                     │
+│  ─────────────────────────────────────────────────────────────────  │
+│                                                                     │
+│  Incoming:                                                          │
+│  ❌ Prohibited — nodes reject incoming transfers with error         │
+│     LEGACY_ACCOUNT_NO_INCOMING                                      │
+│                                                                     │
+│  ─────────────────────────────────────────────────────────────────  │
+│                                                                     │
+│  Outgoing:                                                          │
+│  ✅ Allowed — Unlimited                                             │
+│  ✅ Each transaction with independent ZK Proof + Child Key          │
+│  ✅ Includes: Unfreeze, Withdraw, Claim Rewards, Transfer, ...      │
+│                                                                     │
+│  ─────────────────────────────────────────────────────────────────  │
+│                                                                     │
+│  Account Status:                                                    │
+│  Even after balance reaches zero, the account remains Legacy-Inactive│
+│  and ECDSA Direct Signing remains blocked.                          │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Why is incoming prohibited?
+
+1. Prevent asset lockup: If someone sends funds to a Legacy account after Zero Day, those assets are returned to the sender with an error.
+2. Asset transfer only: This path is designed solely for the owner to transfer assets.
+3. Alignment with OTAK-NES: Every account must have bootstrap_completed = true to receive assets.
+
+Why is outgoing unlimited?
+
+1. Staked assets: Owner must be able to unstake.
+2. Staking rewards: Owner must be able to claim rewards.
+3. DeFi: Owner must be able to exit smart contracts.
+4. Multiple destination accounts: Owner may transfer assets to several accounts.
+5. Transaction failure: If a transaction fails for any reason, the owner must be able to try again.
+
+4. Full Process Diagrams
+
+Step 1: Network State at Quantum Zero Day
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Quantum Zero Day                                 │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  • Network has migrated to OTAK-NES                                 │
+│  • ECDSA confirmation halted                                        │
+│  • All Legacy accounts → Status: Legacy-Inactive                    │
+│  • Account Address = Hash(ECDSA Public Key) exists in State         │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Step 2: Owner — Proof Preparation
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Owner (Legitimate Owner)                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  1. Derives ECDSA Key and Child Key (post-quantum) from Seed:       │
+│                                                                     │
+│     Seed                                                            │
+│       │                                                             │
+│       ├── HD-Derive(m/44'/195'/0'/0/0) → ECDSA Private Key         │
+│       │       │                                                     │
+│       │       └── ECDSA Public Key                                  │
+│       │               │                                             │
+│       │               └── Hash(ECDSA Public) == Account Address ✓   │
+│       │                                                             │
+│       └── HD-Derive(m/44'/195'/0'/0/1) → Child Key Private (PQ)    │
+│               │                                                     │
+│               └── Child Key Public (post-quantum)                   │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Step 3: ZK Proof Generation
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    ZK Proof Generation                              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Public Inputs:                                                     │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │ • Account Address (= Hash(ECDSA Public Key))                  │  │
+│  │ • Child Key Public Key (post-quantum)                         │  │
+│  │ • Secure destination address                                  │  │
+│  │ • Transaction Commitment / Transaction Hash                   │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  Private Inputs (Witness):                                          │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │ • Seed / Secret Derivation Material                           │  │
+│  │ • Derivation Path                                             │  │
+│  │ • Chain Codes                                                 │  │
+│  │ • Child Key Private Key                                       │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  Proof Statement:                                                   │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │ «I possess valid Secret Derivation Material, such that:       │  │
+│  │                                                                │  │
+│  │  1. From it, according to protocol rules, the ECDSA Private   │  │
+│  │     Key is derived                                            │  │
+│  │  2. The ECDSA Public Key is derived from it                   │  │
+│  │  3. Hash(ECDSA Public Key) == Account Address                 │  │
+│  │  4. The PQ Child Key is also derived from the same Secret     │  │
+│  │     Derivation Material, according to the same derivation     │  │
+│  │     hierarchy                                                 │  │
+│  │  5. This Proof is bound to this specific Transaction          │  │
+│  │     Commitment.»                                              │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  Generation time: a few minutes                                     │
+│  (For one or several outgoing transactions — all solely for         │
+│   transferring assets to a secure account — this is acceptable)     │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Step 4: Sending Outgoing Transactions
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Outgoing Transactions                            │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Example Tx 1: Unstake                                              │
+│  • ZK Proof + Child Key 1                                           │
+│  • 5000 TRX is freed                                                │
+│                                                                     │
+│  Example Tx 2: Claim Rewards                                        │
+│  • ZK Proof + Child Key 2                                           │
+│  • 50 TRX reward is freed                                           │
+│                                                                     │
+│  Example Tx 3: Transfer to Secure Account 1                         │
+│  • ZK Proof + Child Key 3                                           │
+│  • 3000 TRX transferred                                             │
+│                                                                     │
+│  Example Tx 4: Transfer to Secure Account 2                         │
+│  • ZK Proof + Child Key 4                                           │
+│  • 3050 TRX transferred                                             │
+│                                                                     │
+│  ...                                                                │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Step 5: Network Validation
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Network Validation                               │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Nodes:                                                             │
+│                                                                     │
+│  1. Verify ZK Proof:                                                │
+│     ┌───────────────────────────────────────────────────────────┐  │
+│     │ ✓ Relationship of Secret Derivation Material with ECDSA Key│  │
+│     │ ✓ ECDSA Public Key = Account Address                      │  │
+│     │ ✓ Relationship of same Secret Derivation Material with    │  │
+│     │   Child Key                                               │  │
+│     │ ✓ Proof is bound to the specific transaction              │  │
+│     └───────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  2. Verify PQ Signature:                                            │
+│     ┌───────────────────────────────────────────────────────────┐  │
+│     │ ✓ Child Key is valid                                      │  │
+│     └───────────────────────────────────────────────────────────┘  │
+│                                                                     │
+│  3. Check that the account is in Legacy-Inactive state.             │
+│                                                                     │
+│  4. Apply normal transaction, balance, and state validation rules,  │
+│     then execute the transaction.                                   │
+│                                                                     │
+│  5. ZK Proof is recorded in the blockchain history                  │
+│     (consistent with the transparent nature of blockchain).         │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Step 6: Final Outcome
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Final Outcome                                    │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  Owner:                                                             │
+│  ─────                                                              │
+│  ✓ Assets transferred to secure account                             │
+│  ✓ New account fully controlled by owner                            │
+│  ✓ No new Access Key signature was published                        │
+│                                                                     │
+│  Attacker:                                                          │
+│  ─────                                                              │
+│  ✗ Could not construct a valid ZK Proof                             │
+│  ✗ Could not construct a valid Child Key                            │
+│  ✗ Could not send a valid transaction                               │
+│  ✗ Assets transferred to secure account, out of reach               │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+5. Why the Attacker Cannot Do This
+
+What the attacker has:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Attacker's Assets                                │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  • ECDSA Private Key (from historical signature analysis)           │
+│  • ECDSA Public Key (from State or history)                         │
+│  • Public network information (from blockchain)                     │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+What the attacker lacks:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Attacker's Critical Gaps                         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  • Seed / Secret Derivation Material                                │
+│  • Root Derivation Secret                                           │
+│  • Chain Code                                                       │
+│  • Derivation Path                                                  │
+│  • Child Key Private Key                                            │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+Technical Argument:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Why the Attacker Cannot Build a ZK Proof         │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  To build a ZK Proof, the attacker must prove:                      │
+│                                                                     │
+│  «I possess valid Secret Derivation Material that:                  │
+│   creates the ECDSA Key for this Account Address                    │
+│   and the PQ Child Key is also derived from it according to the     │
+│   same hierarchy.»                                                  │
+│                                                                     │
+│  ─────────────────────────────────────────────────────────────────  │
+│                                                                     │
+│  To prove this claim, the attacker needs one of two paths:          │
+│                                                                     │
+│  Path 1: Find the original Secret                                   │
+│  ────────────────────────────────                                   │
+│  • Must reach valid Secret Derivation Material from available       │
+│    information.                                                     │
+│  • Cryptographic derivation is a one-way function.                  │
+│  • Base probability of success, assuming a 256-bit search space:    │
+│    2^-256 (effectively zero).                                       │
+│                                                                     │
+│  Path 2: Find a fake Secret                                         │
+│  ────────────────────────────────                                   │
+│  • Choose a random Secret.                                          │
+│  • Hope that its derivation yields both an ECDSA Key matching the   │
+│    Account Address and a valid PQ Child Key for the Proof.          │
+│  • Base probability of success: 2^-256 (effectively zero).          │
+│                                                                     │
+│  This value is an ideal estimate based on a 256-bit search space;   │
+│  actual success probability may vary depending on the attack        │
+│  method, attacker's computational resources, and the exact          │
+│  derivation structure.                                              │
+│                                                                     │
+│  ─────────────────────────────────────────────────────────────────  │
+│                                                                     │
+│  Result: The attacker is trapped in a cryptographic dead end.       │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+6. Why the Network Must Have Fully Migrated to OTAK-NES
+
+To transfer assets from the account, the owner must create a Child Key — which requires the Chain Code derived from the Seed, in accordance with the TRC-102 standard and compatible with the network's post-quantum signature algorithm — and send the transaction via ZK Proof.
+
+Under OTAK-NES, the attacker cannot send a transaction directly to the network using the Access Key from the recovered private and public keys.
+
+Even for a Zero-Day transfer, the attacker would need the account's Secret Derivation Material, the Chain Code derived from it, child key derivation mechanisms, and a ZK Proof — whereas he has only obtained the account's public and private keys.
+
+If the network has not migrated to OTAK-NES:
+
+- The attacker can send a direct transaction with the private key and drain the assets.
+- Nodes do not recognize Child Keys as valid signers.
+- Transactions sent with Child Keys are rejected.
+- There is no mechanism for validating ZK Proofs.
+
+Therefore, the network must have already adopted OTAK-NES to recognize Child Keys and ZK Proofs as valid validation mechanisms.
+
+7. Final Protocol Rule
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    Legacy-Account Rule                              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                     │
+│  For any account with bootstrap_completed == false:                 │
+│                                                                     │
+│  ┌───────────────────────────────────────────────────────────────┐  │
+│  │                                                               │  │
+│  │  IF (transaction is incoming):                                │  │
+│  │      → REJECT                                                 │  │
+│  │      → error: LEGACY_ACCOUNT_NO_INCOMING                      │  │
+│  │                                                               │  │
+│  │  IF (transaction is outgoing):                                │  │
+│  │      → Verify ZK Proof                                        │  │
+│  │      → Verify Transaction Binding                             │  │
+│  │      → Verify PQ Signature (Child Key)                        │  │
+│  │      → Verify Legacy-Inactive State                           │  │
+│  │      → Apply normal balance/state validation                  │  │
+│  │      → If valid: ACCEPT                                       │  │
+│  │      → If invalid: REJECT                                     │  │
+│  │                                                               │  │
+│  │  → No limit on number of outgoing transactions                │  │
+│  │                                                               │  │
+│  └───────────────────────────────────────────────────────────────┘  │
+│                                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+8. Advantages of This Solution
+
+Feature Benefit
+Architectural cleanliness ZK Proof is recorded in history (consistent with blockchain)
+Flexibility Unlimited outgoing transactions (unstake, rewards, transfers, ...)
+Security against the defined scenario Attacker lacks Secret Derivation Material and cannot build a valid ZK Proof
+No Pre-Registration Address is the public connection point; ZK proves the cryptographic relationship
+Preserves user trust in blockchain Enables asset transfer to a secure account
+Prevents asset lockup Incoming to Legacy accounts is prohibited
+Simplicity Only one rule in the protocol
+
+9. Conclusion
+
+Final solution for "Quantum Zero Day":
+
+- Legacy accounts on Quantum Zero Day enter the Legacy-Inactive state.
+- The network prohibits incoming transfers to these accounts (to prevent asset lockup).
+- Outgoing transfers from these accounts are unlimited (unstake, claim rewards, transfer, ...).
+- Each outgoing transaction is signed with a ZK Proof based on Secret Derivation Material + a post-quantum Child Key.
+- The ZK Proof is bound to the specific transaction and cannot be used as an independent authorization for another transaction.
+- The attacker, in the defined scenario, cannot perform this because they do not possess valid Secret Derivation Material.
 ___
 ___
 # Identified Signature-Related Attacks in Blockchain Systems
