@@ -778,6 +778,39 @@ Result: Under the requirements of the OTAK-NES architecture, the attacker remain
 In the described scenario, the network has migrated to post-quantum signatures and no longer validates ECDSA transactions. At this stage, the account owner and wallet possess all the material required to construct a Child Key. The source account generates a Child Key from its Access Keys — and, of course, compatible with the network's post-quantum signature algorithm — and by sending this transaction, transfers the assets to a secure account belonging to the owner.
 
 2. The attacker — even with possession of the private key and public key that they have recovered through the analysis of ECDSA signatures recorded in the account's transaction history and now hold — still cannot spend the assets of the account belonging to the recovered signature.
+
+### Details of Asset Transfer by the Owner to a Secure Account
+ 
+In the Quantum Zero-Day scenario, when an account has not completed the Bootstrap process in this architecture, or the potential migration to post-quantum signatures:
+ 
+The only data the network has about the owner's account is the **account address**, which is derived from the hash of the ECDSA public key and is stored in the network State.
+ 
+When the owner, using the Seed and Chain Code, generates a Child Key compatible with the post-quantum algorithm and sends the transaction to the network, the network has no way to verify and link the transaction between the Child Key and the owner's account.
+ 
+Reason: The account has not completed the migration to OTAK-NES; therefore:
+ 
+- Merkle Root has not been recorded on-chain. 
+- And without Bootstrap/Merkle Root, the network cannot establish and verify the authorization relationship between the submitted PQ Child Key and the existing account.
+  
+### Importance of This Challenge for a Network
+ 
+This issue is not merely about asset transfer in a specific scenario. One of the main goals of OTAK-NES is to enable the network in the future to employ new signature algorithms alongside the current signature algorithm, without leaving the core account logic dependent on any specific signature algorithm.
+ 
+The importance of OTAK-NES lies precisely in this dynamism.
+ 
+With a proper Bootstrap mechanism, and by placing the Merkle Root of accounts in the network State, it is possible to generate Child Keys compatible with various signature algorithms and use them to send transactions.
+ 
+In combination with other architectures such as ATHENA, it is also possible to determine in real time, based on network policies or threat level, which signature algorithm transactions should be sent with to the network — whether globally or per account. With the Merkle Root recorded in the network State, nodes can correctly identify which account sent a Child Key transaction.
+ 
+Therefore, Bootstrap is not merely an initial step for activating OTAK-NES; it is a gateway for an account to enter, in the future, a dynamic architecture for managing signature algorithms.
+ 
+If such a mechanism had been considered from the beginning under the OTAK-NES architecture as part of the base design for the network, the network would have had the necessary dynamism and flexibility not only for the Quantum Zero-Day scenario but also for confronting future cryptographic threats.
+ 
+Quantum Zero-Day is not the first challenge for blockchain, and it will likely not be the last. In the future, new threats, cryptographic algorithms, and even security requirements may emerge that we are unaware of today. We must take steps today for that day.
+  
+### Solution for Transferring the Owner's Assets to a Secure Account, When the Network Supports OTAK-NES
+
+
 ___
 ___
 # Identified Signature-Related Attacks in Blockchain Systems
