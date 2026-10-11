@@ -34,10 +34,47 @@ ___
 ___
 # Rationale
 
-ASR is a standard that ensures the user’s digital currency account assets are not at risk, even if the recovery data is lost or stolen.
-This is because the recovery process in ASR, in addition to a numerical variable, depends on a private keyword variable. This variable is stored in the user’s memory or in a separate location from the numerical variable and acts as the key for recovery. It consists of only 12 English letters, which are easy to remember or can be stored separately from the numerical variable to ensure that even if the numerical recovery data is fully exposed, recovery without the keyword is practically impossible.
+The ASR standard is designed to reduce the risk of unauthorized recovery of cryptocurrency accounts and to prevent offline attacks on recovery data. This standard is intended for scenarios in which part of the recovery data is lost, disclosed, or stolen.
 
-ASR is not a static recovery mechanism; rather, it is a network-dependent, account-state-dependent, and Core security policy-dependent recovery system. This design transforms asset recovery from a single point of failure into a multi-stage, auditable, and adaptive attack-resistant process.
+By employing independent protection layers (the user layer and the network layer), the ASR architecture shifts account recovery dependence from a single phrase to a set of complementary data, and moves account security beyond reliance on a single data set.
+
+- The user layer is responsible for preventing unauthorized disclosure of local recovery data (ASR-REC_Display and ASR-VAR).
+- The network layer is responsible for preventing offline recovery and limiting unauthorized attempts by an attacker, in scenarios where the attacker has access to only one of the two components of the data required for account recovery.
+
+The recovery process in ASR depends on two components in the user layer:
+
+- ASR-REC_Display, which — depending on the user's choice — has two modes: 12 or 24 four-digit 13-bit numbers; and
+- ASR-VAR, which — corresponding to the same prior user choice (12 or 24 four-digit 13-bit numbers) — consists respectively of 12 or 24 uppercase English letters, and acts as the recovery key for the user.
+
+The user must store these two components separately from each other; for example, ASR-VAR may be kept in the user's memory, or in a location separate from ASR-REC_Display (i.e., the numerical data).
+
+The dependence of the recovery process on the two components in the user layer means that, if one of the components is disclosed, completing the recovery process without access to the other component is possible only by guessing the second component or through computational search.
+
+By making the recovery process dependent on the network, the ASR architecture strictly limits an attacker's guessing or computational search via the Rate Limiting policy. The ASR recovery architecture is not a static recovery mechanism. In addition to dependence on the two components in the user layer, it features a network-centric system for detecting unsuccessful and suspicious recovery attempts, and for detecting attempts to recover an account using incomplete recovery data.
+
+When the attacker lacks access to one of the recovery components in the user layer, every attempt by the attacker to recover the account is detected by the network and — under Rate Limiting policies — recorded, reported, and limited.
+
+Dependence on the network makes the following actions by the network possible when one component of the account's recovery data is disclosed:
+
+1. Detection of account recovery attempts in scenarios where the attacker, possessing one of the recovery components in the user layer, is forced to guess or use computational search to obtain the second component.
+
+2. Limiting the attacker's repeated recovery attempts through the Rate Limiting policy.
+
+3. The network, by sending an alert message to the active wallets associated with the same account, informs the owner of the recovery attempt. If the user has previously enabled the delayed account activation option, the attacker will be unable — even with a correct guess and after passing the Rate Limiting policy — to transfer assets before the period specified by the owner has elapsed.
+
+In this architecture, completion of the recovery process first requires, in the user layer, the numerical variable ASR-REC_Display and the lexical variable ASR-VAR, as well as the execution of ASR-CRC cycles for local reconstruction of ASR-REC_Main and derivation of key_local.
+
+Completion of the recovery process — through reconstruction of Final_Entropy — depends on the wallet having access to key_local from the user layer, and access to key_network from the network layer (i.e., the network recovery infrastructure). These two components are necessary and essential for reconstructing Final_Entropy and completing the account recovery process.
+
+Final_Entropy is reconstructed through the XOR operator between key_local and key_network. Consequently, completing the recovery process requires the wallet to have access to both shares — key_local (user layer) and key_network (network layer). The XOR operator in this structure ensures that neither share alone is sufficient to reconstruct Final_Entropy.
+
+key_network is generated independently by the wallet at backup time and is stored in a protected form within the network recovery infrastructure.
+
+At recovery time, the only way for the wallet to obtain key_network is to send both recovery components as ASR-REC_Display_ID and ASR-VAR_ID to the recovery infrastructure, and to pass the network's security controls. These controls include recovery request validation, the Proof-of-Work challenge (PoW), the unified Rate Limiting policy, and protection of key_network. The goal is for repeated or unauthorized recovery attempts — and unauthorized recovery — to be detected and limited by the network. Issuance of recovery authorization takes place only after successful passage through the defined controls.
+
+In addition, the ASR architecture supports alert mechanisms and supplementary protective measures. In the alert system of this architecture, upon detecting an unsuccessful or suspicious recovery attempt, the network recovery infrastructure first limits unauthorized attempts through Rate Limiting policies, and then sends alerts to the active wallets associated with the same account.
+
+After receiving the alert, the account owner may — depending on the level of the identified threat — activate capabilities such as protective delay in account activation, or transfer of assets to a secure account.
 ___
 ___
 # Overall ASR Architecture
