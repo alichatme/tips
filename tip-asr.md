@@ -1498,6 +1498,130 @@ Result of this separation:
 - Local ASR information alone is not sufficient to reconstruct Final_Entropy.
 ___
 ___
+# Account Activation Delay Option
+
+The ASR standard supports an optional feature called Account Activation Delay. This feature is disabled by default for every account.
+
+The user can, at any time, select a delay period from 1 to 125 days and send and register the activation and the configured delay duration with an Access Keys signature to the network recovery infrastructure. These settings can be changed or disabled for the account at any time.
+
+Wallets MUST provide the owner with the ability to view the current status of the Account Activation Delay feature, the configured delay duration, and to change its settings.
+
+### Periodic Recovery Status Inquiry
+
+To enhance account security, it is recommended that the owner periodically inquire about the status of pending activation requests, in proportion to the configured delay duration, by sending a signed query (Signed Query) to the network recovery infrastructure.
+
+This periodic inquiry helps the owner promptly identify suspicious requests and potential threats and provides an appropriate security response window before the activation delay period for new accounts expires. Periodic inquiry alone does not guarantee asset security; rather, it is a defensive and complementary layer that, alongside other security controls, helps protect the user's assets.
+
+Viewing the Number of Requests:
+
+Wallets MUST provide the owner with the ability to view — the number of activation requests — the delay period, and the remaining time for each request. This query MUST include a valid signature from one of the account's authorized Access Keys and be sent to the Recovery Service via the secure channel available in the TRON infrastructure. The Recovery Service MUST validate the signature and the authorization of the signing key, and only upon successful validation, return the number of pending requests and the remaining time for each to the requesting wallet.
+
+### Purpose of the Feature
+
+The purpose of creating a delay in the activation of new accounts is to create a time window for the owner to react in situations such as disclosure of recovery information, information theft, or other related security threats.
+
+When the owner, through periodic inquiry or by receiving a notification from the recovery infrastructure, encounters a new recovery request — which they did not initiate or manage themselves — they identify this message as suspicious activity or a potential attempt by an attacker to gain unauthorized access to the account's assets. In this situation, the delay period gives the owner the opportunity to take necessary protective actions before the configured delay expires and before the recovery process for the new request is completed.
+
+Protective actions available to the owner include:
+
+- Increasing the delay duration up to the maximum allowed (125 days)
+- Transferring assets to a secure account
+- Changing the account's Owner Key through the network permission mechanism (Permission) — provided that this action invalidates the previous recovery data, and consequently, renders the stolen recovery data (which maps to the old key) unusable. In this case, due to the change in recovery data, the owner MUST back up the account again.
+
+If the delay feature is enabled and a new activation request begins, the network recovery infrastructure MUST send a notification or alert about the start of the new activation request to the previously active wallets associated with the same account.
+
+### Reset Mechanism
+
+Any change in the delay settings — including re-enabling or disabling and changing the delay duration — is only possible by resending the settings along with an Access Keys signature of the account to the network recovery infrastructure.
+
+This change MUST apply to all account activation requests — including requests currently undergoing the delay period.
+
+The network recovery infrastructure MUST apply the new settings as a complete reset (and not as a continuation of previous processes) for all activation requests of the same account. The delay duration is recalculated from the time of successful registration of the new settings, regardless of the time elapsed in the previous period. The new delay period, for all requests, starts from the time the changes are registered, and its end time is calculated based on the new valid duration.
+
+The network recovery infrastructure MUST send and notify the new delay status and time — via notification or message — to the associated active wallets and activation requests that are awaiting the completion of the configured delay and recovery completion.
+
+### Status of the New Account During the Delay Period
+
+The new wallet, during the delay period, due to not receiving key_network and consequently being unable to reconstruct Final_Entropy, cannot reconstruct the account keys through the ASR recovery process. In this state, and without the account keys, the wallet will not be able to sign transactions or transfer the account's assets.
+
+If the delay option is enabled, the network recovery infrastructure MUST, after successful validation of the recovery request, provide the Activation_Resume_Token along with general account information including:
+
+- Account identifier or public address
+- Delay status
+- End time of the period
+
+— without disclosing key_network — to the wallet.
+
+During this period, the new account is only capable of:
+
+- Viewing the balance and general account information through the public blockchain infrastructure
+- Viewing the timer and remaining time until the end of the delay period
+- Resending the recovery completion request using the Activation_Resume_Token after the delay period ends, to the network recovery infrastructure, along with the required information and following the defined process.
+
+### Delayed Account Activation Process
+
+1. The wallet initiates the recovery request according to the ASR protocol. In the first step, Recovery_Mode along with ASR-REC_Display_ID is sent to the network recovery infrastructure.
+
+2. The network recovery infrastructure creates a Proof-of-Work challenge (PoW_Challenge) and sends it to the wallet.
+
+3. After solving the Proof-of-Work challenge, the wallet returns the solution (PoW_Solution) along with ASR-VAR_ID to the network recovery infrastructure. The ASR-REC_Display_ID and the Recovery_Mode value MUST also be associated with this request through a valid Recovery Session.
+
+4. The network recovery infrastructure checks the Proof-of-Work response, its connection to the current Recovery Session, the validity of the recovery identifiers, and other necessary security controls. If the recovery request is successfully validated — and the Account Activation Delay is enabled for the account — the network recovery infrastructure identifies the account associated with the recovery information and returns the recovery status response to the wallet without disclosing key_network. This response includes only the account identifier or public address, the delay status, the configured period end time, and the Activation_Resume_Token (to be used for the continuation mechanism at the end of the configured delay period).
+
+5. Upon receiving the account address associated with the recovery request, the wallet displays the balance and general information of that account to the user through the public blockchain infrastructure.
+
+Until the end of the configured delay period, the network recovery infrastructure MUST refrain from delivering key_network to the wallet. Consequently, the wallet cannot compute Final_Entropy and reconstruct the account keys through the ASR recovery process. Without completing the recovery process and reconstructing the account keys, the user or wallet cannot sign transactions or transfer the account's assets.
+
+6. By displaying a countdown of the remaining time until the end of the delay period, the wallet shows the user the allowed time for sending the recovery completion request to the network recovery infrastructure. The start and end times of this period MUST be recorded and controlled in the network recovery infrastructure. Therefore, the wallet's display timer is solely for user information and MUST NOT be the reference for determining the end of the configured delay period.
+
+The network recovery infrastructure MUST send notifications regarding the start, change, or end of the delay period to all active wallets and activation requests associated with the same account — i.e., wallets that have sent an activation request to the network infrastructure. These notifications are for informational purposes, and the execution of security controls MUST NOT depend on their successful sending or receipt.
+
+7. After the delay period ends, the wallet, at the user's request, initiates the recovery completion process again. This request, in the first step, MUST include returning the Activation_Resume_Token (to use the continuation mechanism), along with ASR-REC_Display_ID and Recovery_Mode. After the PoW_Challenge is sent by the network recovery infrastructure, the wallet sends the PoW_Challenge response along with ASR-VAR_ID to the recovery infrastructure, and upon final approval, receives NRA, key_network, and ASR_Version from the recovery infrastructure.
+
+The wallet first selects the ASR-CRC algorithm corresponding to that version using the received ASR_Version. Then, using ASR-REC_Display and ASR-VAR received from the user and executing ASR-CRC cycles, it reconstructs ASR-REC_Main. Afterwards, by decoding ASR-REC_Main, it extracts key_local. Finally, by combining key_local (local share, reconstructed from the user layer) and key_network (network share, received from the recovery infrastructure) via the XOR operator, it computes Final_Entropy and completes the account recovery process.
+
+If the owner has validly disabled the delay feature, the wallet, regardless of the Activation_Resume_Token, can send the recovery completion request without waiting for the delay period to end; however, the network MUST still re-execute all necessary validation steps and security controls.
+
+### Confidential Continuation Token (Activation_Resume_Token)
+
+To properly manage activation requests during the delay period, the network must be able to associate the continuation of a request with the same registered process. For this purpose, the use of a confidential token is proposed.
+
+Token Generation and Delivery:
+
+When the Account Activation Delay option is active for an account and the wallet has sent all required information for the recovery request to the network recovery infrastructure, if all checks and security controls — for the recovery request — are successful, the network recovery infrastructure MUST provide the wallet with basic information including the account address, delay status, and remaining time until the end of the delay period, along with a random and confidential token named Activation_Resume_Token.
+
+This token MUST be generated using a cryptographically secure pseudo-random number generator (CSPRNG) with sufficient length and entropy.
+
+The wallet MUST securely protect this token and, after the configured delay period ends, in the first step to complete the recovery process, send the Activation_Resume_Token along with ASR-REC_Display_ID and Recovery_Mode to the network recovery infrastructure, and by continuing the steps, without change, according to the ASR architecture, the wallet and network complete the account recovery.
+
+### Cancellation of Delay Period by Owner
+
+If the delay period is disabled — by the owner — by sending new settings to the network recovery infrastructure, the time restriction is removed.
+
+With the time restriction removed, activation requests can begin the recovery completion process without needing the Activation_Resume_Token and without waiting for the delay period to end. The steps are as follows:
+
+1. The wallet sends Recovery_Mode and ASR-REC_Display_ID to the network recovery infrastructure.
+
+2. The network recovery infrastructure issues a Proof-of-Work challenge (PoW_Challenge) and sends it to the wallet.
+
+3. After solving the challenge, the wallet returns its solution (PoW_Solution) along with ASR-VAR_ID to the network recovery infrastructure.
+
+4. The network recovery infrastructure checks the validity of the request, the correctness of the PoW, and other security controls. Upon successful approval, it sends NRA, ASR_Version, and key_network to the wallet.
+
+5. The wallet first selects the ASR-CRC algorithm corresponding to that version using the received ASR_Version. Then, using ASR-REC_Display and ASR-VAR received from the user and executing ASR-CRC cycles, it reconstructs ASR-REC_Main. Afterwards, by decoding ASR-REC_Main, it extracts key_local.
+
+6. Finally, by combining key_local (local share) and key_network (network share) via the XOR operator, it computes Final_Entropy, extracts the account's private key, and completes account activation.
+
+### Security Considerations
+
+- Enabling or disabling, as well as changing the delay duration, is only permitted with the owner's valid and authorized signature via Access Keys and registering the request in the network recovery infrastructure.
+- The reference for the start and end of the delay period for a request is the network recovery infrastructure; therefore, changing the device's clock or date is ineffective in bypassing this time restriction.
+- Repeated and multiple recovery requests MUST NOT be able to shorten the configured delay or alter the protective status.
+- The end of the delay period alone is not sufficient for delivering key_network. The network infrastructure MUST, in addition to the deadline, re-receive, check, and confirm the status of the activation process and the validity of the final request (including the values ASR-REC_Display_ID and ASR-VAR_ID).
+- The start, change, and end of the delay period MUST be recorded in the network recovery infrastructure.
+- Notification to other active wallets associated with the account, if eligible wallets exist, SHOULD be sent; however, applying settings and calculating the end time MUST NOT depend on the successful delivery of the notification.
+___
+___
 # Additional Engineering Considerations and Security Constraints
 
 1. Intentionally Underdetermined Recovery
