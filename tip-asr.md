@@ -1757,23 +1757,6 @@ The recovery process is only completed when:
 
 Without these four steps, recovery is impossible.
 
-## Checksum in ASR
-The Checksum in the ASR standard is used solely to detect typographical errors in the recovery data entered by the user and has no security or cryptographic role in the recovery process.
-
-The Checksum is generated as a value derived from the ASR-REC data using the SHA-512/256 function, but this value:
-
-- Does not by itself indicate the correctness of ASR-REC
-- Does not enable full or definitive validation of the recovery data
-- Does not reduce the cryptographic search space
-
-Final validation of recovery data in ASR is inherently network‑dependent and occurs only within the framework of the online recovery process, after verification of account status and Core network security policies.
-
-Consequently:
-
-- The Checksum in ASR is merely a user‑experience aid
-- It provides no valid path for offline verification of recovery data
-- It does not enable recovery or validation independent of the network in any way
-
 ## Role of KDF and Seed in ASR
 
 The Key Derivation Function (KDF) and Seed are still generated before ASR.
