@@ -1785,18 +1785,6 @@ transforms the recovery layer from a single point of failure into a multi-stage,
 This precise positioning introduces ASR as an independent, complementary layer in cryptographic wallet architecture, not a replacement for key generation standards.
 ___
 ___
-# Absolute Prohibition of Offline Recovery in ASR
-
-Unlike BIP-39, where recovery is completely offline, ASR is fundamentally designed to be network‑dependent.
-
-Executing ASR-CRC and mapping to ASR-REC alone does not result in the reconstruction of the Seed or private key.
-The output of all ASR components is only an intermediate recovery value.
-
-Full recovery is conditional upon receiving a Network Recovery Authorization (NRA) from the Core network.
-
-In the absence of NRA, recovery is engineering‑wise impossible.
-___
-___
 # Threat Model
 The ASR standard is designed to protect the account recovery process against threats related to the disclosure of recovery data, and not to counter full compromise of the user's execution environment.
 
