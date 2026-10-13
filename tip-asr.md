@@ -1656,40 +1656,6 @@ This limitation is a fundamental security constraint in the ASR design, not an i
 - Mandatory: When a restriction is applied, a countdown timer must be displayed to the user, indicating the remaining waiting time.
 ___
 ___
-# Delayed Account Activation Option
-
-When viewing recovery data, the user can enable the Delayed Account Activation option (disabled by default).  
-The user can select a delay period from 1 to 94 days and register it with the owner’s signature on the network.
-
-If this option is enabled, whenever a **Network Recovery Authorization (NRA)** is issued by the network and account recovery succeeds, the newly recovered account will remain inactive until the end of the delay period.
-
-### Displaying Recovered Devices with a Single RCID and the Ability to Terminate Previous Sessions:
-
-- It should be possible to view active and inactive devices associated with an RCID, as well as to terminate previous sessions for ASR accounts.
-- Limitation for newly recovered accounts:
-A newly recovered account will not be able to terminate previous sessions for 30 days after activation.
-
-### Status during the delay period:
-- Assets are view‑only.  
-- No signed operations by the owner are permitted before the delay ends.  
-- A countdown timer shows the remaining time to the user.  
-- Notifications are sent to previously active wallets.
-
-### Security note:
-If the owner still has access to a previously active wallet, they can, upon detecting suspicious activity or a potential attack, stop the new account activation process before the delay ends by providing a valid signature.
-
-### Definition of “Owner Activity”
-Any valid on-chain transaction signed by the owner that changes network state, including but not limited to
-
-- Asset transfers
-- Voting
-- Freeze/unfreeze
-- Stake/unstake
-- Reward withdrawal
-- Direct smart contract calls
-
-Receiving assets without owner signature is not considered activity.
-
 ## Position of ASR in the Key Generation to Recovery Chain (Engineering Placement of ASR)
 
 To accurately understand the ASR standard, it is necessary to clearly define its position in the engineering chain from cryptographic key generation to the account recovery process.
