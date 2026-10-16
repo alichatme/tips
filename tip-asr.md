@@ -62,7 +62,7 @@ Dependence on the network makes the following actions by the network possible wh
 
 3. The network, by sending an alert message to the active wallets associated with the same account, informs the owner of the recovery attempt. If the user has previously enabled the delayed account activation option, the attacker will be unable — even with a correct guess and after passing the Rate Limiting policy — to transfer assets before the period specified by the owner has elapsed.
 
-In this architecture, completion of the recovery process first requires, in the user layer, the numerical variable ASR-REC_Display and the lexical variable ASR-VAR, as well as the execution of ASR-CRC cycles for local reconstruction of ASR-REC_Main and derivation of key_local.
+In this architecture, completion of the recovery process first requires, in the user layer, the numerical variable ASR-REC_Display and the lexical variable ASR-VAR, as well as the execution of ASR-CYC cycles for local reconstruction of ASR-REC_Main and derivation of key_local.
 
 Completion of the recovery process — through reconstruction of Final_Entropy — depends on the wallet having access to key_local from the user layer, and access to key_network from the network layer (i.e., the network recovery infrastructure). These two components are necessary and essential for reconstructing Final_Entropy and completing the account recovery process.
 
