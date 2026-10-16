@@ -1895,7 +1895,7 @@ The network recovery infrastructure MUST send notifications regarding the start,
 
 7. After the delay period ends, the wallet, at the user's request, initiates the recovery completion process again. This request, in the first step, MUST include returning the Activation_Resume_Token (to use the continuation mechanism), along with ASR-REC_Display_ID and Recovery_Mode. After the PoW_Challenge is sent by the network recovery infrastructure, the wallet sends the PoW_Challenge response along with ASR-VAR_ID to the recovery infrastructure, and upon final approval, receives NRA, key_network, and ASR_Version from the recovery infrastructure.
 
-The wallet first selects the ASR-CRC algorithm corresponding to that version using the received ASR_Version. Then, using ASR-REC_Display and ASR-VAR received from the user and executing ASR-CRC cycles, it reconstructs ASR-REC_Main. Afterwards, by decoding ASR-REC_Main, it extracts key_local. Finally, by combining key_local (local share, reconstructed from the user layer) and key_network (network share, received from the recovery infrastructure) via the XOR operator, it computes Final_Entropy and completes the account recovery process.
+The wallet first selects the ASR-CYC algorithm corresponding to that version using the received ASR_Version. Then, using ASR-REC_Display and ASR-VAR received from the user and executing ASR-CYC cycles, it reconstructs ASR-REC_Main. Afterwards, by decoding ASR-REC_Main, it extracts key_local. Finally, by combining key_local (local share, reconstructed from the user layer) and key_network (network share, received from the recovery infrastructure) via the XOR operator, it computes Final_Entropy and completes the account recovery process.
 
 If the owner has validly disabled the delay feature, the wallet, regardless of the Activation_Resume_Token, can send the recovery completion request without waiting for the delay period to end; however, the network MUST still re-execute all necessary validation steps and security controls.
 
@@ -1925,7 +1925,7 @@ With the time restriction removed, activation requests can begin the recovery co
 
 4. The network recovery infrastructure checks the validity of the request, the correctness of the PoW, and other security controls. Upon successful approval, it sends NRA, ASR_Version, and key_network to the wallet.
 
-5. The wallet first selects the ASR-CRC algorithm corresponding to that version using the received ASR_Version. Then, using ASR-REC_Display and ASR-VAR received from the user and executing ASR-CRC cycles, it reconstructs ASR-REC_Main. Afterwards, by decoding ASR-REC_Main, it extracts key_local.
+5. The wallet first selects the ASR-CYC algorithm corresponding to that version using the received ASR_Version. Then, using ASR-REC_Display and ASR-VAR received from the user and executing ASR-CYC cycles, it reconstructs ASR-REC_Main. Afterwards, by decoding ASR-REC_Main, it extracts key_local.
 
 6. Finally, by combining key_local (local share) and key_network (network share) via the XOR operator, it computes Final_Entropy, extracts the account's private key, and completes account activation.
 
