@@ -77,176 +77,493 @@ In addition, the ASR architecture supports alert mechanisms and supplementary pr
 After receiving the alert, the account owner may — depending on the level of the identified threat — activate capabilities such as protective delay in account activation, or transfer of assets to a secure account.
 ___
 ___
-# Overall ASR Architecture
-ASR consists of three main components:
+# Main Components of the ASR Architecture
 
-- ASR-REC: Recovery Numbers
-- ASR-VAR: Variable Secret
-- ASR-CRC: Cyclic Reduction Core
+- ASR-REC: Recovery Numerical Data
+- ASR-VAR: Variable per User Choice
+- ASR-CYC: Cycles for Maximum Coverage
 
+## 1. ASR-REC: Recovery Numbers
 
-## Component One: ASR-REC (Recovery Numbers)
-The numerical recovery data, by default, consists of 12 four-digit numbers (a total of 48 digits).
-Each number falls within the range 0000 to 9999.
-This range operates in a modular manner.
-These values are displayed to the user in groups of four digits, separated by - and prefixed with ASR-REC.
+ASR-REC, within the ASR architecture, is a numerical data type and — based on the user's choice — has two different modes:
 
-### Example of ASR-REC Display Format
-ASR-REC-1185-7517-7217-1362-1364-1388-4765-6867-7966-6765-2678-6765
+- 12-number mode: 12 four-digit 13-bit numbers with an original number range of 0000 to 8191 (a total of 8192 states) — nominal capacity of 156 bits.
+- 24-number mode: 24 four-digit 13-bit numbers with an original number range of 0000 to 8191 (a total of 8192 states) — nominal capacity of 312 bits.
 
-### Display Requirements
+Account backup is performed based on one of these two modes, selected by the user.
 
-- Mandatory Left-to-Right
-- Mandatory ASCII
-- Mandatory uniform formatting using "-" and displaying ASR-REC to the left of the numerical variable to prevent homography attacks
+ASR-REC is displayed to the user as 12 or 24 four-digit numbers, separated by hyphens and prefixed with ASR-REC.
 
-In the ASR standard, the user can store the ASR-REC digits without concern, because the recovery process, in addition to having ASR-REC, also requires a private lexical variable called ASR-VAR.
+Example of the ASR-REC display format with 12 four-digit numbers:
 
-## Component Two: ASR-VAR (Variable Secret)
-The user’s private variable is a lexical variable consisting of 12 uppercase English letters (A–Z), selected and mapped by the user.
-This variable is exclusively held by the user and stored either in the user’s memory or in a location separate from ASR-REC.
-ASR-VAR is not stored on the network or in the wallet.
-This variable is considered the access key to the assets, and without ASR-VAR, neither the network nor the wallet can map ASR-REC to an account.
+```
+ASR-REC-4735-3238-3956-7095-7337-7032-1291-2345-3227-2728-7285-2690
+```
 
-### Display Requirements
-- Uppercase letters A–Z only
+Display Requirements
+
+- English ASCII digits from 0 to 9 only
+- No spaces
+- Left-to-right display
+- Uniform formatting using the hyphen -
+- Use of the ASR-REC prefix at the beginning of the string, on the left side of the variable, for data-type identification, reduction of display and input errors, and prevention of homography attacks
+
+This data has two distinct components:
+
+- ASR-REC_Main: the base recovery value that the wallet generates from key_local at account registration time, and which serves as the basis for ASR-CYC computations and integration.
+- ASR-REC_Display: the display value that results from integrating ASR-REC_Main with the ASR-CYC output (in the form of mod 8192), and which the user keeps as recovery data.
+
+## 2. ASR-VAR: Variable per User Choice
+
+ASR-VAR, within the ASR architecture, is a lexical data type. Although the letters of this variable are selected and determined by the user in the ASR standard, the number of letter variables is a function of the number of ASR-REC values:
+
+- Whenever the user selects the 12 four-digit number mode for ASR-REC, ASR-VAR has 12 lexical variables.
+- And whenever the user selects the 24 four-digit number mode, ASR-VAR has 24 lexical variables.
+
+The letters of ASR-VAR are selected by the user and kept in the user's memory or in a location separate from ASR-REC. ASR-VAR is not stored on the network or in the wallet.
+
+This variable is considered the access key to the assets. Without ASR-VAR, neither the network nor the wallet can map ASR-REC to an account.
+
+Display Requirements
+
+- Uppercase English letters A to Z only
 - ASCII encoding only
 - No spaces
-- Left-to-Right display
-- Uniform formatting with "-" with ASR-VAR displayed to the left of the variable to prevent homography attacks
+- Left-to-right display
+- Uniform formatting using the hyphen -, with the ASR-VAR prefix at the beginning of the string, on the left side of the variable, for data-type identification, reduction of display and input errors, and prevention of homography attacks
 - A maximum of two consecutive repeated letters is allowed
 
 The repetition restriction is applied to prevent the selection of extremely low-entropy variables (e.g., AAAAAAAAAAAA) and is comparable to password policy standards in secure systems.
 Allowing up to two consecutive repeated letters ensures linguistic compatibility with natural English language structures.
 
-### Example ASR-VAR Display:
+Example: ASR-VAR display format with 12 lexical variables
+
+```
 ASR-VAR-SUNBOYINHOME
+```
 
-Each ASR-VAR lexical character, after entering the cryptographic cycle specific to this standard ASR-CRC , is used by default to encrypt four digits of ASR-REC.
+Each lexical variable of ASR-VAR, after entering the cryptographic cycle specific to this standard (ASR-CYC), is used by default to encrypt four digits of ASR-REC.
 
-## Component Three : ASR-CRC (Cyclic Reduction Core)
-This system structurally increases the cost of each guess or attack attempt by creating exponential growth in computational states.
+For this reason, the number of ASR-VAR variables is not an independent choice; rather, it is a function of the ASR-REC mode selected.
+If the user selects the 12-number mode, ASR-VAR has 12 lexical variables;
+and if the user selects the 24-number mode, ASR-VAR will have 24 lexical variables.
 
-The cyclic cryptographic core is responsible for:
-- Converting letters to numbers
-- Executing cryptographic cycles via additive variable aggregation to expand numerical digit ranges
-- Ensuring full coverage of the numerical range 0000 to 9999 in the default ASR configuration
+## 3. ASR-CYC: Cycles for Maximum Coverage
+
+ASR-CYC, or maximum-coverage cycles, is a cyclic process that — through gradual expansion of numerical values and maximum coverage of the range 0000 to 8191 — prevents structural disclosure of ASR-REC_Main.
+
+Security role of these cycles:
+
+If ASR-VAR were directly integrated with ASR-REC_Main (without cycles), each of its letters — which has a value between 1 and 26 — would only create a small range around the original value. In this case, with the disclosure of ASR-REC_Display, an attacker could find the original value in a short time by searching this small range.
+
+The ASR-CYC cycles eliminate this structural weakness:
+by executing consecutive additions and applying mod 8192, the final output is dispersed across the entire range 0000 to 8191. As a result, ASR-REC_Display provides the attacker with no structural information about the position of ASR-REC_Main.
+
+ASR-CYC alone does not produce new entropy; rather, it covers a structural vulnerability and spreads the existing entropy of ASR-VAR across the entire ASR-REC structure, thereby expanding the attacker's effective search space to the maximum possible range.
+
+### ASR-CYC is responsible for the following:
+
+- Mapping letters to numbers
+- Executing the cycles by summing each variable with the next variable, and the last variable with the first variable (modularly), until the last remaining variable reaches a 9-digit number (≥ 100,000,000)
+- Applying mod 8192 to each result to produce the "ASR-CYC final output" in the range 0000–8191
+- Modular summation of the ASR-CYC final output with the ASR-REC_Main numbers, in order to obtain ASR-REC_Display and display it to the user
 
 ### Letter-to-Number Mapping
-The ASR-VAR vocabulary consists exclusively of uppercase English letters A–Z in ASCII.
-Each letter corresponds to a number:
+
+The ASR-VAR vocabulary consists exclusively of uppercase English letters A to Z in ASCII.
+Each letter maps to a number:
 A = 1, B = 2, …, Z = 26
 
 ### Cryptographic Cycle Execution:
-First, the lexical variables are converted into a numeric sequence, written inside brackets, and separated by -
-Then, each variable is added to the next variable in sequence; the last variable is added modularly to the first.
-This is performed for all 12 values.
-The results are written inside brackets and separated by - forming the next cycle.
-With repeated aggregation, subsequent cycles produce numbers with increasing digit lengths.
-These cycles continue until the last variable exceeds four digits (in the default ASR configuration).
 
-### Full Range Coverage Guarantee:
-Once variable values exceed four digits, only the rightmost four digits of each value are extracted for integration, and the remaining leftmost digits are discarded.
-Continuation of the cycles is necessary to guarantee full coverage of the numeric range 0000 to 9999.
+First, the letter variables are mapped to numbers.
+Then, in order, each variable is summed with the next variable, and the last variable is also summed with the first variable.
+The summation results are written inside brackets and separated by the - sign, forming the numbers of the variables produced by the first cycle.
+To sum the variables in a new cycle, we use the values from the last cycle (i.e., the previous cycle).
 
-### Complete Practical Example of the ASR-CRC Cryptographic Model
+With repeated ASR-CYC cycles, numbers with larger digit lengths are produced.
 
-Assume the user selects the following ASR-VAR
+The cycles continue until the last remaining variable reaches a 9-digit number (≥ 100,000,000).
 
-ASR-VAR-ABCDEFGHIJKL
+---
 
-In the first step, each lexical variable of ASR-VAR is replaced with its numerical digit inside brackets and separated by the - sign.
+Numerical Example of Letter Conversion and Cycle Execution in ASR-CYC
 
-[1-2-3-4-5-6-7-8-9-10-11-12]
+Suppose the user has chosen the following ASR-VAR:
 
-Then, each variable is added to the variable in front of it, and the last variable is also added modularly to the first variable. The results of the additions are written in order inside brackets and separated by the - sign, and recorded as the next cycle.
+```
+ASR-VAR-SUNBOYINHOME
+```
 
-Numerical example of the first cycle of the above example:
+First, letter-to-number mapping:
 
-1+2=3  
-2+3=5  
-3+4=7  
-4+5=9  
-5+6=11  
-6+7=13  
-7+8=15  
-8+9=17  
-9+10=19  
-10+11=21  
-11+12=23  
-12+1=13 
+Each lexical variable of ASR-VAR is replaced with its numerical digit and separated by the - sign.
 
-Result:
-[3-5-7-9-11-13-15-17-19-21-23-13]
+```
+SUNBOYINHOME → [19-21-14-2-15-25-9-14-8-15-13-5]
+```
 
-Second Cycle
-3+5=8  
-5+7=12  
-7+9=16  
-9+11=20  
-11+13=24  
-13+15=28  
-15+17=32  
-17+19=36  
-19+21=40  
-21+23=44  
-23+13=36  
-13+3=16 
+Then, each variable is summed with the variable in front of it, and the last variable is also summed modularly with the first variable.
+The summation results are written in the same order inside brackets and separated by the - sign, and are recorded as the first cycle.
 
-Result:
-[8-12-16-20-24-28-32-36-40-44-36-16]
+Method of computing the first cycle in the above example:
 
-The cycles continue until the last variable exceeds four digits for all variables. Then, in the above assumption, as well as in the default ASR standard, only the rightmost four digits resulting from the cycle of each variable enter the integration stage, and the remaining left digit(s) of each variable are ignored.
+```
+19+21=40
+21+14=35
+14+2=16
+2+15=17
+15+25=40
+25+9=34
+9+14=23
+14+8=22
+8+15=23
+15+13=28
+13+5=18
+19+5=24
+```
 
-### Modular Integration of ASR-CRC Output with ASR-REC (with Example)
+Result of cycle 1:
 
-In ASR, the user’s private variable (ASR-VAR) is first processed through the ASR-CRC core.
-The output of this process is a four-digit numeric value (ASR-CRC Output), which serves as an intermediate recovery value and cannot independently reconstruct the Seed or private key.
-This four-digit value is then modularly added to each four-digit ASR-REC number, and the final result is displayed to the user.
-If the sum exceeds 9999, the calculation continues modularly from 0000.
+```
+[40-35-16-17-40-34-23-22-23-28-18-24]
+```
 
-### In another example, with hypothetical numbers different from the previous example.
+Result of cycle 2:
 
-Assume:
-The value of the first four-digit number in ASR-REC is equal to:
-4444
+```
+[75-51-33-57-74-57-45-45-51-46-42-64]
+```
 
-And the four-digit output resulting from processing ASR-VAR in the ASR-CRC cycles is equal to:
-2222
+Result of cycle 3:
 
-In this case, the integration is performed as follows:
-4444 + 2222 = 6666
+```
+[126-84-90-131-131-102-90-96-97-88-106-139]
+```
 
-The value 6666 is displayed as the ASR-REC value to the user.
+Result of cycle 4:
 
-### Recovery Process
-During recovery, the user enters 6666 as the first ASR-REC value.
-After entering ASR-VAR, the wallet reruns ASR-CRC and calculates:
-ASR-CRC Output = 2222
+```
+[210-174-221-262-233-192-186-193-185-194-245-265]
+```
 
-The wallet, after subtracting the number resulting from the ASR-CRC cycle from the user's 4-digit ASR-REC number, reconstructs the original middle digit value for account recovery
+Result of cycle 5:
 
-6666 − 2222 = 4444
+```
+[384-395-483-495-425-378-379-378-379-439-510-475]
+```
 
-Note: If subtraction results in a value below 0000, the calculation proceeds modularly by subtracting from 9999.
+Result of cycle 6:
 
-After reconstructing ASR-REC values, the wallet sends the recovery proof to the network in accordance with the ASR standard.
+```
+[779-878-978-920-803-757-757-757-818-949-985-859]
+```
 
-If account status, security policies, and timing conditions are approved, the network issues a Network Recovery Authorization (NRA).
+Result of cycle 7:
 
-Only after receiving this authorization can the recovery process be completed.
+```
+[1657-1856-1898-1723-1560-1514-1514-1575-1767-1934-1844-1638]
+```
 
-This model guarantees that:
-Without ASR-VAR, ASR-REC cannot be reconstructed
+Result of cycle 8:
 
-Even with ASR-REC and ASR-VAR, recovery cannot be completed without network authorization
+```
+[3513-3754-3621-3283-3074-3028-3089-3342-3701-3778-3482-3295]
+```
 
-Recovery requires the simultaneous presence of three independent factors
-- ASR-REC
-- ASR-VAR
-- Network-issued Recovery Authorization
+Result of cycle 9:
 
-This design transforms recovery from a static operation into a controlled, network-dependent, abuse-resistant process.
+```
+[7267-7375-6904-6357-6102-6117-6431-7043-7479-7260-6777-6808]
+```
+
+Result of cycle 10:
+
+```
+[14642-14279-13261-12459-12219-12548-13474-14522-14739-14037-13585-14075]
+```
+
+Result of cycle 11:
+
+```
+[28921-27540-25720-24678-24767-26022-27996-29261-28776-27622-27660-28717]
+```
+
+Result of cycle 12:
+
+```
+[56461-53260-50398-49445-50789-54018-57257-58037-56398-55282-56377-57638]
+```
+
+Result of cycle 13:
+
+```
+[109721-103658-99843-100234-104807-111275-115294-114435-111680-111659-114015-114099]
+```
+
+Result of cycle 14:
+
+```
+[213379-203501-200077-205041-216082-226569-229729-226115-223339-225674-228114-223820]
+```
+
+Result of cycle 15:
+
+```
+[416880-403578-405118-421123-442651-456298-455844-449454-449013-453788-451934-437199]
+```
+
+Result of cycle 16:
+
+```
+[820458-808696-826241-863774-898949-912142-905298-898467-902801-905722-889133-854079]
+```
+
+Result of cycle 17:
+
+```
+[1629154-1634937-1690015-1762723-1811091-1817440-1803765-1801268-1808523-1794855-1743212-1674537]
+```
+
+Result of cycle 18:
+
+```
+[3264091-3324952-3452738-3573814-3628531-3621205-3605033-3609791-3603378-3538067-3417749-3303691]
+```
+
+Result of cycle 19:
+
+```
+[6589043-6777690-7026552-7202345-7249736-7226238-7214824-7213169-7141445-6955816-6721440-6567782]
+```
+
+Result of cycle 20:
+
+```
+[13366733-13804242-14228897-14452081-14475974-14441062-14427993-14354614-14097261-13677256-13289222-13156825]
+```
+
+Result of cycle 21:
+
+```
+[27170975-28033139-28680978-28928055-28917036-28869055-28782607-28451875-27774517-26966478-26446047-26523558]
+```
+
+Result of cycle 22:
+
+```
+[55204114-56714117-57609033-57845091-57786091-57651662-57234482-56226392-54740995-53412525-52969605-53694533]
+```
+
+Result of cycle 23:
+
+```
+[111918231-114323150-115454124-115631182-115437753-114886144-113460874-110967387-108153520-106382130-106664138-108898647]
+```
+
+In cycle 23, all variables have become 9-digit numbers. Since the cycle-termination condition has been met — namely, the last remaining variable reaching a 9-digit number — the cycles stop, and the result of the twenty-third cycle is taken as the "final result" of ASR-CYC.
+
+### Extracting the Final Output
+
+Using mod 8192 on the "final result" of cycle 23, the "final output" of ASR-CYC is extracted:
+
+Final Result Remainder "mod 8192"
+111918231 7319
+114323150 3790
+115454124 4268
+115631182 1102
+115437753 4281
+114886144 1536
+113460874 1674
+110967387 6747
+108153520 2736
+106382130 0818
+106664138 4298
+108898647 2391
+
+Final output of ASR-CYC:
+
+```
+ASR-CYC-7319-3790-4268-1102-4281-1536-1674-6747-2736-0818-4298-2391
+```
+
+All output values lie within the range 0000 to 8191. Leading zeros are displayed to preserve the four-digit format and are mandatory.
+
+### Method of Computing and Integrating ASR-CYC with ASR-REC to Produce ASR-REC_Display
+
+In the example below:
+
+```
+ASR-REC_Main-4735-3238-3956-7095-7337-7032-1291-2345-3227-2728-7285-2690
+```
+
+After the ASR-CYC cycles stop and the final result is determined — mod 8192 is applied to each value, so that the final output in the range 0000 to 8191 is obtained for each ASR-VAR variable.
+
+Next, the output of each variable is modularly "added" — within the range 0000 to 8191 — to the corresponding four-digit number in ASR-REC_Main.
+The resulting value is displayed to the user as ASR-REC_Display.
+
+```
+REC_Display[i] = (REC_Main[i] + CYC[i]) mod 8192
+```
+
+Method of computing the first ASR-VAR variable and its corresponding value in ASR-REC_Main:
+
+```
+REC_Main = 4735
+CYC      = 7319
+4735 + 7319 = 12054
+12054 mod 8192 = 3862
+→ REC_Display = 3862
+```
+
+Method of computing the fourth ASR-VAR variable and its corresponding value in ASR-REC_Main modularly:
+
+```
+REC_Main = 7095
+CYC      = 1102
+7095 + 1102 = 8197
+8197 mod 8192 = 0005
+→ REC_Display = 0005
+```
+
+Results obtained for all ASR-VAR variables and their corresponding values in ASR-REC_Main:
+
+# REC_Main CYC Computation REC_Display
+1 4735 7319 12054 mod 8192 3862
+2 3238 3790 7028 7028
+3 3956 4268 8224 mod 8192 0032
+4 7095 1102 8197 mod 8192 0005
+5 7337 4281 11618 mod 8192 3426
+6 7032 1536 8568 mod 8192 0376
+7 1291 1674 2965 2965
+8 2345 6747 9092 mod 8192 0900
+9 3227 2736 5963 5963
+10 2728 0818 3546 3546
+11 7285 4298 11583 mod 8192 3391
+12 2690 2391 5081 5081
+
+ASR-REC_Display:
+
+```
+ASR-REC-3862-7028-0032-0005-3426-0376-2965-0900-5963-3546-3391-5081
+```
+
+### ASR-REC_Main Recovery Process
+
+In the recovery process, the user first enters ASR-REC_Display.
+
+ASR-REC_Display:
+
+```
+ASR-REC-3862-7028-0032-0005-3426-0376-2965-0900-5963-3546-3391-5081
+```
+
+Next, the user provides ASR-VAR.
+
+```
+ASR-VAR-SUNBOYINHOME
+```
+
+The wallet executes the ASR-CYC cycles using ASR-VAR and computes CYC_Output:
+
+```
+ASR-CYC-7319-3790-4268-1102-4281-1536-1674-6747-2736-0818-4298-2391
+```
+
+After "subtracting" the value produced by the ASR-CYC cycle from the ASR-REC_Display value, modularly and within the range 0000 to 8191, the wallet reconstructs the ASR-REC_Main value.
+
+Note: If the subtraction results in a value less than 0000, the computation continues modularly within the range 0000 to 8191.
+
+```
+REC_Main[i] = (REC_Display[i] − CYC[i]) mod 8192
+```
+
+# Display CYC Computation REC_Main
+1 3862 7319 −3457 mod 8192 4735 ✅
+2 7028 3790 3238 3238 ✅
+3 0032 4268 −4236 mod 8192 3956 ✅
+4 0005 1102 −1097 mod 8192 7095 ✅
+5 3426 4281 −855 mod 8192 7337 ✅
+6 0376 1536 −1160 mod 8192 7032 ✅
+7 2965 1674 1291 1291 ✅
+8 0900 6747 −5847 mod 8192 2345 ✅
+9 5963 2736 3227 3227 ✅
+10 3546 0818 2728 2728 ✅
+11 3391 4298 −907 mod 8192 7285 ✅
+12 5081 2391 2690 2690 ✅
+
+Successful reconstruction:
+
+```
+ASR-REC-Main-4735-3238-3956-7095-7337-7032-1291-2345-3227-2728-7285-2690
+```
+
+### Complete Diagram
+
+```
+ASR-VAR-SUNBOYINHOME
+        ↓
+[19-21-14-2-15-25-9-14-8-15-13-5]
+        ↓ (23 cycles)
+[111918231-114323150-...-108898647]
+        ↓ (mod 8192)
+ASR-CYC-7319-3790-4268-1102-4281-1536-1674-6747-2736-0818-4298-2391
+        ↓
+ASR-REC-Main-4735-3238-3956-7095-7337-7032-1291-2345-3227-2728-7285-2690
+        ↓ (integration mod 8192)
+ASR-REC-3862-7028-0032-0005-3426-0376-2965-0900-5963-3546-3391-5081
+        ↓ (display to user)
+```
+
+Recovery — reverse of the previous process:
+
+```
+ASR-REC-3862-... + ASR-VAR-SUNBOYINHOME
+        ↓ (re-execution of 23 ASR-CYC cycles)
+ASR-CYC-7319-3790-...-0818-...
+        ↓ (modular subtraction)
+ASR-REC-Main-4735-3238-...-2728-...
+        ↓
+key_local
+        ↓ (XOR with key_network from the network)
+Final_Entropy
+```
+
+### Recovery Completion Conditions
+
+The account recovery process begins with receiving recovery data from the user. The wallet first receives ASR-REC_Display and then ASR-VAR from the user.
+
+It then uses ASR-VAR to execute the ASR-CYC cycles, obtaining the final output of this stage.
+
+Using ASR-REC_Display and modular subtraction within the range 0000–8191 from the final ASR-CYC output, the wallet reconstructs the ASR-REC_Main value.
+
+### Why is reconstructing ASR-REC_Main alone insufficient to complete recovery?
+
+ASR-REC_Main is only used to reconstruct key_local, and completing the recovery process requires obtaining key_network (the network share) from the network recovery infrastructure. These two shares are both necessary and essential for computing Final_Entropy and recovering the account.
+
+Next, the wallet extracts key_local by decoding ASR-REC_Main. Finally, by combining key_local (the user share) and key_network (the network share, received from the recovery infrastructure) via the XOR operator, it computes Final_Entropy and completes the account recovery process.
+
+To obtain key_network and complete the recovery process, the wallet sends the required information — including ASR-REC_Display_ID and ASR-VAR_ID — to the network recovery infrastructure, and after successfully passing the network's security controls (including Proof-of-Work (PoW) and Rate Limiting), it receives key_network from the network recovery infrastructure.
+
+The final value of Final_Entropy is computed using the following relation, and account recovery is completed:
+
+```
+Final_Entropy = key_local XOR key_network
+```
+
+### Additional Notes
+
+The ASR-CYC steps are identical in both the 12-number and 24-number modes. In the 24-number mode, to maintain execution order, the number of ASR-VAR variables and the number of ASR-REC positions increases from 12 to 24, and the ASR-CYC cycles are executed over 24 values.
+
+Since ASR-CYC operations consist solely of simple additions, and even at the 9-digit threshold the number of cycles remains limited (approximately 23 to 27 rounds), the computational cost is negligible. Therefore, the 9-digit threshold was chosen so that the uniformity of the output distribution after mod 8192 is maintained at the highest possible level.
+
+In this version, the permitted numerical range for ASR-REC values is 0000 to 8191.
+
+Standard modular rule: mod 8192
+
+Cycle-termination condition: the cycles continue until the last remaining variable reaches a 9-digit number (≥ 100,000,000). Then mod 8192 is applied to each value.
+
+Reason for choosing the 9-digit termination threshold: The larger the range of the final cycle values, the more uniform the distribution produced by mod 8192. With termination at 9 digits, the range length reaches more than 1,220 times the modulus, and the bias is reduced to ~0.08% — effectively zero. By contrast, termination at 6 digits produces a 33% bias, and at 8 digits a 0.66% bias.
 ___
 ___
 # Network-Dependent Account Recovery in ASR: Architectural Constraints and the Impossibility of Offline Recovery
