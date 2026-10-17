@@ -754,7 +754,7 @@ In the twenty-four-number ASR-REC mode:
 
 - ASR-VAR consists of 24 English letter variables (uppercase A to Z).
 
-Each character of ASR-VAR, after conversion to a numeric value and passing through the ASR-CRC cycle, produces a four-digit output. This four-digit output is modularly combined with the corresponding value in ASR-REC, and the final result is displayed to the user as ASR-REC_Display.
+Each character of ASR-VAR, after conversion to a numeric value and passing through the ASR-CYC cycle, produces a four-digit output. This four-digit output is modularly combined with the corresponding value in ASR-REC, and the final result is displayed to the user as ASR-REC_Display.
 
 Therefore:
 
@@ -768,7 +768,7 @@ and:
 24 ASR-VAR characters ↔ 24 ASR-REC positions
 ```
 
-Corresponding to the increase in numeric variables of ASR-REC from 12 four-digit numbers to 24 four-digit numbers, the letter variables of ASR-VAR also increase from 12 letter variables to 24 letter variables. This increase is necessary and essential to preserve the structure, execution steps, and operation of ASR-CRC cycles, without changing the ASR architectural logic.
+Corresponding to the increase in numeric variables of ASR-REC from 12 four-digit numbers to 24 four-digit numbers, the letter variables of ASR-VAR also increase from 12 letter variables to 24 letter variables. This increase is necessary and essential to preserve the structure, execution steps, and operation of ASR-CYC cycles, without changing the ASR architectural logic.
 
 ### 4. One-Way Recovery Identifiers
 
@@ -1218,9 +1218,9 @@ The user selects ASR-VAR:
 - In 12-number mode: 12 uppercase English letters (A–Z)
 - In 24-number mode: 24 uppercase English letters (A–Z)
 
-Step 6 — Execute ASR-CRC and Generate ASR-REC_Display
+Step 6 — Execute ASR-CYC and Generate ASR-REC_Display
 
-The wallet executes ASR-CRC cycles and computes ASR-REC_Display based on ASR-VAR and ASR-REC_Main.
+The wallet executes ASR-CYC cycles and computes ASR-REC_Display based on ASR-VAR and ASR-REC_Main.
 
 Step 7 — Compute Identifiers
 
