@@ -1379,19 +1379,19 @@ Step 5 — Reconstruct Final_Entropy
 
 After successfully receiving a valid response from the network (including key_network, ASR_Version, and NRA), the wallet:
 
-1. First uses the ASR_Version received from the network to ensure that the ASR-CRC algorithm and reconstruction steps match the version used during Enrollment.
-2. Then, using ASR-REC_Display and ASR-VAR, it first processes ASR-VAR again through ASR-CRC cycles and obtains the numeric output for each variable.
-3. Then the wallet modularly subtracts the ASR-CRC output from the four-digit value of ASR-REC_Display. This operation is performed for all values, and as a result, the original ASR-REC_Main values that existed before the integration step are reconstructed.
+1. First uses the ASR_Version received from the network to ensure that the ASR-CYC algorithm and reconstruction steps match the version used during Enrollment.
+2. Then, using ASR-REC_Display and ASR-VAR, it first processes ASR-VAR again through ASR-CYC cycles and obtains the numeric output for each variable.
+3. Then the wallet modularly subtracts the ASR-CYC output from the four-digit value of ASR-REC_Display. This operation is performed for all values, and as a result, the original ASR-REC_Main values that existed before the integration step are reconstructed.
 
 Conceptually:
 
 ```
-ASR-REC_Main[i] = (ASR-REC_Display[i] − CRC_Output[i]) mod 8192
+ASR-REC_Main[i] = (ASR-REC_Display[i] − CYC_Output[i]) mod 8192
 ```
 
 The modular operation is performed in the range 0000–8191; therefore the result always lies in this range and no separate range check is needed.
 
-Therefore, ASR-REC_Display alone cannot be directly converted to ASR-REC_Main, and its reconstruction requires possessing ASR-VAR and correctly executing the ASR-CRC process.
+Therefore, ASR-REC_Display alone cannot be directly converted to ASR-REC_Main, and its reconstruction requires possessing ASR-VAR and correctly executing the ASR-CYC process.
 
 Note: In the current version of the ASR standard, all modular calculations are performed in the range 0000–8191 (13-bit space). Future versions of ASR may define different ranges.
 
