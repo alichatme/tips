@@ -1764,7 +1764,7 @@ The birthday attack is primarily used to find collisions in hash functions. For 
 
 This relationship cannot be directly generalized to the entropy space of ASR-REC, because ASR-REC cannot be considered as a hash function, and the attacker's goal in the ASR recovery process is not to find a collision in a hash function; rather, the goal is to reconstruct Final_Entropy and ultimately complete the recovery process and obtain the account keys.
 
-In the ASR architecture, even if the attacker possesses one of the values ASR-REC_Display or ASR-VAR, they cannot examine the corresponding possible space alone. This process is only possible by possessing both ASR-REC_Display and ASR-VAR, completing the ASR-CRC cycles, and sending ASR-REC_Display_ID and ASR-VAR_ID along with other required variables, and obtaining key_network from the network recovery infrastructure.
+In the ASR architecture, even if the attacker possesses one of the values ASR-REC_Display or ASR-VAR, they cannot examine the corresponding possible space alone. This process is only possible by possessing both ASR-REC_Display and ASR-VAR, completing the ASR-CYC cycles, and sending ASR-REC_Display_ID and ASR-VAR_ID along with other required variables, and obtaining key_network from the network recovery infrastructure.
 
 Reconstruction of Final_Entropy without access to key_network in the ASR architecture is not possible; because:
 
