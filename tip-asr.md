@@ -1539,7 +1539,7 @@ Neither of the two components ASR-REC_Display and ASR-VAR alone is sufficient to
 ```
 ASR-REC_Display + ASR-VAR
             ↓
-    ASR-CRC Processing
+    ASR-CYC Processing
             ↓
       ASR-REC_Main
             ↓
@@ -1559,7 +1559,7 @@ Conceptual Process
 ```
 ASR-REC_Display + ASR-VAR
             ↓
-    ASR-CRC Processing
+    ASR-CYC Processing
             ↓
       ASR-REC_Main
             ↓
@@ -1593,7 +1593,7 @@ Overall Process Diagram
                   │ ASR-REC_Display + ASR-VAR     │
                   └──────────────┬───────────────┘
                                  ↓
-                      ASR-CRC Processing
+                      ASR-CYC Processing
                                  ↓
                           ASR-REC_Main
                                  ↓
@@ -1641,7 +1641,7 @@ ASR does not say that key_network prevents guessing ASR-VAR.
 
 The attacker may be able to guess ASR-VAR.
 
-But if the attacker has only one of the two components ASR-REC_Display or ASR-VAR correct, that component alone is not sufficient to complete the account Recovery process; because to obtain ASR-REC_Main, we need both ASR-REC_Display and ASR-VAR and correct execution of ASR-CRC cycles.
+But if the attacker has only one of the two components ASR-REC_Display or ASR-VAR correct, that component alone is not sufficient to complete the account Recovery process; because to obtain ASR-REC_Main, we need both ASR-REC_Display and ASR-VAR and correct execution of ASR-CYC cycles.
 Also, to obtain key_local, ASR-REC_Main must first be reconstructed.
 And to obtain Final_Entropy, in addition to key_local, obtaining key_network from the network's Recovery infrastructure is also necessary; provided that the required information, including ASR-REC_Display_ID, ASR-VAR_ID, and Recovery_Mode, is sent according to the defined process and the request passes the network security controls, including PoW, Rate Limit, and other validation policies.
 
