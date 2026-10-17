@@ -670,7 +670,7 @@ ASR-VAR = 24 uppercase English letters
 Allowed characters = A-Z
 ```
 
-ASR-compliant wallets MUST check this limitation before continuing the Recovery process (and before computing ASR-CRC).
+ASR-compliant wallets MUST check this limitation before continuing the Recovery process (and before computing ASR-CYC).
 
 Therefore, the wallet must not accept inputs such as the following as valid ASR-VAR:
 
