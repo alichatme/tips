@@ -1784,11 +1784,11 @@ Why Offline Recovery Is Not Possible in ASR
 
 In the ASR architecture, the recovery process is designed such that ASR-REC_Display and ASR-VAR are two independent and complementary components. Possessing only one of these two components is not sufficient to reconstruct ASR-REC_Main.
 
-If the attacker has only ASR-REC_Display, without ASR-VAR they cannot execute ASR-CRC cycles to process ASR-REC_Display values and obtain ASR-REC_Main.
+If the attacker has only ASR-REC_Display, without ASR-VAR they cannot execute ASR-CYC cycles to process ASR-REC_Display values and obtain ASR-REC_Main.
 
 On the other hand, if the attacker has only ASR-VAR, they do not have ASR-REC_Display and therefore cannot complete the conversion and reconstruction process of ASR-REC_Main.
 
-Therefore, reconstruction of key_local requires possessing both components. The attacker must first possess both ASR-REC_Display and ASR-VAR, then execute ASR-CRC cycles to reach ASR-REC_Main, and finally decode it to reconstruct key_local.
+Therefore, reconstruction of key_local requires possessing both components. The attacker must first possess both ASR-REC_Display and ASR-VAR, then execute ASR-CYC cycles to reach ASR-REC_Main, and finally decode it to reconstruct key_local.
 
 Even after reconstructing key_local, the attacker needs key_network to reach Final_Entropy:
 
