@@ -1973,99 +1973,316 @@ This limitation is a fundamental security constraint in the ASR design, not an i
 - Mandatory: When a restriction is applied, a countdown timer must be displayed to the user, indicating the remaining waiting time.
 ___
 ___
-## Position of ASR in the Key Generation to Recovery Chain (Engineering Placement of ASR)
+# Countering Bulk Offline Account Generation in the ASR Architecture through the Mandatory Use of Argon2id KDF
 
-To accurately understand the ASR standard, it is necessary to clearly define its position in the engineering chain from cryptographic key generation to the account recovery process.
+The ASR architecture implements and mandates the Key Derivation Function (KDF) precisely, standardly, and uniformly across all ASR-compatible wallets to achieve the following security objectives:
 
-In HD wallet architecture and the BIP-39 standard, the key generation path is as follows:
+First — Preventing bulk offline account generation: Given that the account-creation process in blockchain is offline, an attacker can inexpensively generate millions of accounts in an offline environment and simply compare the resulting addresses against the addresses existing on the network. If the address of any of these accounts matches an existing account, the attacker has effectively obtained the private key of that account.
 
-Entropy
-→ Checksum
-→ Mnemonic (2048 words)
-→ PBKDF2-HMAC-SHA512
-→ 512-bit Seed
-→ Master Private Key
-→ Public Key / Address
-→ Wallet
-→ Recovery using Mnemonic
+Second — Preventing the accidental generation of similar accounts with identical private keys: Even without any attacker involvement, when a user creates a new account on the blockchain, there is a probability that the new account's private key will be identical to one of the existing accounts — although this probability is extremely low, it is not zero.
 
-In this structure, the Mnemonic directly represents the Seed, and anyone who gains access to it can recover the user's private key and assets without any security barrier.
 
-Where ASR Fits in This Chain
+ASR, by mandating the use of Argon2id as the default KDF, dramatically increases the cost of each guess. However, Argon2id alone does not prevent bulk generation of random accounts or address collisions. But it renders the generation of millions of accounts economically unjustifiable.
 
-The ASR standard does not change any of the following processes:
+Key point for the user: The user needs to understand that if an identical input (a single random datum) is fed to two different KDFs — one a conventional, insecure-against-bulk-offline-generation KDF (such as PBKDF2), and the other a KDF with high hardware cost (such as Argon2id) — the outputs of these two KDFs will not be identical and will lead to different public and private keys.
 
-- Entropy generation
-- Seed generation
-- Key Derivation Functions (KDF)
-- Private and public key generation
-- HD Wallet structure
-- Network cryptographic algorithms
+Consequently, when a user creates an account using a resistant KDF (Argon2id):
 
-All of the above steps remain exactly as before, following existing cryptographic standards.
+- An attacker using conventional KDFs (PBKDF2) cannot recover the account — even if they possess the input, the PBKDF2 output leads to different keys and therefore a different account.
+- For three key reasons, an attacker does not turn to resistant KDFs:
+  - First, the high hardware cost.
+  - Second, the need for bulk account generation.
+  - Third, the vastness of the search space.
+  The combination of these three factors makes the attack economically unjustifiable.
 
-ASR only redefines the Recovery layer.
+In this way, by choosing the ASR architecture — and consequently, the mandate of the Argon2id KDF and higher entropy compared to conventional algorithms, as well as the quality of CSPRNG — the user makes their account more resilient in the long term against two threats: "bulk offline account generation" and "accidental collision."
 
-From an engineering perspective, the new chain will be as follows:
 
-Entropy
-→ Seed Generation (unchanged)
-→ Master Keys (unchanged)
-→ Wallet (unchanged)
+In many common methods — including BIP-39 — PBKDF2 is used to derive the wallet Seed. In contrast, Argon2id is a memory-hard algorithm that, with configurable parameters for memory, number of passes, and degree of parallelism, can dramatically increase the computational and memory cost of each attempt to guess the input data.
 
-↓ (at recovery time)
+Therefore, ASR mandates that Argon2id be defined as the standard and default KDF in the key-derivation path of this architecture.
 
-ASR Recovery Layer
-    ASR-REC (numeric recovery data)
-    ASR-VAR (user private variable)
-    ASR-CRC (cyclic cryptographic process)
-    Network Verification
+### 1. Why ASR Mandates the Use of Argon2id
 
-Fundamental Difference from BIP-39
+1.1. Producing Different Keys with Different KDFs
 
-In BIP-39:
-Mnemonic = Seed = Access to Private Key
+If an identical random datum is fed to two different KDFs — such as PBKDF2 and Argon2id — a different derived output results. More precisely: these two KDFs, due to algorithmic differences, do not produce identical outputs even with identical inputs.
 
-In ASR:
-ASR-REC ≠ Seed
-ASR-REC has no relation to the Seed or private key without ASR-VAR.
-ASR-REC is only an "input to the recovery process", not a direct representation of the private key.
+For example, if an account has been created with Argon2id, an attempt to recover the account with PBKDF2 — even using the same input — yields a different derived output. Consequently, the resulting private key, public key, and blockchain address will be different.
 
-The recovery process is only completed when:
+Hence, by mandating Argon2id as its default KDF, ASR takes an important step in enhancing the asset security of users' digital accounts.
 
-1. The user enters ASR-REC
-2. The user enters ASR-VAR
-3. The ASR-CRC cryptographic cycle is executed
-4. The network verifies the process
+1.2. Probability of Address Collisions
 
-Without these four steps, recovery is impossible.
+If the cryptographic entropy is generated correctly, the probability that two independent accounts share the same address is extremely small; but mathematically, it is not zero. This threat has two distinct scenarios:
 
-## Role of KDF and Seed in ASR
+First scenario — accidental collision between two users: When N independent accounts exist on the network, the probability that at least two accounts from this set share the same address (birthday attack):
 
-The Key Derivation Function (KDF) and Seed are still generated before ASR.
+```
+P ≈ N(N−1) / 2^161
+```
 
-ASR has no involvement in Seed generation whatsoever.
+Second scenario — an attacker's active attack against the network: When an attacker generates N accounts and the network has M existing accounts, the probability that at least one of the N accounts matches at least one of the M existing accounts:
 
-Rather, after Seed generation and wallet creation, the recovery data – instead of a Mnemonic – is defined in the form of ASR-REC and dependent on ASR-VAR.
+```
+P ≈ N × M / 2^160
+```
 
-In engineering terms:
+This formula is mathematically akin to the logic of the "birthday attack" — with the difference that, rather than a collision within a single set, it measures collisions between two sets (the attacker's N accounts and the network's M accounts).
 
-ASR replaces the Mnemonic, not the Seed.
+These estimates rest on correct key generation and an approximately uniform distribution of addresses.
 
-### Engineering Conclusion
+Although these probabilities are negligible in practical conditions, the possibility of collision is mathematically not zero. Therefore, ASR considers secure entropy generation, consistency in key derivation, and protection against guessing recovery data — through preventing offline account creation — to be important security considerations.
 
-ASR is not a key generation standard.
+1.3. Structural Weakness of Conventional Blockchain Systems
 
-ASR is a Secure Recovery Standard that:
+In conventional blockchain systems, the wallet generates the private key, computes the corresponding public key and address entirely offline. The network typically verifies signatures and applies consensus rules; but it usually does not know which KDF was used to generate the private key.
 
-- Without changing core network cryptography
-- Without changing key algorithms
-- Without relying on smart contracts
-- Without fees
+As a result, an attacker can generate candidate keypairs and their corresponding addresses offline — without registering any candidate account on the blockchain. If the attacker's goal is to guess the recovery data of a specific account, they can derive candidate inputs and compare the resulting public identifiers against the target account's identifier or the target network.
 
-transforms the recovery layer from a single point of failure into a multi-stage, network-dependent process.
+By obtaining the public identifier and querying the network — given that addresses are public — the attacker learns whether their guess was correct. Then, given the low cost of account creation under PBKDF2, they repeat the process until success is achieved.
 
-This precise positioning introduces ASR as an independent, complementary layer in cryptographic wallet architecture, not a replacement for key generation standards.
+The security objective of ASR is to standardize secure key derivation and to dramatically increase the computational and memory cost of each attempt to derive a candidate input in the offline account-creation process, in order to enhance the security of digital accounts. This standard, by mandating a KDF resistant to offline attacks and by making the user aware of the requirement to use the correct default KDF of this architecture, takes important steps to enhance account security and protect users' assets.
+
+The user should know that choosing the correct KDF at account-creation time has three security consequences:
+
+- The probability of an offline creation of an account similar to theirs is minimized.
+- Bulk generation of accounts with identical private keys becomes economically unjustifiable for the attacker.
+- Their assets are preserved in the long term and the security factor of their account increases.
+
+In this way, the user's awareness of the role of the KDF becomes an operational incentive to choose it correctly — and account security is elevated from a mere technical decision to an informed user choice.
+
+### 2. Comparison of KDFs
+
+Different KDFs differ in their security properties, computational resource requirements, and intended applications.
+
+2.1. PBKDF2
+
+PBKDF2 is a password-based key-derivation function specified in RFC 8018. It repeatedly applies a pseudorandom function — typically HMAC-SHA-256 — according to a specified number of iterations. PBKDF2 does not require much memory — and this very property makes it attractive to an attacker, since they can execute thousands of guesses in parallel at low cost. In contrast, memory-hard KDFs such as Argon2id, through greater computational load, render parallelization economically unjustifiable for the attacker.
+
+PBKDF2 inherently provides no strong memory-hard resistance. Thus, with extremely low cost and in offline and parallel fashion, one can generate many accounts and verify the generated accounts against public blockchain data. PBKDF2, for offline and parallel attacks — from the attacker's perspective — is an ideal tool.
+
+2.2. scrypt
+
+scrypt is a password-based key-derivation function that requires significant memory and computation. This memory requirement can raise the cost of parallel guessing and hardware-specialized attacks.
+
+Its parameters must be chosen carefully to strike a balance among security resistance, implementation compatibility, and the performance constraints of supported devices.
+
+2.3. Argon2id
+
+Argon2id is chosen as the default Key Derivation Function (KDF) of ASR. This algorithm combines data-independent and data-dependent memory access and is designed to increase resistance against side-channel attacks and hardware-specialized attacks.
+
+ASR uses the second recommended configuration of RFC 9106 for Argon2id, though its Salt and output lengths differ from the values recommended by that same profile:
+
+- Memory cost: 64 MiB (memory_kib = 65536)
+- Time cost: 3 passes (iterations = 3)
+- Parallelism: 4 lanes (parallelism = 4) — i.e., four independent lanes executed in parallel across four processor cores
+- Salt length: 64 bytes — equal to ASR-REC_Display_ID (full SHA-512 output)
+- Output length: 64 bytes (512 bits)
+- Algorithm version: Version 19 (0x13)
+
+KDF Input
+
+The KDF input in ASR is Final_Entropy — not key_local alone:
+
+```
+Final_Entropy = key_local XOR key_network
+KDF_Input = "ASR-Recovery-v1" || Final_Entropy
+```
+
+This definition guarantees a fundamental security requirement: key_network plays an essential role in the key-derivation path. Without receiving key_network from the network recovery infrastructure, Final_Entropy cannot be reconstructed, and consequently Master_Seed — and the corresponding private key — cannot be computed.
+
+This dependency is not merely a procedural constraint that can be bypassed by circumventing network rules; it is rooted in the cryptographic computation itself. Even if the attacker has access to key_local, without key_network, the key-derivation path halts at the very first step — before reaching Master_Seed or the private key.
+
+More precisely: in ASR, the network does not merely issue a recovery "permission"; it is an essential component of the computation itself. This distinction is the primary boundary between ASR and designs that entrust security solely to procedural rules.
+
+Reason for choosing 512 bits for output_length
+
+A 512-bit output directly provides compatibility with the HD derivation chain (BIP-32 or similar) without requiring an intermediate expansion step. Furthermore, a 512-bit output preserves a 256-bit security margin even against Grover-based quantum attacks — since Grover halves the search space (512 ÷ 2 = 256). This security margin is independent of the input entropy (Final_Entropy with 156 or 312 bits) and aligns with NIST Level 5 (256-bit security).
+
+Supplementary note — full coverage of the 312-bit space: The 24-number mode of ASR has 312 bits of entropy (39 bytes). PBKDF2-HMAC-SHA-256 produces a fixed 32-byte output — which is smaller than the 312-bit space and, by the Pigeonhole Principle, results in reduced effective entropy. In contrast, Argon2id both uses BLAKE2b-512 internally (64-byte / 512-bit output) and has an adjustable final output length. ASR explicitly fixes this length at 512 bits so that the 312-bit space of the 24-number mode is fully covered and no compression or forced collision occurs.
+
+The extra cost of this choice in Argon2id is negligible — since the costly part is memory filling, not output generation.
+
+This configuration, using 3 computational passes and 64 MiB of memory, increases the cost of each attempt to derive a key. As a result, executing many offline attempts and bulk-generating accounts will incur higher costs. At the same time, its lower memory requirement enables the use of Argon2id across a broader range of devices — including Android phones with limited memory.
+
+Identifiers and Salt
+
+ASR-REC_Display_ID and ASR-VAR_ID in ASR are computed using SHA-512:
+
+```
+ASR-REC_Display_ID = SHA-512(Canonical_ASR-REC_Display)  → 64 bytes
+ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)  → 64 bytes
+```
+
+Reason for choosing SHA-512 over SHA-256: The 24-number mode of ASR has 312 bits of entropy (39 bytes). The output of SHA-256 (32 bytes / 256 bits) is smaller than this space, and by the Pigeonhole Principle, using it leads to reduced effective entropy and forced collisions. SHA-512 (64 bytes / 512 bits) covers the entire 312-bit entropy and preserves ASR's security claim for the 24-number mode. This change is applied uniformly to ASR-REC_Display_ID, ASR-VAR_ID, and the Salt.
+
+Reason for choosing a Salt derived from ASR-REC_Display_ID:
+
+If ASR-REC_Display_ID is used as the Salt, the wallet can compute this value locally from ASR-REC_Display at recovery time and does not need to receive it from the network.
+
+Using this identifier as the Salt:
+
+- Prevents circular dependency — because the identifier is derived from the recovery data, not from the private key.
+- Requires no new field or synchronization — because the wallet reconstructs ASR-REC_Display_ID itself from ASR-REC_Display during recovery.
+- Its 64-byte length is compatible with RFC 9106 (the maximum permitted Salt is 2^32 - 1 bytes).
+
+Important note on uniqueness: The actual uniqueness of the KDF is provided by Final_Entropy (with 156 or 312 bits of entropy) — not by the Salt. The Salt plays only the role of preventing precomputation and is inherently a public value. Even in the case of a negligible collision of ASR-REC_Display_ID (probability at most 1/2^256 with SHA-512), since Final_Entropy differs, the KDF output will differ, and the accounts will not be similar.
+
+Two main objectives of choosing Argon2id in ASR:
+
+- First — increasing the cost of offline attacks: Raising the memory and computational cost of each attempt, to reduce the feasibility of performing many low-cost, high-speed attempts.
+- Second — creating an independent derivation path for ASR: By using Argon2id instead of PBKDF2, the derivation output for an identical input will be different. Therefore:
+  - The user, by choosing the key-generation path matching the ASR default, reaches the primary private and public key for their account — with higher security, of course.
+  - In contrast, an attacker, even with an identical input and using the old PBKDF2 path, reaches different public and private keys than the user's account and therefore cannot access the user's account.
+
+All ASR-compatible wallets MUST use this same algorithm, version, and defined parameters so that account derivation and recovery are performed identically. The parameters of this configuration MUST NOT be left to library-specific defaults.
+
+### 3. Economic Defense Against Bulk Offline Account Generation
+
+One of the important features of Argon2id is its memory hardness. In this method, the attacker, for each attempt to test a candidate input, must pay the computational and memory cost determined by the KDF parameters.
+
+This property is ASR's primary defense against the attack of bulk offline account generation:
+
+- The attacker, in an offline environment, generates numerous Final_Entropy values, and for each, computes the private key, public key, and corresponding address.
+- They then compare the resulting addresses against the addresses existing on the network. If any match is found, they gain control of that account.
+- With PBKDF2: This attack is economically fully justifiable — since PBKDF2 is a fast and cheap KDF, and the attacker can make billions of guesses per second.
+- With Argon2id: Each guess requires allocating 64 MiB of memory and considerable computational power. Given the high hardware cost, the need for bulk account generation, and the vast search space, the attacker cannot generate millions of accounts in parallel. These factors render the attack economically unjustifiable.
+
+3.1. The One-Time Cost for a Real User vs. the Bulk Cost for an Attacker
+
+The key point is the difference between the one-time cost for a real user and the bulk cost for an attacker. The real user pays this cost only once, at account creation or recovery — depending on hardware, from several hundred milliseconds to a few seconds — and thereafter incurs no cost in daily use. But an attacker who wants to bulk-generate accounts offline must pay this same cost separately for each guess. When this cost is multiplied across millions or billions of guesses, the attack becomes economically completely unjustifiable.
+
+3.2. The Attacker's Dilemma: The Expensive Path or the Futile Path
+
+A natural question arises here: why doesn't the attacker simply use the old, cheap PBKDF2 and avoid this heavy cost?
+
+The answer lies in the deterministic nature of key-derivation functions. For an identical input, the outputs of Argon2id and PBKDF2 are mathematically different; therefore, the PBKDF2-based derivation path leads to a different private key, public key, and address. Through this cheap path, the attacker cannot reach the keys of an ASR account — because those accounts were created with Argon2id. More precisely: using the old PBKDF2 path, though cheap, does not produce the same keys as the ASR account.
+
+The practical consequence is that the attacker faces a dilemma:
+
+- Either pay the heavy Argon2id cost for each guess — which renders bulk attack economically meaningless;
+- Or use the cheap PBKDF2 path — which takes them to a different key space and never reaches the ASR account.
+
+In this way, Argon2id — not by "making the attack impossible," but by closing the cheap path and making the effective path expensive — curbs bulk offline account generation.
+
+This defense is economic in nature and should be honestly presented as such: offline account creation remains theoretically possible, but it is no longer "worth it." The degree of this cost increase depends on the chosen parameters, the power of the attacker's hardware, and the amount of entropy in the secret information.
+
+### 4. The Self-Punishing Consequence for a Dishonest Wallet
+
+A wallet that does not comply with this requirement (for example, uses PBKDF2) accepts two serious consequences:
+
+- It creates an account with a different address that cannot be recovered by any other ASR-compliant wallet.
+- The user becomes vulnerable to the attack of bulk offline account generation — because PBKDF2 keeps the guess cost low.
+
+This self-punishing consequence creates security pressure to comply with the standard — without requiring cryptographic verification of the KDF by the network.
+
+### 5. Requirement of Uniform KDF in Account Creation and Recovery
+
+In the ASR architecture, every compatible wallet MUST use the same standard key-derivation method when creating and recovering accounts.
+
+If an account was created with a specific method, its recovery MUST use exactly the same method, parameters, and required inputs to reconstruct the same Seed, private key, and address.
+
+Wallets using the conventional PBKDF2 KDF are obliged to honestly inform the user of the risk to their account and, at registration with the network recovery infrastructure, to send and register the correct information.
+
+5.1. Metadata Registered in the Recovery Infrastructure
+
+During the Enrollment phase, the wallet sends the information required for account recovery, along with a signature from the account's Access Key, to the network recovery infrastructure:
+
+- ASR_Version
+- Account
+- Recovery_Mode
+- ASR-REC_Display_ID
+- ASR-VAR_ID
+- key_network
+- KDF_Algorithm
+- KDF_Version
+- KDF_Parameters
+- Derivation_Scheme_Version
+- Nonce
+- Signing_Key_ID
+- Enrollment_Signature
+
+This information MUST NOT include the private key, the secret Seed, or any information that would allow unauthorized access to the account.
+
+Definition of KDF and derivation-scheme fields
+
+- KDF_Algorithm: The name of the key-derivation algorithm (e.g., Argon2id).
+- KDF_Version: The version and exact parameters of the KDF algorithm (e.g., asr-kdf-v1 = Argon2id with 64 MiB memory, 3 passes, 4 parallel lanes, 512-bit output).
+- KDF_Parameters: The exact values of the KDF parameters (memory, iterations, parallelism, output length).
+- Derivation_Scheme_Version: Specifies the version of the key-derivation scheme — including the domain tag ("ASR-Recovery-v1"), the Salt construction, the transformation of KDF output into Master_Seed, the HD derivation path, and the address-generation method. This field is independent of KDF_Version and allows the derivation scheme to be upgraded without changing the KDF algorithm.
+
+Signed Canonical Message
+
+The Canonical message that the wallet MUST sign with the Access Key is as follows:
+
+```
+ASR_Enrollment_Message =
+    Domain || ASR_Version || Account || Recovery_Mode ||
+    ASR-REC_Display_ID || ASR-VAR_ID || key_network ||
+    KDF_Algorithm || KDF_Version || KDF_Parameters ||
+    Derivation_Scheme_Version || Nonce
+```
+
+Validation and Storage
+
+After successful validation of the Access Key signature by network nodes and verification of other recovery parameters, the information is registered and stored in Core Recovery Key Network Storage. The network then returns an NRA to the wallet.
+
+Honest limitation
+
+Registering this metadata is mandatory for preserving compatibility and selecting the correct recovery method; but by itself it does not prove that the wallet actually used the declared algorithm at account-creation time. This limitation is an honest constraint in ASR's design — not a flaw.
+
+5.2. Verification Responsibility
+
+Account recovery depends on sending correct information to the network recovery infrastructure. During recovery, the user may use a different wallet, and that wallet may operate on its own default KDF (Argon2id). If the information sent (such as KDF_Version) is incorrect to the network recovery infrastructure, recovery will not be performed.
+
+Furthermore, recovery is cryptographically dependent on receiving key_network from the recovery infrastructure — because Final_Entropy = key_local XOR key_network, and without key_network, Final_Entropy and consequently Master_Seed cannot be reconstructed. Therefore, even if all other information is correct, recovery without key_network is mathematically impossible.
+
+This dependency cannot be nullified by circumventing network rules or changing the request path; because key_network is not a "pass permit" that could be forged, but a component of the computation itself, whose absence severs the key-derivation chain at the very first step.
+
+Therefore, the responsibility for verifying the correctness of the sent information rests with the wallet and the user. The wallet MUST send the correct information to the recovery infrastructure, and the user MUST ensure the correctness of their recovery data.
+
+---
+
+### 6. Proposed Requirements for Implementation
+
+To prevent divergent interpretations, the ASR standard defines the following requirements:
+
+1. KDF Requirement: The use of Argon2id in the key-derivation path defined by the standard is mandatory.
+
+2. Standard Parameters:
+ASR uses the second recommended configuration of RFC 9106 for Argon2id, though its Salt and output lengths differ from the values recommended by that same profile:
+
+```
+- Memory cost: 64 MiB (memory_kib = 65536)
+- Time cost: 3 passes (iterations = 3)
+- Parallelism: 4 lanes (parallelism = 4) — i.e., four independent lanes executed in parallel across four processor cores
+- Salt length: 64 bytes — equal to ASR-REC_Display_ID (full SHA-512 output)
+- Output length: 64 bytes (512 bits)
+- Algorithm version: Version 19 (0x13)
+```
+
+This profile provides the necessary balance between resistance to offline attacks and feasibility on mobile devices. Implementations MUST use these exact values so that the KDF output is identical across all wallets.
+
+3. Identifier Hash Algorithm: ASR-REC_Display_ID and ASR-VAR_ID MUST be computed using SHA-512:
+
+```
+ASR-REC_Display_ID = SHA-512(Canonical_ASR-REC_Display)  → 64 bytes
+ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)  → 64 bytes
+```
+
+Reason: the entropy of the 24-number mode (312 bits / 39 bytes) exceeds the capacity of SHA-256 (256 bits / 32 bytes). Using SHA-256 causes forced collisions (per the Pigeonhole Principle). SHA-512 covers the entire 312-bit space.
+
+4. Input and Domain Separation: The KDF input MUST be constructed via Final_Entropy — not key_local alone:
+
+```
+Final_Entropy = key_local XOR key_network
+KDF_Input = "ASR-Recovery-v1" || Final_Entropy
+```
+
+This requirement guarantees that, without receiving key_network from the network recovery infrastructure, the derivation of Master_Seed and consequently the reconstruction of the private key are cryptographically impossible.
+
+5. Metadata Registration: The version and parameters required for compatible recovery must be registered in the network recovery infrastructure, without disclosing confidential information.
 ___
 ___
 # Threat Model
