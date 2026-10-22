@@ -777,22 +777,22 @@ To prevent direct transmission of ASR-REC_Display and ASR-VAR to the network, AS
 ASR-REC_Display Identifier:
 
 ```
-ASR-REC_Display_ID = SHA-256(Canonical_ASR-REC_Display)
+ASR-REC_Display_ID = SHA-512(Canonical_ASR-REC_Display)
 ```
 
 ASR-VAR Identifier:
 
 ```
-ASR-VAR_ID = SHA-256(Canonical_ASR-VAR)
+ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)
 ```
 
-Both outputs are SHA-256 and are 32 bytes long.
+Both outputs are SHA-512 and are 32 bytes long.
 
 These identifiers can be converted to a standard representation for transmission and storage.
 
 Important Principle
 
-SHA-256 is a one-way hash function. Computing the identifier from the input data is fast and easy, but directly recovering the input from the hash is computationally infeasible.
+SHA-512 is a one-way hash function. Computing the identifier from the input data is fast and easy, but directly recovering the input from the hash is computationally infeasible.
 
 However, ASR security should not rely on the secrecy of these two identifiers.
 
@@ -895,8 +895,8 @@ Core Recovery Key Network Storage
 
 Field Descriptions
 
-- ASR-REC_Display_ID = SHA-256(Canonical_ASR-REC_Display)
-- ASR-VAR_ID = SHA-256(Canonical_ASR-VAR)
+- ASR-REC_Display_ID = SHA-512(Canonical_ASR-REC_Display)
+- ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)
 - ASR_Version specifies the ASR standard version used to create and recover this record.
 - Recovery_Mode specifies whether the record corresponds to the 12 or 24-number mode.
 - The index (ASR-REC_Display_ID, ASR-VAR_ID) allows the Recovery Service to find the corresponding record.
@@ -1138,14 +1138,14 @@ Security implication:
 
 If key_network is not available to the attacker, even possessing key_local is not sufficient to reconstruct Final_Entropy.
 
-### 10. Role of SHA-256
+### 10. Role of SHA-512
 
-SHA-256 is used in ASR to create one-way identifiers:
+SHA-512 is used in ASR to create one-way identifiers:
 
 ```
 ASR-REC_Display
       ↓
-SHA-256
+SHA-512
       ↓
 ASR-REC_Display_ID
 ```
@@ -1155,7 +1155,7 @@ and:
 ```
 ASR-VAR
       ↓
-SHA-256
+SHA-512
       ↓
 ASR-VAR_ID
 ```
@@ -1227,8 +1227,8 @@ Step 7 — Compute Identifiers
 The wallet computes:
 
 ```
-ASR-REC_Display_ID = SHA-256(Canonical_ASR-REC_Display)
-ASR-VAR_ID = SHA-256(Canonical_ASR-VAR)
+ASR-REC_Display_ID = SHA-512(Canonical_ASR-REC_Display)
+ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)
 ```
 
 Step 8 — Generate Nonce
@@ -1571,7 +1571,7 @@ whereas:
 ```
 ASR-REC_Display
         ↓
-      SHA-256
+      SHA-512
         ↓
 ASR-REC_Display_ID
 ```
@@ -1581,7 +1581,7 @@ and:
 ```
 ASR-VAR
     ↓
-  SHA-256
+  SHA-512
     ↓
 ASR-VAR_ID
 ```
@@ -1606,14 +1606,14 @@ Overall Process Diagram
          │
 ASR-REC_Display
          ↓
-      SHA-256
+      SHA-512
          ↓
 ASR-REC_Display_ID
          │
          │
 ASR-VAR
          ↓
-      SHA-256
+      SHA-512
          ↓
 ASR-VAR_ID
          │
@@ -1670,7 +1670,7 @@ Practical Note: The real user knows whether they wrote down 12 numbers or 24 num
 
 Notes
 
-- ASR-REC_Display_ID and ASR-VAR_ID do not inherently encode Recovery_Mode in their SHA-256 value.
+- ASR-REC_Display_ID and ASR-VAR_ID do not inherently encode Recovery_Mode in their SHA-512 value.
 - Recovery_Mode is an explicit and independent parameter used in the Recovery process for request validation and enforcement of Rate Limiting.
 
 Ambiguous Error
