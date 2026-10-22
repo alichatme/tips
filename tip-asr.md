@@ -786,7 +786,7 @@ ASR-VAR Identifier:
 ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)
 ```
 
-Both outputs are SHA-512 and are 32 bytes long.
+Both outputs are SHA-512 and are 64 bytes long.
 
 These identifiers can be converted to a standard representation for transmission and storage.
 
