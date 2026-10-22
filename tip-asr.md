@@ -1454,7 +1454,7 @@ Changing:
 - IP
 - VPN
 - Tor
-- Device
+- Wallet
 - Wallet Version
 
 must not be able to bypass the main Rate Limiting policy.
