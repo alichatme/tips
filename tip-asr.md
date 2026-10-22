@@ -960,27 +960,41 @@ This architecture makes key_network and the recovery metadata independent of the
 
 ### 7. Requirement for Access Keys Signature to Prevent Replay and Fake key_network Registration in Enrollment
 
-To prevent fake key_network registration and Replay attacks, every Enrollment request MUST be sent to the recovery infrastructure with a valid signature by the account's Access Keys and a unique Nonce.
+To prevent fake key_network registration and Replay attacks, every Enrollment request MUST be sent to the Network Recovery Infrastructure with a valid signature by the account's Access Keys and a unique Nonce.
 
 Access Keys are keys that have access to an account's assets and permissions.
+
+Signed Canonical Message
 
 In the signature message, the wallet MUST sign the following Canonical message:
 
 ```
 ASR_Enrollment_Message =
     Domain || ASR_Version || Account || Recovery_Mode ||
-    ASR-REC_Display_ID || ASR-VAR_ID || key_network || Nonce
+    ASR-REC_Display_ID || ASR-VAR_ID || key_network ||
+    KDF_Algorithm || KDF_Version || KDF_Parameters ||
+    Derivation_Scheme_Version || Nonce
 ```
 
 Enrollment Request Structure
 
 ```json
 {
+  "ASR_Version": "...",
   "Account": "...",
   "Recovery_Mode": 12,
   "ASR-REC_Display_ID": "...",
   "ASR-VAR_ID": "...",
   "key_network": "...",
+  "KDF_Algorithm": "Argon2id",
+  "KDF_Version": "asr-kdf-v1",
+  "KDF_Parameters": {
+    "memory_kib": 65536,
+    "iterations": 3,
+    "parallelism": 4,
+    "output_length": 64
+  },
+  "Derivation_Scheme_Version": "asr-derivation-v1",
   "Nonce": "...",
   "Signing_Key_ID": "...",
   "Signature": "..."
@@ -992,15 +1006,18 @@ Recovery Service Checks Before Storage
 - Validity of the signature on the Canonical message
 - Belonging of the signing key to the Account
 - The signature was produced by a valid Access Key.
-- The Nonce has not been used before
-- Validation of the structure of ASR-REC_Display_ID, ASR-VAR_ID, and Recovery_Mode
-- Validation of the length and structure of key_network
-- Store key_network only after all checks succeed
-- Return NRA to the wallet, indicating successful registration of key_network in the network recovery infrastructure
+- The Nonce has not been used before.
+- Validation of the structure of ASR-REC_Display_ID, ASR-VAR_ID, and Recovery_Mode.
+- Validation of the length and structure of key_network.
+- Validation of KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version (in terms of structure and compatibility with permitted ASR versions).
+- Store key_network and KDF metadata only after all checks succeed.
+- Return NRA to the wallet, indicating successful registration of key_network and metadata in the Network Recovery Infrastructure.
+
+Network Recovery Infrastructure Requirements
 
 Therefore, the following must be observed:
 
-- Core Recovery Key Network Storage MUST NOT store any key_network unless the corresponding Enrollment request has been authenticated with a valid signature from an authorized Access Key.
+- The Network Recovery Infrastructure MUST NOT store any key_network unless the corresponding Enrollment request has been authenticated with a valid signature from an authorized Access Key.
 - Every Enrollment request MUST include a unique Nonce.
 - The Recovery Service MUST maintain a record of used Nonces with a specified expiry window. Suggested default: 24 hours.
 - Any request containing a duplicate Nonce MUST be rejected.
@@ -1010,7 +1027,7 @@ Necessity of Digital Signature in Enrollment
 
 Requiring a digital signature for Enrollment is essential to prevent fake key_network registration.
 
-If the signature were not required, an attacker could generate a fake key_network for an arbitrary account and send it to Core Recovery Key Network Storage, creating a fake record, so that during Recovery, the real user encounters an incorrect key_network and their recovery fails.
+If the signature were not required, an attacker could generate a fake key_network for an arbitrary account and send it to the Network Recovery Infrastructure, creating a fake record — so that during Recovery, the real user encounters an incorrect key_network and their recovery fails.
 
 This attack can appear as a destructive attack or Denial of Service against the Recovery process.
 
@@ -1018,7 +1035,7 @@ Therefore, the Enrollment signature ensures that:
 
 - Recovery registration must be approved by an authorized Access Key of the account.
 - An attacker without access to an authorized Access Key cannot create a valid Enrollment record.
-- The integrity of Core Recovery Key Network Storage data is better preserved.
+- The integrity of the Network Recovery Infrastructure data is better preserved.
 
 Enrollment MUST be possible with any valid and authorized Access Key.
 
@@ -1052,7 +1069,7 @@ Instead:
 
 - The Access Key is used in Enrollment for signing and authorization.
 - key_network in Storage is protected by an independent Storage Encryption Key.
-- Recovery, after meeting the necessary conditions, receives key_network from the Recovery infrastructure.
+- Recovery, after meeting the necessary conditions, receives key_network from the Network Recovery Infrastructure.
 
 Therefore, Signature and Storage Encryption have independent roles.
 
