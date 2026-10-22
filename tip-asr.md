@@ -872,20 +872,18 @@ If the submitted information is correct and valid and successful, it returns the
 
 After receiving this information, the wallet reconstructs the key-derivation path using KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version — which were stored in the Enrollment record. Then, using key_local and key_network, it computes Final_Entropy and reconstructs Master_Seed via Argon2id, completing the account recovery.
 
-### 6. Core Recovery Key Network Storage
+### 6. Network Recovery Infrastructure
 
-key_network is stored in a protected repository called:
+The Network Recovery Infrastructure is the storage location for the metadata required for account recovery — including key_network, KDF specifications, and other information necessary for reconstructing the key derivation path.
 
-Core Recovery Key Network Storage
+key_network has a special role in this infrastructure: this value is an essential component of computing Final_Entropy — and without it, the reconstruction of Master_Seed and the private key is cryptographically impossible. For this reason, key_network — unlike other metadata — is stored encrypted at rest.
 
-and is under the control of the network's Recovery infrastructure.
-
-This repository is not a public storage on the blockchain, and its information should not be publicly published on the chain.
+This infrastructure is under the control of the network, and its data store is not a public storage on the blockchain; its information must not be publicly published on-chain.
 
 Record Structure
 
 ```
-Core Recovery Key Network Storage
+Network Recovery Infrastructure
 │
 ├── Index: (ASR-REC_Display_ID, ASR-VAR_ID)
 │
@@ -895,7 +893,11 @@ Core Recovery Key Network Storage
     ├── Recovery_Mode
     ├── ASR-REC_Display_ID
     ├── ASR-VAR_ID
-    ├── key_network
+    ├── key_network          (encrypted at rest)
+    ├── KDF_Algorithm
+    ├── KDF_Version
+    ├── KDF_Parameters
+    ├── Derivation_Scheme_Version
     ├── Enrollment_Signature
     ├── Signing_Key_ID
     ├── Nonce
@@ -908,33 +910,34 @@ Field Descriptions
 - ASR-REC_Display_ID = SHA-512(Canonical_ASR-REC_Display)
 - ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)
 - ASR_Version specifies the ASR standard version used to create and recover this record.
-- Recovery_Mode specifies whether the record corresponds to the 12 or 24-number mode.
+- Recovery_Mode specifies whether the record corresponds to the 12-number or 24-number mode.
+- KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version provide the metadata required to reconstruct the key derivation path — and are returned to the wallet during Recovery.
 - The index (ASR-REC_Display_ID, ASR-VAR_ID) allows the Recovery Service to find the corresponding record.
-- Enrollment_Signature is the digital signature of the entire Canonical Enrollment message, not just the key_network signature.
+- Enrollment_Signature is the digital signature of the entire Canonical Enrollment message, not merely the signature of key_network.
 - Signing_Key_ID is the identifier of the signing key.
 - Nonce is the unique value of the Enrollment request to prevent Replay.
 
-Protection of key_network
+Protection of Stored Data
 
-During Enrollment, the wallet independently generates key_network using a CSPRNG, then computes key_local = Final_Entropy XOR key_network and encodes the ASR-REC_Main structure based on key_local. It then sends key_network along with other required information and Enrollment_Signature to the Recovery Service.
+During Enrollment, the wallet independently generates key_network using a CSPRNG, then computes key_local = Final_Entropy XOR key_network and encodes the ASR-REC_Main structure based on key_local. It then sends key_network, along with other required information and Enrollment_Signature, to the Recovery Service.
 
-After receiving and successfully validating the information, the Recovery Service encrypts the key_network on the network infrastructure side before storing it, using an infrastructure encryption key independent of the account's private key.
+After receiving and successfully validating the information, the Recovery Service encrypts key_network on the network infrastructure side — prior to storage — using an infrastructure encryption key independent of the account's private key. The remaining fields of the record — including ASR-REC_Display_ID, ASR-VAR_ID, and the KDF metadata — are stored unencrypted, since they either serve as Index fields and must be searchable for efficient lookups, or are considered public information.
 
-This Storage encryption key must not be derived from the Account Private Key, ASR-REC, ASR-VAR, Account, or any other information recoverable by the user.
+This Storage encryption key MUST NOT be derived from the Account Private Key, ASR-REC, ASR-VAR, Account, or any other information recoverable by the user.
 
-The Storage encryption key must be maintained and protected by the network's secure key management infrastructure and must not be given to the wallet or user.
+The Storage encryption key MUST be maintained and protected by the network's secure key management infrastructure, and MUST NOT be provided to the wallet or the user.
 
-Therefore, key_network is stored encrypted in Storage, and the wallet is not responsible for encrypting it for Storage.
+Therefore, key_network is stored encrypted within the Network Recovery Infrastructure, and the wallet is not responsible for encrypting it for Storage.
 
-Retrieving key_network
+Retrieval of Stored Data
 
-During Recovery, the wallet first receives the information needed to obtain key_network — including ASR-REC_Display and ASR-VAR — from the user. Then, according to ASR architectural principles and network policies, it initiates the Recovery process in stages:
+During Recovery, the wallet first receives the information required to obtain key_network — including ASR-REC_Display and ASR-VAR — from the user. Then, in accordance with ASR architectural principles and network policies, it initiates the Recovery process in stages:
 
-1. The wallet first sends ASR-REC_Display_ID and Recovery_Mode to the network's Recovery infrastructure.
+1. The wallet first sends ASR-REC_Display_ID and Recovery_Mode to the Network Recovery Infrastructure.
 2. The network issues a PoW_Challenge.
 3. After solving the PoW, the wallet sends PoW_Solution and ASR-VAR_ID.
 
-If the network confirms the information:
+If the network validates the information:
 
 - The Recovery Service finds the corresponding record.
 - The Recovery Service decrypts key_network in the secure infrastructure environment using the Storage encryption key.
@@ -943,11 +946,17 @@ After that, the network returns the following to the wallet through a secure and
 
 - NRA
 - ASR_Version
+- KDF_Algorithm
+- KDF_Version
+- KDF_Parameters
+- Derivation_Scheme_Version
 - key_network
 
-The wallet reconstructs Final_Entropy using key_local and key_network and completes the Recovery process.
+After receiving this information, the wallet reconstructs the key derivation path using KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version. Then, using key_local and key_network, it computes Final_Entropy and reconstructs Master_Seed via Argon2id, completing the Recovery process.
 
-This architecture makes key_network independent of the device, previous wallet installation, or wallet storage location. Therefore, if the wallet is deleted, the device is changed, or a new wallet is installed, upon successful authentication of the Recovery process, the new wallet can obtain key_network from the network's Recovery infrastructure and continue the recovery process.
+Independence from Device and Wallet
+
+This architecture makes key_network and the recovery metadata independent of the device, prior wallet installation, or wallet storage location. Therefore, if the wallet is deleted, the device is changed, or a new wallet is installed, upon successful authentication of the Recovery process, the new wallet can obtain key_network and other required recovery information from the Network Recovery Infrastructure and complete the recovery process.
 
 ### 7. Requirement for Access Keys Signature to Prevent Replay and Fake key_network Registration in Enrollment
 
