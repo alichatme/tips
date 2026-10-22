@@ -814,25 +814,31 @@ In the ASR architecture, NRA is a control authorization issued by the network's 
 
 First — Enrollment Stage
 
-During Enrollment, the wallet sends the information required for account recovery — including the following — along with a signature from the account's Access Key to the network:
+During the Enrollment stage, the wallet sends the information required for account recovery — including the following — along with a signature from the account's Access Key to the network:
 
 - ASR_Version
+- Account
+- Recovery_Mode
 - ASR-REC_Display_ID
 - ASR-VAR_ID
 - key_network
-- Recovery_Mode
+- KDF_Algorithm
+- KDF_Version
+- KDF_Parameters
+- Derivation_Scheme_Version
 - Nonce
+- Signing_Key_ID
 - Enrollment_Signature
 
-After successful validation of the Access Key signature by network nodes and verification of other Recovery parameters, the information is recorded and stored in Core Recovery Key Network Storage. Then the network returns an NRA to the wallet.
+After successful validation of the Access Key signature by network nodes and verification of other recovery parameters, the information is recorded and stored in Core Recovery Key Network Storage. The network then returns an NRA to the wallet.
 
-This NRA indicates to the wallet that the account's Recovery information has been successfully stored in the designated network infrastructure (recovery storage).
+This NRA indicates to the wallet that the account's recovery information has been successfully stored in the designated network infrastructure (Recovery Storage).
 
 Second — Recovery Stage
 
-NRA in the Recovery stage acts as the control authorization for the recovery process, which is issued after full validation of the request and returned to the wallet along with ASR_Version and key_network.
+NRA in the Recovery stage acts as the control authorization for the recovery process, which is issued after full validation of the request and returned to the wallet along with ASR_Version, KDF metadata, and key_network.
 
-Steps for the wallet to obtain Recovery information from the network
+Steps for the Wallet to Obtain Recovery Information from the Network
 
 In the Recovery process, the wallet first:
 
@@ -858,9 +864,13 @@ If the submitted information is correct and valid and successful, it returns the
 
 - NRA
 - ASR_Version
+- KDF_Algorithm
+- KDF_Version
+- KDF_Parameters
+- Derivation_Scheme_Version
 - key_network
 
-The wallet then reconstructs Final_Entropy using key_local and key_network and completes the account recovery.
+After receiving this information, the wallet reconstructs the key-derivation path using KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version — which were stored in the Enrollment record. Then, using key_local and key_network, it computes Final_Entropy and reconstructs Master_Seed via Argon2id, completing the account recovery.
 
 ### 6. Core Recovery Key Network Storage
 
