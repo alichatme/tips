@@ -2421,11 +2421,3 @@ The key differences are:
 As a result, ASR enhances security not by replacing basic cryptography, but by completely redesigning the concept of digital asset recovery.
 ___
 ___
-# Summary
-ASR is not a recovery phrase; it is a security‑oriented, network‑dependent recovery system.
-
-In this standard, the recovery process is deliberately underdetermined, and even with full possession of the user's recovery data, reconstructing the Seed or controlling the assets is impossible without a recovery authorization issued by the network.
-
-By moving recovery from a single point of failure to a multi‑stage process that depends on account status, time, and the Core network's security policies, ASR completely eliminates offline recovery while enabling monitoring, rate limiting, delays, and resistance to adaptive attacks.
-
-This design transforms asset recovery from a static, uncontrollable operation into a dynamic, manageable, and abuse‑resistant mechanism.
