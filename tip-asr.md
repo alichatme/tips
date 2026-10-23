@@ -1219,7 +1219,7 @@ Requirements:
 
 ASR uses the same existing security layer of TRON and does not define a new transfer protocol.
 
-### 12. Complete Process of Key Network Send and Save in Network — Enrollment
+### 12. Complete Enrollment Process — Sending and Storing Metadata in the Network Recovery Infrastructure
 
 The Enrollment process in ASR consists of the following steps:
 
@@ -1256,7 +1256,7 @@ The user selects ASR-VAR:
 
 Step 6 — Execute ASR-CYC and Generate ASR-REC_Display
 
-The wallet executes ASR-CYC cycles and computes ASR-REC_Display based on ASR-VAR and ASR-REC_Main.
+The wallet executes the ASR-CYC cycles and, based on ASR-VAR and ASR-REC_Main, computes the ASR-REC_Display value.
 
 Step 7 — Compute Identifiers
 
@@ -1271,31 +1271,42 @@ Step 8 — Generate Nonce
 
 The wallet generates a unique Nonce for this Enrollment request.
 
-Step 9 — Sign Enrollment Message
+Step 9 — Sign the Enrollment Message
 
 The wallet signs the Canonical Enrollment message with an authorized Access Key of the account:
 
 ```
 ASR_Enrollment_Message =
     Domain || ASR_Version || Account || Recovery_Mode ||
-    ASR-REC_Display_ID || ASR-VAR_ID || key_network || Nonce
+    ASR-REC_Display_ID || ASR-VAR_ID || key_network ||
+    KDF_Algorithm || KDF_Version || KDF_Parameters ||
+    Derivation_Scheme_Version || Nonce
 ```
 
 Step 10 — Send to Network
 
-The wallet sends the following information to the network through the secure channel existing in the TRON infrastructure:
+The wallet sends the following information to the network through the secure channel available in the TRON infrastructure:
 
-```
+```json
 {
-  ASR_Version,
-  Account,
-  Recovery_Mode,
-  ASR-REC_Display_ID,
-  ASR-VAR_ID,
-  key_network,
-  Nonce,
-  Signing_Key_ID,
-  Signature
+  "ASR_Version": "...",
+  "Account": "...",
+  "Recovery_Mode": 12,
+  "ASR-REC_Display_ID": "...",
+  "ASR-VAR_ID": "...",
+  "key_network": "...",
+  "KDF_Algorithm": "Argon2id",
+  "KDF_Version": "asr-kdf-v1",
+  "KDF_Parameters": {
+    "memory_kib": 65536,
+    "iterations": 3,
+    "parallelism": 4,
+    "output_length": 64
+  },
+  "Derivation_Scheme_Version": "asr-derivation-v1",
+  "Nonce": "...",
+  "Signing_Key_ID": "...",
+  "Signature": "..."
 }
 ```
 
@@ -1306,16 +1317,17 @@ The network checks the following:
 - Validity of the Access Key signature
 - Belonging of the signature to the specified Account
 - Validity of Signing_Key_ID
-- Nonce not used (prevention of Replay)
+- Nonce not previously used (Replay prevention)
 - Validity of the structure of ASR-REC_Display_ID, ASR-VAR_ID, and Recovery_Mode
 - Validity of the length and structure of key_network
+- Validity of KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version (in terms of structure and compatibility with permitted ASR versions)
 
 Step 12 — Storage
 
 After all checks succeed:
 
 - key_network is encrypted with an independent Storage Encryption Key (belonging to the infrastructure).
-- The corresponding record is stored in Core Recovery Key Network Storage.
+- The corresponding record — including key_network (encrypted) and metadata (unencrypted) — is stored in the Network Recovery Infrastructure.
 
 Step 13 — Return NRA
 
