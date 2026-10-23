@@ -1341,7 +1341,7 @@ Step 15 — Display ASR-REC_Display to User
 
 The wallet displays ASR-REC_Display to the user and emphasizes that ASR-VAR MUST be kept separately.
 
-### 13. Complete Process of Key Network Receive and Recovery
+### 13. Complete Process of Metadata Retrieval and Recovery
 
 The recovery process in ASR includes a PoW layer to prevent widespread abuse and increase the cost of online attacks.
 
@@ -1358,7 +1358,7 @@ The network issues a PoW_Challenge.
 Requirements:
 
 - PoW_Challenge MUST be bound to the Recovery Session.
-- PoW Difficulty MUST be adjustable by the network. This adjustability is essential for adapting to network conditions, available computational power, and security policies over time.
+- PoW difficulty MUST be adjustable by the network. This adjustability is essential for adapting to network conditions, available computational power, and security policies over time.
 
 Conceptual structure of PoW_Input:
 
@@ -1376,7 +1376,7 @@ This binding prevents reuse of a solved PoW_Solution in a different request.
 Step 3 — Send Response and Second Identifier
 
 The wallet solves the Challenge and computes PoW_Solution.
-Then it sends the result along with ASR-VAR_ID to the network:
+It then sends the result along with ASR-VAR_ID to the network:
 
 ```
 { PoW_Solution, ASR-VAR_ID }
@@ -1394,14 +1394,14 @@ The network checks the following in order:
 - Match of Recovery_Mode (through Session)
 - Correctness of PoW_Solution
 - Binding of PoW to Recovery Session
-- Match of ASR-VAR_ID with Recovery Record
+- Match of ASR-VAR_ID with the Recovery Record
 - Rate Limit status
-- Other Recovery security policies
+- Other recovery security policies
 
 If all items are valid, the network returns the following to the wallet:
 
 ```
-{ NRA, ASR_Version, key_network }
+{ NRA, ASR_Version, KDF_Algorithm, KDF_Version, KDF_Parameters, Derivation_Scheme_Version, key_network }
 ```
 
 If any item is invalid, the network returns only the following message to the wallet:
@@ -1414,22 +1414,17 @@ The error MUST NOT reveal any information about which step failed.
 
 Reason for ambiguous error:
 
-If the network announces, for example:
-"ASR-REC_Display_ID is valid but ASR-VAR_ID is incorrect"
-
-the attacker can learn that they correctly guessed and computed ASR-REC_Display_ID, and focus their attack on other parts of recovery.
+If the network announces, for example: "ASR-REC_Display_ID is valid but ASR-VAR_ID is incorrect", the attacker can learn that they correctly guessed and computed ASR-REC_Display_ID, and focus their attack on other parts of recovery.
 
 Therefore, the Recovery Service MUST NOT reveal the failure step.
 
 The Recovery Service MUST NOT reveal which individual recovery component failed.
 
-Step 5 — Reconstruct Final_Entropy
+Step 5 — Reconstruct Derivation Path and Final_Entropy
 
-After successfully receiving a valid response from the network (including key_network, ASR_Version, and NRA), the wallet:
+After successfully receiving a valid response from the network (including key_network, ASR_Version, the 4 KDF fields, and NRA), the wallet:
 
-1. First uses the ASR_Version received from the network to ensure that the ASR-CYC algorithm and reconstruction steps match the version used during Enrollment.
-2. Then, using ASR-REC_Display and ASR-VAR, it first processes ASR-VAR again through ASR-CYC cycles and obtains the numeric output for each variable.
-3. Then the wallet modularly subtracts the ASR-CYC output from the four-digit value of ASR-REC_Display. This operation is performed for all values, and as a result, the original ASR-REC_Main values that existed before the integration step are reconstructed.
+1. Reconstruct ASR-REC_Main: First, using ASR-REC_Display and ASR-VAR, it processes ASR-VAR again through ASR-CYC cycles and obtains the numeric output of each variable. Then it modularly subtracts the ASR-CYC output from the four-digit value of ASR-REC_Display. This operation is performed for all values, and as a result, the original ASR-REC_Main values that existed before the integration step are reconstructed.
 
 Conceptually:
 
@@ -1443,19 +1438,29 @@ Therefore, ASR-REC_Display alone cannot be directly converted to ASR-REC_Main, a
 
 Note: In the current version of the ASR standard, all modular calculations are performed in the range 0000–8191 (13-bit space). Future versions of ASR may define different ranges.
 
-After the wallet reconstructs ASR-REC_Main:
+2. Extract key_local: After reconstructing ASR-REC_Main:
 
 ```
 key_local = Decode(ASR-REC_Main)
 ```
 
-Then:
+3. Reconstruct Final_Entropy:
 
 ```
 Final_Entropy = key_local XOR key_network
 ```
 
-After successful computation of Final_Entropy, the Recovery process is complete.
+4. Reconstruct Master_Seed and the private key: Using KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version received from the network, the wallet reconstructs the key derivation path:
+
+```
+Salt = ASR-REC_Display_ID
+KDF_Input = "ASR-Recovery-v1" || Final_Entropy
+Master_Seed = Argon2id(KDF_Input, Salt, KDF_Parameters)
+```
+
+Then, using Derivation_Scheme_Version, it derives the private key and account address from Master_Seed.
+
+After successful computation of Master_Seed and the corresponding private key, the recovery process is complete.
 
 ### 14. Rate Limiting
 
