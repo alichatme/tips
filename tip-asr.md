@@ -1464,126 +1464,126 @@ After successful computation of Master_Seed and the corresponding private key, t
 
 ### 14. Rate Limiting
 
-To prevent adaptive online attacks, each Recovery request must be counted as a single attempt in the Rate Limiting policy.
+The recovery process in the ASR architecture depends on two data types:
 
-Regardless of which component of the Recovery request is incorrect, the result of that request, if failed, is considered a Failed Recovery Attempt.
+- ASR-REC_Display: The numerical recovery data that the user records and keeps in a secure location.
+- ASR-VAR: The lexical variable, chosen by the user, that serves as the recovery key and is kept in the user's memory or in a secure location separate from ASR-REC_Display.
 
-Therefore, the following are all considered a type of failure in the Rate Limiting policy:
+Why must the two recovery data types be kept separate from each other?
 
-- Wrong REC + Correct VAR
-- Wrong REC + Wrong VAR
-- Correct REC + Wrong VAR
-- Wrong REC + Changed VAR
-- Invalid PoW
-- Invalid REC ID
-- Invalid VAR ID
-- Invalid Recovery_Mode
+Due to the ASR design logic. Account recovery depends on possessing both ASR-REC_Display and ASR-VAR, in addition to obtaining authorization from the Network Recovery Infrastructure. Therefore, the Rate Limiting policy in the ASR architecture operates on the same logic.
 
-The purpose of this design is to prevent an attacker from creating a new counter by changing one of the identifiers or Recovery parameters and bypassing the previous restriction.
+To recover an account, the user has access to both recovery components. After sending the required information to the Network Recovery Infrastructure and successfully passing the validation stages, the user receives key_network from the network. Then, by combining key_network and key_local via the XOR operator, the user reconstructs Final_Entropy and, using Argon2id, derives Master_Seed and the corresponding private key — thereby completing the account recovery process.
 
-Initial Policy
+The Rate Limiting logic rests on the assumption that one of the two recovery data types has, for any reason, been disclosed and is in the attacker's possession. In such a situation, the attacker still needs the second data type to complete the recovery process and, to find it, is forced to search or guess.
+
+In the ASR architecture, successful recovery requires possessing both recovery identifiers. Therefore, disclosing only one of them is not sufficient to complete recovery. Given the vastness of the search space and the limit of each attempt block to three failed attempts, along with progressive time restrictions, the attacker's ability to rapidly search for the missing data is drastically reduced — making unauthorized recovery practically very difficult and time-consuming.
+
+Basis for Applying the Policy
+
+At account registration time, the network MUST — in addition to receiving and storing key_network along with the ASR-REC_Display_ID and ASR-VAR_ID identifiers — also receive and store the account number (Account), KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version in the Network Recovery Infrastructure.
+
+The network's Recovery Service maintains an independent counter and rate-limiting history for each ASR-REC_Display_ID and each ASR-VAR_ID. In every failed recovery request — regardless of the validity of either identifier — both identifiers' counters are incremented. This uniform behavior prevents information disclosure through differences in counting patterns and conceals the ability to infer which identifier was valid. This mechanism is designed to counter Oracle attacks.
+
+Once the counter for an identifier reaches three failed attempts, a notification-required event is recorded and, per the "Notification" section, will be sent at the next 12:00 GMT.
+
+Notification to the owner occurs only if at least one of the two identifiers belongs to a real account:
+
+- Valid ASR-REC_Display_ID + invalid ASR-VAR_ID: The network considers this request a probable sign of disclosure of the numerical data ASR-REC_Display and an attempt to guess the lexical data ASR-VAR. The rate-limiting counters for both identifiers are incremented and, after three effective failed attempts, a notification event is recorded for the account associated with that ASR-REC_Display_ID.
+- Valid ASR-VAR_ID + invalid ASR-REC_Display_ID: The network considers this request a probable sign of disclosure of ASR-VAR and an attempt to guess the numerical data ASR-REC_Display. The rate-limiting counters for both identifiers are incremented and, after three effective failed attempts, a notification event is recorded for the account associated with that ASR-VAR_ID.
+- Both identifiers invalid: The network considers this request a sign of a blind attempt to search for both ASR-VAR and ASR-REC_Display. The rate-limiting counters for both identifiers are incremented, but no notification event is recorded for any account owner — because no real account associated with these identifiers has been identified.
+
+Behavior During Lockout
+
+If either identifier is in a Lockout state, the recovery request MUST be rejected — even if valid identifiers have been submitted. As long as the Lockout of either identifier is active, the network MUST NOT continue the recovery process or release key_network.
+
+Requests received during Lockout MUST NOT be counted as effective failed attempts and MUST NOT cause the active Lockout to be reset, restarted, or extended. After Lockout expires, the next three effective failed attempts will trigger the next time restriction per the progressive policy.
+
+This policy prevents an attacker from using a disclosed identifier and guessing the second identifier to continue the recovery process while the time restriction is active, or to infer additional information from the network's behavior.
+
+Rate limiting MUST be tied to the recovery identifiers and MUST NOT depend solely on the request's IP address, VPN endpoint, Tor, or wallet version. Changes to these characteristics MUST NOT reset or bypass the identifier-based rate-limiting policy.
+
+Through the registration record, the network knows which account number each valid recovery identifier (ASR-REC_Display_ID or ASR-VAR_ID) belongs to. The network MUST send a security alert to the account associated with the valid identifier. This alert informs the account owner of the recovery attempt so they can determine whether the request was initiated by themselves. If the request is unauthorized, the owner can promptly initiate the necessary security measures — including enabling Account Activation Delay and setting the maximum delay period, or transferring assets to a secure account.
+
+Rate Limiting Policy
+
+After three failed attempts for an identifier, a 24-hour time restriction is applied. After this restriction ends, the next three effective failed attempts will double the last applied time restriction:
 
 ```
-3 failed attempts → 24-hour restriction
-next 3 failures  → 48-hour restriction
-next 3 failures  → 96-hour restriction
-next 3 failures  → 192-hour restriction
+3 effective failed attempts → 24-hour restriction
+3 next effective failed attempts → 48-hour restriction
+3 next effective failed attempts → 96-hour restriction
+3 next effective failed attempts → 192-hour restriction
 ...
-```
-
-That is, after every group of three consecutive failures, the last applied time restriction is doubled:
-
-```
 Lockout_Time = Previous_Lockout_Time × 2
 ```
 
-Changing Identifier and Bypassing Restriction
+After a successful account recovery, the counters and rate-limiting states associated with that account's ASR-REC_Display_ID and ASR-VAR_ID SHOULD be reset to zero. This reset MUST NOT affect counters or rate-limiting states belonging to other accounts.
 
-Changing:
+Lockout Mechanism Without a Separate Timer
+
+To implement the rate-limiting policy, there is no need to activate an independent timer for each request or each identifier. Instead of an active countdown, the network uses time recording and comparison at the moment of the next request.
+
+How it works:
+
+- Time and status recording: For each identifier, the network records and maintains the time of the last effective failed attempt and the applied Lockout duration.
+- Check at the moment of the next request: Upon receiving each new request, the network compares the current time with the recorded time and the Lockout duration, and based on this comparison determines whether the Lockout is still active or has expired.
+- Behavior during Lockout: Requests received during Lockout are rejected without processing, with the message lockout_time_rate_limited. These requests MUST NOT extend, restart, or shorten the active restriction, and MUST NOT be counted as effective failed attempts.
+- Upon receiving the next request, the network compares the current time with the Lockout end time to determine its expiry; in that case, the next three effective failed attempts will trigger a new Lockout with twice the previous period's duration — following the progressive policy of 24, 48, 96, 192 hours, and so on.
+- The Recovery Service and the wallet's user interface MUST clearly display to the user the remaining time until the restriction ends and the time allowed for the next attempt.
+
+Important conclusion: This design — rather than running multiple parallel timers for each request — relies on time recording and evaluation at the moment of the request. This approach dramatically reduces both computational load and state-management complexity, while ensuring uniform behavior for all requests.
+
+Notification
+
+The network's Recovery Service sends all eligible notifications once per day, at 12:00 GMT, and only if an end-to-end encryption (E2EE) mechanism is available. Notifications created after 12:00 GMT on one day will be sent at 12:00 GMT the next day.
+
+Reason for choosing the 24-hour cycle (centralized sending at 12:00 GMT):
+
+- The rate-limiting policy creates at least a 24-hour restriction after every three failed attempts on an identifier. During this period, it is not possible to send a new request for the same identifier. Therefore, in each 24-hour window, at most one block of three attempts — and consequently at most one notification-required event — occurs.
+- Centralized sending of notifications at a fixed daily hour (12:00 GMT) eliminates the possibility of an attacker analyzing notification behavior and prevents the attacker from inferring the validity of their request from the notification timing.
+
+Notification confidentiality requirements:
+
+- Sending a notification is permitted only if an E2EE mechanism is available.
+- The notification MUST be sent through an end-to-end encrypted channel, such that only the account owner can receive and decrypt its content.
+- The network MUST NOT disclose the occurrence or content of the notification through publicly observable events, public logs, or unauthenticated APIs.
+- The notification content MUST NOT specify which of the two identifiers was valid or invalid.
+
+Message content:
+
+- A recovery attempt with one valid datum and one invalid datum has been recorded.
+- If this attempt was not initiated by you, please take the necessary security measures immediately.
+
+The message MUST NOT reveal which datum was valid.
+
+Additional Notes
+
+Impossibility of Bypassing the Restriction
+
+Changing the following MUST NOT be able to bypass the main rate-limiting policy:
 
 - ASR-REC_Display_ID
 - ASR-VAR_ID
 - Recovery_Mode
-- IP
+- IP address
 - VPN
 - Tor
-- Wallet
-- Wallet Version
+- Wallet or wallet version
 
-must not be able to bypass the main Rate Limiting policy.
+Non-Disclosure of the Failed Component
 
-Account or Address is not the main basis for Rate Limit, because the user may not have the account address at the time of Recovery.
+The Recovery Service MUST NOT disclose which recovery component was invalid. The Recovery Service MUST complete all validation steps to the end and MUST NOT terminate the process in a way that allows the requester to infer which component was invalid.
 
-Counting Failed Recovery Attempts and applying restrictions is done only after the complete completion of the process and the return of { Recovery Error }. This order ensures that the attacker cannot infer information about the Rate Limit status from the timing or behavior of the network's response.
-
-Important Principle
-
-Every failed Recovery Request, regardless of which component was incorrect, must be calculated within a unified Rate Limiting policy.
-
-Rate Limiting Policy in the ASR Architecture
-
-In the ASR architecture, each recovery request is counted as a single unit in the Rate Limiting policy. If any of the request components are invalid, including ASR-REC_Display_ID, PoW_Solution, ASR-VAR_ID, or Recovery_Mode, the validation result is not announced separately to the requester.
-
-Requirement for Complete Completion of Steps:
-
-The Recovery Service MUST complete all validation steps defined in the Recovery process to the end, regardless of which step it identified an invalid component.
-
-The Recovery Service MUST NOT stop the process midway in a way that is inferable to the requester.
-
-At the end of the process, regardless of which component was invalid, only one general message is returned:
+At the end of the process, regardless of which component was invalid, only a single generic message is returned:
 
 ```
 { Recovery Error }
 ```
 
-Reason for this requirement:
+Applying Rate Limiting to Non-Existent Records
 
-If the network stops midway and announces that "ASR-REC_Display_ID is valid but ASR-VAR_ID is invalid", the attacker can use this response to determine the validity of part of their input and narrow their search space to the remaining part. This makes the attack faster and more targeted.
-
-Therefore:
-
-Recovery Service MUST NOT reveal which individual recovery component failed.
-
-Prevention of Error Oracle:
-
-The Rate Limiting policy in the ASR architecture is designed such that even if an invalid component is identified in the early stages of Recovery, this detection must not create a response or behavior that is inferable by the attacker.
-
-The goal is to prevent the attacker from using differences in error messages, response order, or observable behavior of validation steps, early receipt of the Recovery Error message, or early termination of recovery before completing all steps from the network side, to gain information to limit their search space.
-
-Unified Recovery Failure Counter:
-
-All failed requests, regardless of whether the error is related to ASR-REC_Display_ID, PoW_Solution, ASR-VAR_ID, Recovery_Mode, or other security controls, are calculated within the same Rate Limiting policy and the same unified Recovery failure counter.
-
-Applying Rate Limit for Non-Existent Records
-
-The Recovery Service MUST apply the Rate Limiting policy even for ASR-REC_Display_IDs that have no record in Core Recovery Key Network Storage.
-
-Reason: If the network applies Rate Limit only for existing records, the attacker can infer from the difference in network behavior (e.g., the number of allowed attempts before lockout) whether a given ASR-REC_Display_ID belongs to an active record or not.
-
-Therefore:
-
-- Every Recovery request, regardless of whether the ASR-REC_Display_ID belongs to an existing or non-existing record, MUST be counted within the same unified Rate Limiting policy.
-- The network's behavior MUST be identical in both cases (existing and non-existing record).
-- This policy ensures prevention of Recovery Oracle through differences in Rate Limiting behavior.
-
-This is a point that is forgotten in many systems:
-
-- Most developers only think about existing records.
-- But the attacker uses exactly the difference in behavior to discover information.
-- This technique is known in security as "Timing Attack" or "Oracle Attack".
-
-Design Goals:
-
-This design simultaneously pursues two goals:
-
-- Preventing disclosure of the failed step or component of the Recovery process
-- Preventing the use of differences in messages or behavior of validation steps to reduce and target the attacker's search space
-
-This policy is consistent with the principle of Minimum Disclosure and ensures that the Recovery Service does not provide additional information about the record status, validity of input components, or the failure step of the process to the requester.
-
-Security Principle:
-
-The Recovery Service MUST NOT reveal which individual recovery component failed.
+The Recovery Service MUST apply the rate-limiting policy even to ASR-REC_Display_ID and ASR-VAR_ID values that have no record in the Network Recovery Infrastructure. The network's behavior MUST be identical in both cases — existing record and non-existent record — such that the response, attempt counting, and rate-limiting behavior do not reveal to the requester whether an identifier exists or not.
 
 ### 15. ASR Security Principle
 
