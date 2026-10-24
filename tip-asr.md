@@ -2455,27 +2455,153 @@ This requirement guarantees that, without receiving key_network from the network
 ___
 ___
 # Threat Model
-The ASR standard is designed to protect the account recovery process against threats related to the disclosure of recovery data, and not to counter full compromise of the user's execution environment.
 
-1. ASR is resilient against:
+The ASR standard is designed to protect the account recovery process against threats related to the disclosure of recovery data — not against full compromise of the user's execution environment. This distinction defines the primary boundary of the ASR threat model: ASR protects the "recovery" path, not the "direct access" path to the private key.
 
-- Partial or full disclosure of recovery data (ASR-REC)
-- Disclosure of the user's private variable (ASR-VAR)
-- Theft of physical or digital backups
-- Offline brute‑force attacks (fundamentally impossible)
-- Adaptive online brute‑force attacks (using Recovery Context and rate limiting)
-- Phishing attacks targeting the recovery process
-- Shoulder surfing
-- Attempts to recover without network authorization
-- Malicious delayed recovery, even in the event of simultaneous theft of all recovery data
-    (using Recovery Delay, network notifications, and account‑state dependency)
+### 1. Threats ASR Is Resilient Against
 
-2. Out of Scope:
+1.1. Disclosure of One of the Two Recovery Components
 
-- Active malware with simultaneous access to the user's execution environment
-- Compromise of operating system, firmware, or runtime
-- Attacks based on full device control at the time of owner signing
-- Non‑cryptographic attacks such as physical coercion or in‑person social engineering
+In ASR, account recovery depends on two independent components: ASR-REC_Display (the numerical datum) and ASR-VAR (the lexical variable that serves as the recovery key). Disclosure of either component alone is insufficient for recovery:
+
+- Disclosure of ASR-REC_Display alone: Without ASR-VAR, the attacker cannot compute ASR-CYC_Output and therefore cannot reconstruct ASR-REC_Main.
+- Disclosure of ASR-VAR alone: Without ASR-REC_Display, the attacker cannot reconstruct ASR-REC_Main, even if they execute ASR-CYC.
+
+1.2. Access to key_network Only Through the Network — With Both Data and Passing Procedural Controls
+
+If one of the recovery data components (ASR-REC_Display or ASR-VAR) is disclosed, the attacker cannot compute key_local — and therefore Final_Entropy cannot be reconstructed without key_network. key_network can only be obtained through the Network Recovery Infrastructure and after passing the validation stages.
+
+However, if both components are disclosed simultaneously, the attacker can compute key_local and send a recovery request through the Network Recovery Infrastructure. In this scenario, ASR makes no claim of "impossibility"; rather, it relies on procedural defenses:
+
+- If the Account Activation Delay option is disabled: After passing the validation and rate-limiting stages, the attacker receives key_network — but this request records a notification-required event, and at the next 12:00 GMT, a security alert is sent to the owner.
+- If the Account Activation Delay option is enabled: The Network Recovery Infrastructure postpones the delivery of key_network until the end of the delay period — which the owner has set. During this period, the attacker's wallet has access only to the account's public information (published on the blockchain); and the owner, through periodic inquiry or receipt of a notification, has an opportunity to react.
+
+In both cases, two independent defense layers are activated: rate limiting (which restricts repeated attempts on an identifier via progressive Lockout and increments both identifiers' counters simultaneously, so the attacker cannot infer the validity of their guess from the counting pattern) and time-batched notifications (which are sent at a fixed hour of 12:00 GMT, so the attacker cannot infer the validity or invalidity of their request from the notification timing).
+
+1.3. Resistance Against Offline Brute-Force Attacks and Bulk Account Generation
+
+By mandating Argon2id (64 MiB memory, 3 passes, 4 parallel lanes, 512-bit output), ASR dramatically increases the cost of each guess. To bulk-generate accounts in an offline environment, the attacker must pay a significant memory and CPU cost per guess — and this renders the attack economically unjustifiable. In contrast, PBKDF2 (used in BIP-39) provides no such resistance and enables the generation of billions of accounts at negligible cost.
+
+1.4. Cross-Standard Attack
+
+If an identical input is fed to two different KDFs (PBKDF2 and Argon2id), they do not produce identical outputs, due to algorithmic differences. Consequently, if an account has been created with Argon2id, an attempt to recover it with PBKDF2 — even using the same input — leads to a different private key, public key, and blockchain address.
+
+Therefore, if an attacker reaches a private key via the BIP-39 path (using PBKDF2), that key will not match the private key of an ASR account (created with Argon2id and the domain tag "ASR-Recovery-v1"). The deterministic difference between Argon2id and PBKDF2, together with Domain Separation, ensures that even with identical Final_Entropy, the KDF output — and thus the resulting address — will differ. Therefore, the BIP-39 attack on ASR is mathematically closed.
+
+1.5. Online Guessing of the Missing Component
+
+ASR's identifier-based rate limiting (ASR-REC_Display_ID and ASR-VAR_ID) sharply limits the number of effective attempts by the attacker. The progressive policy (24 → 48 → 96 → 192 hours) together with a unified counter for both identifiers limits the possibility of rapid search for the missing data and, given the large search space, eliminates the practical and economic justification for the attack. Requests during Lockout are rejected without processing, with the code lockout_time_rate_limited, and neither extend nor reset the restriction.
+
+1.6. Oracle Attacks
+
+ASR adopts four principles to prevent information leakage through network behavior:
+
+- Uniform behavior in all cases: The network behaves identically for valid and invalid inputs.
+- Generic message: On failure, only { Recovery Error } is returned — without revealing which component was invalid.
+- Rate limiting for non-existent records: The rate-limiting policy applies even to identifiers with no record, so the existence or non-existence of an identifier cannot be inferred from network behavior.
+- Time-batched notifications: All notifications are sent at 12:00 GMT (not immediately), so the attacker cannot infer the validity of their guess from notification timing.
+
+1.7. Replay Attacks and Fake key_network Registration
+
+Every Enrollment request must be sent with a valid Access Key signature and a unique Nonce. The Network Recovery Infrastructure maintains a record of used Nonces with a specified expiry window (suggested: 24 hours) and rejects any request containing a duplicate Nonce. This mechanism prevents fake key_network registration and Replay attacks.
+
+1.8. Disclosure of key_network at Rest
+
+key_network is stored in the Network Recovery Infrastructure encrypted at-rest. The Storage encryption key is not derived from the account's private key, ASR-REC, ASR-VAR, Account, or any user-recoverable information, and is protected by the network's secure key management infrastructure.
+
+1.9. Side-Channel and Timing Attacks
+
+Argon2id is designed for resistance against side-channel attacks. ASR-CYC — by dispersing entropy across the full range 0000–8191 — reveals no structural information about ASR-REC_Main. Notifications are sent at a fixed hour (12:00 GMT) to prevent inference from timing.
+
+1.10. Phishing, Shoulder Surfing, and Reducing User Error
+
+- ASR display requirements: Uniform formatting with ASR-REC-... and ASR-VAR-..., left-to-right display, ASCII-only, and removal of homoglyph characters — help reduce the risk of phishing and shoulder surfing.
+- Reducing user error in entering variables: The mandate of ASR-VAR to uppercase English letters A–Z in ASCII, and English digits in ASR-REC, is a deliberate decision to reduce user error. To appreciate the importance of this decision, suppose ASR-VAR also accepted lowercase letters, digits, and symbols: in that case, the combination of uppercase and lowercase letters, spaces, digits, and symbols — with the many similar characters such as O (uppercase), o (lowercase), 0 (zero), I (uppercase), and l (lowercase), and many more of this kind — would become the primary source of error in reading or entering the variables, and the user would face costly errors during recovery. ASR deliberately restricts ASR-VAR to uppercase letters, and ASR-REC_Display to English digits, and the wallet also validates each variable's input in real time as the user enters it. This combination, in addition to eliminating ambiguity, results in a desirable user experience and, in line with enhancing security and reducing recovery errors, takes an important step toward minimizing mistakes and ensuring a pleasant user experience — by defining a standard input format for each variable.
+
+1.11. Unauthorized Recovery Without Network Authorization
+
+Account recovery without obtaining key_network from the Network Recovery Infrastructure is cryptographically impossible. This dependency is embedded in the structure of the Final_Entropy computation — not in access rules — and therefore cannot be removed or ignored merely by bypassing procedural policies.
+
+1.12. Disclosure of the Seed or Private Key via the Infrastructure
+
+The Core network has no access to the raw ASR-VAR and ASR-REC_Display — it only maintains their hashes (ASR-VAR_ID and ASR-REC_Display_ID) as Index. It also does not store or reconstruct the Seed or private key, and does not participate in the wallet's local cryptographic computations.
+
+1.13. Bypassing Rate Limiting via Changes to Request Characteristics
+
+Changing ASR-REC_Display_ID, ASR-VAR_ID, Recovery_Mode, IP address, VPN, Tor, or wallet version MUST NOT bypass the rate-limiting policy. Rate limiting is tied to recovery identifiers, not to request characteristics.
+
+1.14. Attack via the Account Activation Delay Option
+
+If the Account Activation Delay option is enabled, even if the attacker obtains both recovery data components, due to the lack of access to key_network, they cannot complete the recovery process and reach the private key and the account's assets until the end of the delay period — which the owner has set.
+
+1.15. Timely Detection of Unauthorized Recovery Attempts (Periodic Inquiry)
+
+To enhance account security, it is recommended that the owner periodically inquire about the status of pending activation requests, in proportion to the configured delay duration, by sending a signed query (Signed Query) to the Network Recovery Infrastructure.
+
+Whenever the owner — through periodic inquiry or by receiving a notification from the Recovery Infrastructure — encounters a new recovery request that they did not initiate or manage themselves, they identify this message as suspicious activity or a probable attempt by an attacker to gain unauthorized access to the account's assets. In this situation, the delay period gives the owner the opportunity to immediately initiate the necessary protective measures before the configured delay expires and before the suspicious wallet sends the recovery completion request to the network.
+
+Protective measures available to the owner include:
+
+- Increasing the delay duration up to the maximum allowed (125 days).
+- Transferring assets to a secure account.
+- Changing the account's Owner Key through the network permission mechanism (Permission) — provided that this action invalidates the previous recovery data, and consequently renders the stolen recovery data (which maps to the old key) unusable. In this case, due to the change in recovery data, the owner MUST back up the account again.
+
+1.16. Quantum Attacks on the Search Space
+
+The entropy of 156 bits (12-number mode) and 312 bits (24-number mode), under a Grover attack — which halves the search space — is reduced to approximately 78 and 156 bits of post-quantum security, respectively:
+
+- 12-number mode (78-bit post-quantum): above NIST Level 1 (64-bit post-quantum).
+- 24-number mode (156-bit post-quantum): above NIST Level 5 (128-bit post-quantum).
+
+The 512-bit KDF output ensures that the KDF output is not the limiting factor for security — the limiting factor is the input entropy (Final_Entropy), not the output length. Therefore, the user can obtain a higher post-quantum security margin by selecting the 24-number mode.
+
+### 2. Out of Scope
+
+The following are outside the ASR threat model, and ASR makes no claim of protection against them:
+
+2.1. Direct Theft of the Private Key
+
+- Active malware with access to the wallet's execution environment
+- Successful phishing that extracts the Seed or private key from the user
+- Physical access to the device at the time of owner signing
+
+ASR protects the "recovery" path, not the "direct access" path to the private key.
+
+2.2. Compromise of the Operating System, Firmware, or Runtime
+
+If the wallet's execution environment is fully under the attacker's control, ASR cannot protect. This limitation is common to all cryptographic standards.
+
+2.3. Non-Cryptographic Attacks
+
+- Physical coercion of the owner
+- In-person social engineering
+- Deceiving the user into voluntarily disclosing the components
+
+2.4. Weak CSPRNG Implementation
+
+ASR assumes a standard and secure CSPRNG. If the CSPRNG implementation is flawed, the entropy of Final_Entropy is reduced, and ASR's security is weakened. CSPRNG security is the implementer's responsibility.
+
+2.5. Attack on the Network's Key Management Infrastructure
+
+If the Storage encryption key protecting key_network is compromised, key_network is exposed. This is a network-infrastructure-level threat, not a weakness in ASR's design.
+
+2.6. Attack on the Communication Channel Between Wallet and Network
+
+ASR uses the secure channel available in the TRON infrastructure. If this channel is compromised, ASR cannot protect on its own.
+
+2.7. Weak Wallet Implementation
+
+If a wallet stores, displays, or in any way provides key_network to the user, this violates the standard — but ASR cannot prevent it. The self-punishing consequence (inability to recover by other ASR-compliant wallets, alongside the enhancement of the user's asset security) creates an awareness-driven pressure to comply with the standard.
+
+### 3. Conclusion
+
+The ASR threat model rests on three fundamental principles:
+
+1. Separation of the two local components: Disclosure of one does not enable recovery.
+2. Cryptographic dependency on key_network: Disclosure of both local components is insufficient for offline recovery — key_network is only obtainable through the network. However, in the event of disclosure of both, the attacker can act through the network path; in which case, procedural controls (rate limiting, delay, alert) come into play.
+3. Economic resistance of the KDF: Bulk offline account generation becomes economically unjustifiable.
+
+This threat model honestly declares its own limitations: ASR protects the recovery path, not the user's execution environment. It makes no claim of absolute security; rather, it claims that through multi-layered protection — at three levels: user, wallet, and network — it elevates account security to a degree where attacking it becomes practically and economically unjustifiable. This multi-layered protection includes the separation of recovery data, the use of an offline-recovery-resistant KDF, and the cryptographic dependency of recovery on the network. In addition, by restricting the activation of new accounts when the "Account Activation Delay" option is enabled, and by identifying an activation request that the owner has not managed, the opportunity to respond to an unauthorized activation request is placed in the owner's hands.
 ___
 ___
 # Why ASR Is a Recovery Alternative to BIP-39 (Design Rationale)
