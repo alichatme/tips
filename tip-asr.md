@@ -2029,36 +2029,117 @@ ___
 ___
 # Responsibilities
 
-### User Responsibilities
-Maintain ASR-VAR and ASR-REC separately
+### 1. User Responsibilities
 
-### Wallet Responsibilities
-The wallet performs all local cryptographic recovery computations
+The user is responsible for the secure and separate safekeeping of the two recovery components:
 
-- Storing ASR-REC
-- Receiving and processing ASR-VAR
-- Executing ASR-CRC
-- Generating Recovery Proof
+- ASR-REC_Display: The numerical recovery data — consisting of 12 or 24 four-digit numbers — that the wallet computes and displays to the user. The user must record these recovery numbers and keep them in a secure location.
+- ASR-VAR: The private variable, chosen by the user, that serves as the recovery key; it is kept in the user's memory or in a location separate from ASR-REC_Display.
 
-However, the wallet is deliberately designed to lack the ability to independently reconstruct the Seed or derive the private key.
-Even with correct and complete execution of all local steps, the recovery process will not converge to a single value without receiving the additional data issued by the Core network.
+The user must take care to safeguard both recovery data components:
 
-The wallet:
+- If either of the two recovery data components is lost, the user must re-initiate backup.
+- If one of the recovery data components is disclosed, the user must promptly initiate the necessary security measures.
 
-- Is not the owner of the Seed
-- Does not have final control over the account
-- Cannot complete recovery offline or unilaterally
+ASR-VAR is processed locally during recovery; therefore, neither the wallet nor the Network Recovery Infrastructure stores it.
 
-This limitation is a fundamental security constraint in the ASR design, not an implementation flaw.
+It is recommended that the user, by enabling the "Account Activation Delay" option, periodically and in proportion to the configured delay duration, inquire about the status of account activation requests from the Network Recovery Infrastructure; and if they identify a request that was not initiated or managed by themselves, they should promptly initiate the necessary security measures.
 
-### ASR Network Layer Responsibilities
+### 2. Wallet Responsibilities
 
-- No smart contracts
-- No gas or fees
-- Core logic level
-- First block of 3 unsuccessful attempts → Apply a 24-hour restriction.
-- Each subsequent block of 3 unsuccessful attempts → Apply a time restriction double the previous one (e.g., 24h → 48h → 96h → ...).
-- Mandatory: When a restriction is applied, a countdown timer must be displayed to the user, indicating the remaining waiting time.
+Backup Mode Selection and Input Validation
+
+When initiating the backup process, the wallet presents both the 12-number and 24-number modes to the user so that the user can choose one. After the user selects the 12-number or 24-number mode, the rest of the generation and recovery process proceeds based on that selection.
+
+Before performing any cryptographic computation, the wallet validates the inputs. For ASR-REC_Display, only English digits in the range 0000 to 8191 and structural conformance to ASCII digits are accepted. For ASR-VAR, only uppercase English letters A to Z with ASCII encoding and at most two consecutive repeated letters are accepted — without lowercase letters, spaces, digits, characters from other languages, symbols, or other Unicode characters. This validation MUST be performed at the moment of input by the wallet.
+
+Account Creation
+
+The wallet performs local cryptographic computations as follows: it first generates Final_Entropy with a CSPRNG — 156 bits in 12-number mode and 312 bits in 24-number mode. It then independently generates key_network with a CSPRNG, of the same length as Final_Entropy, and computes key_local = Final_Entropy XOR key_network. It encodes key_local into the ASR-REC_Main structure, executes the ASR-CYC cycles based on ASR-VAR, and computes ASR-REC_Display from the modular integration of ASR-REC_Main with ASR-CYC_Output in the range 0000 to 8191. It also computes the identifiers using SHA-512:
+
+```
+ASR-REC_Display_ID = SHA-512(Canonical_ASR-REC_Display)
+ASR-VAR_ID = SHA-512(Canonical_ASR-VAR)
+```
+
+Enrollment
+
+The wallet sends the enrollment request — including ASR_Version, Account, Recovery_Mode, ASR-REC_Display_ID, ASR-VAR_ID, key_network, KDF_Algorithm, KDF_Version, KDF_Parameters, Derivation_Scheme_Version (as defined in Section 5.1), Nonce, and signed with an Access Key — to the Network Recovery Infrastructure.
+
+After successful enrollment and receipt of confirmation from the Network Recovery Infrastructure, the wallet MUST erase the temporary copies of key_network and Final_Entropy from memory, and MUST NOT store, display, or in any way provide key_network to the user — because key_network is a recovery key belonging to the network, not a user key. The wallet then displays ASR-REC_Display to the user and emphasizes that ASR-VAR MUST be kept separately.
+
+Recovery Process
+
+In the recovery process, the wallet first receives ASR-REC_Display and ASR-VAR from the user and sends ASR-REC_Display_ID and Recovery_Mode to the Network Recovery Infrastructure. After solving the PoW_Challenge and sending PoW_Solution along with ASR-VAR_ID, and upon successful validation, it receives key_network, ASR_Version, and the four KDF fields from the Network Recovery Infrastructure.
+
+The wallet then executes the ASR-CYC cycles corresponding to the received ASR_Version, reconstructs ASR-REC_Main via modular subtraction of ASR-CYC_Output from ASR-REC_Display in the range 0000 to 8191, decodes ASR-REC_Main to extract key_local, and computes Final_Entropy = key_local XOR key_network. Finally, using KDF_Algorithm, KDF_Version, KDF_Parameters, and Derivation_Scheme_Version, it reconstructs the key derivation path and derives Master_Seed and the private key via Argon2id — thereby completing the account recovery process.
+
+If the Account Activation Delay Option Is Enabled
+
+The wallet displays to the owner the current status of the option, the configured duration, and the ability to change its settings; and, in the periodic inquiry of requests — signed with Access Keys and sent to the Network Recovery Infrastructure — it displays to the owner the number of activation requests and the remaining time until activation of each. It also displays a countdown timer to the user until the end of the configured deadline. The wallet MUST securely protect Activation_Resume_Token in its own memory and, at the end of the delay period and at the user's request, send it along with ASR-REC_Display_ID and Recovery_Mode in the first step of the recovery completion request to the Network Recovery Infrastructure.
+
+Wallet Design Limitation
+
+The wallet is intentionally designed to lack the ability to independently reconstruct the Seed or derive the private key: the wallet is not the owner of the Seed, does not have final control over the account, and cannot complete recovery offline or unilaterally. This limitation is a fundamental security constraint in the ASR design, not an implementation flaw.
+
+### 3. Network Recovery Infrastructure Responsibilities
+
+Safekeeping of key_network and Recovery Metadata
+
+The most important responsibility of this infrastructure is to store key_network in its Storage in encrypted form at-rest (encryption in the at-rest state). The Storage encryption key MUST NOT be derived from the account's private key, ASR-REC, ASR-VAR, Account, or any information recoverable by the user. This key MUST be maintained and protected by the network's secure key management infrastructure, and MUST NOT be provided to the wallet or the user.
+
+During Enrollment
+
+Receiving the enrollment request and storing key_network must be accompanied by a valid signature from the account's Access Keys and a unique Nonce. This request includes ASR-REC_Display_ID, ASR-VAR_ID, Recovery_Mode, key_network, the KDF fields, and the Access Key signature. After validating the Access Key signature, the signature's belonging to the account, the validity of Signing_Key_ID, the previous non-use of the Nonce, and the structure of key_network — and after the success of all checks — the infrastructure stores key_network and returns an NRA (meaning successful registration in the Network Recovery Infrastructure) to the originating wallet.
+
+The Network Recovery Infrastructure MUST refrain from storing key_network if the enrollment request is not accompanied by a valid signature from the account's Access Keys. Additionally, maintaining a record of used Nonces with a specified expiry window (suggested: 24 hours) and rejecting any request containing a duplicate Nonce are among the other responsibilities of this infrastructure.
+
+During Recovery
+
+In the recovery process, after receiving ASR-REC_Display_ID and Recovery_Mode from the wallet, the network does not declare their validity or invalidity at this stage — or at subsequent stages, before completion and throughout all stages. The network's behavior MUST be identical in both cases — receiving correct information and receiving incorrect information.
+
+The network issues PoW_Challenge bound to the Recovery Session and with the ability to adjust PoW difficulty, in proportion to network conditions, available computational power, and security policies — such that the PoW both prevents mass attacks and remains tolerable for legitimate users.
+
+The network MUST execute all validation stages to the end, regardless of which stage identified an invalid component. The network MUST NOT halt the process or provide a response in a manner that allows the requester to determine which component was valid and which was invalid, or to obtain information for narrowing their search space by observing the network's reactions or the progress of validation and the stage at which incorrect information was identified.
+
+Therefore, after passing through all recovery stages, if any stage was submitted with incorrect information, the network's Recovery Service behaves identically and, only at the final stage, in the event of recovery failure, confines itself to sending a single generic message — without disclosing which component was invalid:
+
+```
+{ Recovery Error }
+```
+
+During Delivery of key_network
+
+After correct information is sent to the Network Recovery Infrastructure and the validation and rate-limiting process is successfully completed, the network returns key_network, ASR_Version, and the four KDF fields along with the NRA to the wallet. The network recovery system MUST use the same secure channel existing in the infrastructure between the wallet and the network for receiving and sending information.
+
+During Rate Limiting
+
+Rate limiting in ASR is designed to prevent adaptive online attacks. The basic assumption is that the attacker has obtained one of the recovery data components and, by altering it, is trying to find the correct data and obtain key_network from the network. The network maintains an independent rate-limiting counter and history for each ASR-REC_Display_ID and each ASR-VAR_ID, and in each failed request — regardless of the validity or invalidity of either identifier — increments the counters of both identifiers. This uniform behavior prevents information disclosure through differences in counting patterns and conceals the ability to infer which identifier was valid; a mechanism designed to counter Oracle attacks.
+
+After three failed attempts for an identifier, a 24-hour time restriction is applied. After this restriction ends, the next three effective failed attempts double the last applied time restriction — following the progressive policy of 24, 48, 96, 192 hours and so on. If either of the two identifiers is in a Lockout state, the recovery request MUST be rejected — even if valid identifiers have been submitted. Requests received during Lockout MUST NOT be counted as effective failed attempts and MUST NOT cause the active Lockout to be reset, restarted, or extended.
+
+To implement this policy, there is no need to activate an independent timer for each request or each identifier. Instead of an active countdown, the network uses time recording and comparison at the moment of the next request: the time of the last effective failed attempt and the applied Lockout duration are recorded, and upon receiving each new request, the network compares the current time with the recorded time and the Lockout duration and determines whether the Lockout is still active or has expired. Requests received during Lockout are rejected without processing, with the message lockout_time_rate_limited. This approach reduces both computational load and state-management complexity and ensures uniform behavior for all requests. The Recovery Service and the wallet's user interface MUST clearly display to the user the remaining time until the restriction ends and the time allowed for the next attempt.
+
+Regarding notifications, the network's Recovery Service sends all eligible notifications once per day, at 12:00 GMT, and only if an end-to-end encryption (E2EE) mechanism is available. The reason for this choice is that if the network were to send a notification to the account immediately upon three failed attempts, the attacker could realize that one of their guesses was correct; therefore, centralized sending of notifications at a fixed daily hour (12:00 GMT) eliminates this possibility. Notifications created after 12:00 GMT on one day will be sent at 12:00 GMT the next day. Notification occurs only if at least one of the two identifiers belongs to a real account, and the message content MUST NOT specify which datum was valid.
+
+If the Account Activation Delay Option Is Enabled
+
+If the Account Activation Delay option is enabled, the Network Recovery Infrastructure performs the following:
+
+- Validating the signature and authorization of the signing key in inquiries regarding the status of activation requests.
+- Returning the number of pending requests and the remaining time for each request, only after successful validation with a signature from the account's Access Keys.
+- Applying new settings as a complete reset (and not as a continuation of previous processes) for all activation requests of the same account.
+- Recalculating the delay duration from the time of successful registration of the new settings, regardless of the time elapsed in the previous period.
+- Sending a notification or message regarding the new delay status and time to the associated active wallets.
+- Providing Activation_Resume_Token along with general account information — including the account identifier or public address, the delay status, and the end time of the period — to the wallet, without disclosing key_network.
+- Refraining from delivering key_network to the wallet until the end of the configured delay period.
+- The reference for determining the start and end of the delay period is the Network Recovery Infrastructure — not the counter displayed to the user in the wallet.
+- Sending notifications regarding the start, change, or end of the delay period to all active wallets and activation requests associated with the same account.
+- Re-executing all validation stages by the network upon receiving the recovery completion request after the delay period ends and upon receiving Activation_Resume_Token.
+
+Access Limitation
+
+The Core network has no access to the raw ASR-VAR and ASR-REC_Display — it only maintains their hashes (ASR-VAR_ID and ASR-REC_Display_ID) as Index. It also does not store or reconstruct the Seed, the private key, or any other recovery data, and does not participate in the wallet's local cryptographic computations.
 ___
 ___
 # Countering Bulk Offline Account Generation in the ASR Architecture through the Mandatory Use of Argon2id KDF
