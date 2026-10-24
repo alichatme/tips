@@ -2480,25 +2480,26 @@ ___
 ___
 # Why ASR Is a Recovery Alternative to BIP-39 (Design Rationale)
 
-BIP-39 is a Seed generation standard that makes recovery dependent on full knowledge of the Mnemonic.
-In this model, recovery is a completely offline, unsupervised process with no distinction between the legitimate owner and an attacker.
+BIP-39 is a Seed generation standard that limits recovery to the safekeeping of the Mnemonic data. In this model, recovery is a completely offline, unsupervised process that makes no distinction between the legitimate owner and an attacker.
 
-In contrast, ASR does not replace the Seed or private key.
-Instead, it transforms the recovery process into a conditional, multi‑stage, network‑dependent flow.
+In contrast, ASR replaces neither the Seed nor the private key. Instead, it transforms the account creation and recovery process into a conditional, multi-stage, network-dependent flow.
+
+In ASR, recovery depends on two independent variables: a numerical datum (ASR-REC_Display), which the user keeps in a secure location, and a lexical variable (ASR-VAR), which serves as the recovery key and is kept in the user's memory or in a location separate from the numerical data. Neither of these two components alone is sufficient for recovery.
 
 The key differences are:
 
-- In BIP‑39, full disclosure of the Mnemonic directly leads to loss of assets.
-    In ASR, the recovery data alone is incapable of recovery and is useless without network approval.
-- BIP‑39 enables offline brute‑force attacks and unlimited attempts without rate limiting.
-    ASR fundamentally makes this class of attacks impossible by eliminating offline recovery.
-- BIP‑39 has no native concept of "recovery control, suspension, or rejection."
-    ASR turns recovery into an observable, rate‑limit‑able, and policy‑governable event at the network level.
-- BIP‑39 reduces recovery to a single point of failure.
-    ASR eliminates this single point of failure by separating ASR‑REC, ASR‑VAR, and network verification cycles.
-- In BIP‑39, the network is unaware of the recovery process.
-    In ASR, the network is part of the recovery security model.
+- Two-variable dependency with separate storage: In BIP-39, recovery depends on a single Mnemonic. In ASR, recovery depends on two independent components that must be stored separately — a numerical datum (ASR-REC_Display) and a lexical recovery key (ASR-VAR). Disclosure of either component alone does not enable recovery.
+- Structural protection via ASR-CYC: The ASR-CYC cycles operate on the lexical recovery key (ASR-VAR) and progressively spread its entropy across the entire numerical range (0000–8191). Without these cycles, an attacker in possession of ASR-REC_Display could search a small range around the original value and reconstruct ASR-REC_Main. With ASR-CYC, ASR-REC_Display reveals no structural information about ASR-REC_Main — and the search space is expanded to the maximum possible range.
+- Recovery data vs. Mnemonic: In BIP-39, full disclosure of the Mnemonic directly leads to loss of assets. In ASR, disclosure of either recovery component (ASR-REC_Display or ASR-VAR) alone does not lead to loss of assets — because Final_Entropy cannot be reconstructed without key_network, and key_network can only be obtained if the user possesses both recovery data components and passes through the validation stages.
+- KDF strength and offline attacks: BIP-39 uses PBKDF2 — a non-memory-hard KDF — which, combined with the fully offline nature of recovery, enables offline brute-force attacks and unlimited attempts without rate limiting. ASR addresses this in two ways: (1) by mandating Argon2id with a 64 MiB memory cost, which renders bulk offline brute-force attacks economically unjustifiable; and (2) by making the reconstruction of Final_Entropy cryptographically dependent on key_network — which makes complete offline recovery impossible.
+- KDF configurability with recovery safety: ASR mandates Argon2id with specific parameters (64 MiB memory, 3 passes, 4 parallel lanes, 512-bit output) as the default. However, the exact algorithm, version, and KDF parameters used for each account are stored in encrypted form (at-rest) within the Network Recovery Infrastructure. Because different KDFs produce different outputs, this storage ensures that the recovery infrastructure always retains the exact derivation settings for each account — so users need not remember or manage KDF details, and recovery remains possible regardless of which KDF configuration was used.
+- Recovery control: BIP-39 has no native concept of "recovery control, suspension, or rejection." ASR turns recovery into an observable, rate-limit-able, and policy-governable event at the network level.
+- Single point of failure: BIP-39 reduces recovery to a single point of failure. ASR eliminates this single point of failure by separating ASR-REC_Display, ASR-VAR, and key_network — with the Network Recovery Infrastructure serving as the final cryptographic gate.
+- Network awareness: In BIP-39, the network is unaware of the recovery process. In ASR, the Network Recovery Infrastructure is part of the recovery security model — from enrollment and rate limiting, to the cryptographic dependency on key_network.
+- Entropy capacity: BIP-39 offers a nominal entropy of 128 bits (12 words) or 256 bits (24 words). ASR offers a nominal entropy of 156 bits (12-number mode) or 312 bits (24-number mode) — a higher security margin, particularly relevant for resistance against quantum search.
+- Account Activation Delay option: In BIP-39, the owner or legitimate user has no means of being notified or of imposing any restriction on new accounts activated with their recovery data — and if the recovery phrase is disclosed, the assets become immediately accessible to the attacker. In ASR, by virtue of holding key_network, the Network Recovery Infrastructure can notify the owner whenever a new wallet is added to their account, and — by enabling the "Account Activation Delay" option — can defer the new wallet's access to the private key and assets until the end of the delay period set by the owner. This time window allows the owner to take the necessary protective measures before any unauthorized access occurs.
+- Future extensibility: Future versions of ASR may allow users to select KDF difficulty levels — after appropriate testing and validation. Because the chosen KDF settings are recorded per-account in the Network Recovery Infrastructure, such extensions do not compromise recovery; the wallet can always reconstruct the exact derivation path from the stored metadata.
 
-As a result, ASR enhances security not by replacing basic cryptography, but by completely redesigning the concept of digital asset recovery.
+As a result, ASR enhances security not by replacing basic cryptography, but by fundamentally redesigning the concept of creating, safeguarding, and recovering digital assets.
 ___
 ___
