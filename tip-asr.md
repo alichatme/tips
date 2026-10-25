@@ -1827,7 +1827,7 @@ Reconstruction of Final_Entropy without access to key_network in the ASR archite
 Final_Entropy = key_local XOR key_network
 ```
 
-key_network is an independent network share that is protected after Enrollment in Core Recovery Key Network Storage and is provided to the wallet only after the successful completion of the Recovery process, including PoW, identifier validation, and Rate Limiting policies.
+key_network is an independent network share that is protected after Enrollment in the Network Recovery Infrastructure and is provided to the wallet only after the successful completion of the Recovery process, including PoW, identifier validation, and Rate Limiting policies.
 
 Therefore, ASR security against offline attacks is not solely dependent on the size of the ASR-REC space, and the network architecture also adds an independent layer to the recovery process.
 
