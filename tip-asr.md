@@ -832,7 +832,7 @@ During the Enrollment stage, the wallet sends the information required for accou
 - Signing_Key_ID
 - Enrollment_Signature
 
-After successful validation of the Access Key signature by network nodes and verification of other recovery parameters, the information is recorded and stored in Core Recovery Key Network Storage. The network then returns an NRA to the wallet.
+After successful validation of the Access Key signature by network nodes and verification of other recovery parameters, the information is recorded and stored in the Network Recovery Infrastructure. The network then returns an NRA to the wallet.
 
 This NRA indicates to the wallet that the account's recovery information has been successfully stored in the designated network infrastructure (Recovery Storage).
 
