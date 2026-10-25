@@ -12,6 +12,8 @@ replaces:
 ---
 ASR – Adaptive Secure Recovery
 Adaptive Secure Recovery Standard for Cryptocurrency Accounts
+
+**ASR Protocol Version: 1.0.0**
 ___
 ___
 # Introduction
