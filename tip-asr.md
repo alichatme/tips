@@ -1713,7 +1713,7 @@ Role of Recovery_Mode
 
 At the time of creating and registering ASR, the user chooses one of the 12 or 24 modes. The backup steps continue based on this choice.
 
-During Enrollment, the wallet sends the Recovery_Mode value to the network in addition to the described values. This value is stored in Core Recovery Key Network Storage and is used during Recovery for request validation and enforcement of the Rate Limiting policy.
+During Enrollment, the wallet sends the Recovery_Mode value to the network in addition to the described values. This value is stored in the Network Recovery Infrastructure and is used during Recovery for request validation and enforcement of the Rate Limiting policy.
 
 2. Recovery:
 
