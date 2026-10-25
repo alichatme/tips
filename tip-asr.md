@@ -2397,7 +2397,7 @@ ASR_Enrollment_Message =
 
 Validation and Storage
 
-After successful validation of the Access Key signature by network nodes and verification of other recovery parameters, the information is registered and stored in Core Recovery Key Network Storage. The network then returns an NRA to the wallet.
+After successful validation of the Access Key signature by network nodes and verification of other recovery parameters, the information is registered and stored in the Network Recovery Infrastructure. The network then returns an NRA to the wallet.
 
 Honest limitation
 
