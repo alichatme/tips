@@ -1607,7 +1607,7 @@ key_local + key_network
       Final_Entropy
 ```
 
-And key_network is an independent secret protected in Core Recovery Key Network Storage.
+And key_network is an independent secret protected in the Network Recovery Infrastructure.
 
 Conceptual Process
 
