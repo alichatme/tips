@@ -1,6 +1,6 @@
 ---
 tip: XXXX
-title: "ATHENA: Admission and Transaction Handling for Efficient Network Architecture"
+title: "AVP-DS: Increasing the Number of Confirmed Transactions Through Address-Based Parallel Validation Paths and Separation of the Decision Layer from the Execution Layer"
 author: Ali (@alichatme)
 status: Draft
 type: Standards Track
@@ -8,9 +8,9 @@ category: Core
 created: 2026-07-11
 discussions-to: https://github.com/tronprotocol/tips/issues/905
 ---
-# ATHENA
+# AVP-DS
 
-### Admission and Transaction Handling for Efficient Network Architecture
+### Increasing the Number of Confirmed Transactions Through the Creation and Expansion of Address-Based Parallel Validation Paths and Separation of the Decision Layer from the Execution Layer
 
 ### Smarter Admission. Fairer Scheduling. Greater Scalability.
 
