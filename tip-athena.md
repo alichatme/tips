@@ -28,13 +28,13 @@ Various solutions have been proposed to improve blockchain scalability, includin
 
 The AVP-DS capability, by separating the decision layer from the execution layer in a network and by organizing and creating address-based parallel validation paths, offers an effective approach to increasing the network's processing capacity. The goal of this capability is more efficient distribution of transactions based on the instructions and permits issued by the network protocol; in such a way that parallel validation paths are created and expanded not by default or pre-determined, but dynamically and based on addressing and the permit issued by the network protocol. These paths are considered in accordance with the current capacity of the network or new hardware and software capacities—such as new signature algorithms, new nodes, or new execution engines. This approach increases transaction confirmation capacity without replacing the fundamental mechanisms of the network—such as consensus, state transition, or the ledger structure.
 
-``1. Separation of the Decision Layer from the Execution Layer``
+### 1. Separation of the Decision Layer from the Execution Layer
 
 One of the main principles of the AVP-DS capability is the separation of the decision-making layer regarding the permitted validation path of transactions from the components responsible for validation in the network. In this framework, the network protocol is the authority for issuing permits to route transactions to the network and to place them in the permitted validation path. The instructions regarding the processing path, the permitted components, and the validation conditions are determined within the same issued permit, and the network components act based on the instructions contained in the permit and within the scope of the components specified therein.
 
 This separation is carried out with the aim of using parallel validation paths and providing a basis for organizing these paths according to the path specified in the permit and the rules of the network protocol. Path changes, handling invalid or dependent transactions, and management of exceptional conditions are carried out in accordance with the rules and mechanisms of the network protocol. After the permit is issued and the components and validation path are determined therein, no path or component outside the framework of the issued permit is valid, and all network components are required to comply with the instructions and the processing path specified in the permit.
 
-`2. Address-Based Parallel Validation Paths`
+### 2. Address-Based Parallel Validation Paths
 
 The AVP-DS capability focuses on creating and expanding parallel validation paths using the mechanism of addressing transactions. Its goal is to provide a framework for routing transactions to parallel paths for validation, using the division of the network's existing hardware capacity and the effective distribution of incoming transactions among these groups.
 
@@ -44,7 +44,7 @@ When issuing a permit, the network protocol, based on the received information, 
 
 The role of AVP-DS in the network is solely to add a capability, not to impose a requirement or interfere with existing mechanisms. This capability only adds the possibility of creating and expanding address-based parallel validation paths to the network and does not create any requirement for its use; it also does not create any change in the consensus algorithm, ledger structure, state transition logic, or the native validation rules of the network. All decisions regarding sequential or parallel validation, path determination, conflict management, and permit issuance are made exclusively within the framework of the policies and rules of the network protocol, and AVP-DS has no interference in these mechanisms. In other words, AVP-DS is an optional and activatable platform that, if the network protocol decides, places the existing processing capacity and new capacities at the disposal of parallel validation paths.
 
-`3. Addressing Based on Existing and Added Capacity to the Network`
+### 3. Addressing Based on Existing and Added Capacity to the Network
 
 One of the important goals of the AVP-DS capability is to provide parallel validation paths using addressing and determining the validation path in real time and in the form of a permit for each transaction by the network protocol.
 
@@ -62,7 +62,7 @@ Adding parallel paths increases the input validation capacity to the network and
 
 The goal of this capability is to add parallel validation paths in proportion to the rate of incoming transaction requests to the network, so that the basis for effective use of existing capacity or capacity added in the future to the network is provided; this goal is realized based on addressing and separate determination of the validation path of each transaction in the network and based on the permit of the network protocol.
 
-`4. Preserving the Current Mechanisms of the Network`
+### 4. Preserving the Current Mechanisms of the Network
 
 The AVP-DS capability, with the aim of improving and organizing validation paths and effectively using the current capacity of the network, is designed based on the important principle of separating the decision layer from the execution layer. This capability does not create any change in initial validation, transaction execution engines, state transition, consensus, block production, finalization, or registration of results in the network ledger.
 
