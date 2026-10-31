@@ -1928,85 +1928,89 @@ ATHENA significantly reduces the attack surface at the transaction admission and
 However, ATHENA is not responsible for the consensus algorithm or the fundamental security of the Host Protocol. It serves solely as a complementary layer that manages and controls the transaction lifecycle—from the initial admission request through to final monitoring after ledger recording.
 ___
 ___
+# The AVP-DS Capability Vision for the Network
 
-# The Architectural Vision Behind ATHENA
+"The true innovation of AVP-DS is not parallel validation of transactions itself; it is determining the routing path of transactions across the network for their confirmation, based on addressing and the components specified in the permit issued by the Network Protocol.
 
-"The true innovation of ATHENA is not parallel execution itself; it is making transaction routing a first-class architectural component of blockchain systems."
+This capability is one of the fundamental capabilities in blockchain networks built on the separation of the Decision Layer from the Execution Layer."
 
-### Separating Transaction Routing from Transaction Execution
+Separation of the Decision Layer from the Execution Layer
 
-One of the fundamental principles of the ATHENA architecture is the separation of Transaction Routing from Transaction Execution.
+One of the fundamental principles of the AVP-DS capability is the separation of the Decision Layer — responsible for deciding the routing and confirmation path of a transaction — from the Execution Layer, i.e., the components responsible for validating and confirming the transaction in the network.
 
-In most conventional blockchain architectures, after a transaction enters the network, its validation and execution path is gradually determined based on the internal state of the network. In this model, routing decisions are made concurrently with transaction entry, and different network components make independent decisions throughout the processing pipeline.
+In many conventional blockchain architectures, once a transaction enters the network, its validation and execution path is determined gradually and based on the internal state of the network. In this model, routing decisions are made concurrently with the transaction's entry into the network and throughout the processing stages, and different network components may make independent decisions at different stages of the process.
 
-ATHENA fundamentally changes this approach.
+The AVP-DS capability fundamentally changes this approach.
 
-In ATHENA, before the transaction enters the network, its complete validation and execution path is determined. This path is recorded in the form of an Execution Permit and enters the network alongside the transaction. From that moment onward, all network components are required to follow only the path defined in the Execution Permit—without making any independent routing or execution decisions.
+In AVP-DS, before the transaction enters the network, its complete validation and execution path is determined. This path is recorded in the form of an Execution Permit, which enters the network alongside the transaction. From that moment onward, all network components are required to follow the path defined in the Execution Permit, and no independent decision-making regarding path changes or re-routing of the transaction is permitted outside the framework of the permit.
 
-In other words, the Execution Permit is the execution blueprint of the transaction, and all network components are merely executors of that blueprint.
+In other words, the Execution Permit is the execution blueprint of the transaction, and all network components act according to this blueprint and within the framework of the Network Protocol's rules.
 
-### The Intelligent Routing Layer
+### The Intelligent Decision Layer
 
-In this architecture, ATHENA creates an intelligent transaction management and routing layer responsible for selecting the most appropriate processing path before the transaction enters the network.
+In this approach, the AVP-DS capability provides a foundation for intelligent management and routing of transactions, enabling the determination of the appropriate execution path before the transaction enters the network.
 
-This layer, based on transaction information, real-time network state, and Host Protocol policies, decides:
+Based on the transaction's information, the real-time state of the network, and the policies of the Network Protocol, this mechanism determines the following:
 
-- Which initial validator nodes should perform the validation
-- Which execution domain the transaction should enter
-- Which parallel execution engine within that domain should execute the transaction
-- How the complete transaction lifecycle—from admission to final ledger registration—should proceed
+- Which initial validator nodes should perform the validation.
+- Which execution domain the transaction should enter.
+- Which parallel execution engine within that domain should execute the transaction.
+- How the complete lifecycle of the transaction — from admission to final registration in the ledger — should proceed.
 
-As a result, the transaction's path is determined before it enters the network, and all network components simply follow that path.
+As a result, the transaction's path is determined before it enters the network, and network components subsequently act in accordance with the path specified in the Execution Permit.
 
-### Independence from Network Processing Capacity
+### Independence from Redesign and Rework
 
-The innovation of ATHENA is not in creating parallel execution engines or increasing the number of validator nodes.
+The innovation of AVP-DS is not the creation of parallel execution engines or an increase in the number of initial validator nodes.
 
-The core innovation is the creation of an independent transaction routing layer.
+The core innovation is providing the capability to route transactions from the moment of entry to registration in the ledger, based on the permit issued by the Network Protocol.
 
-For this reason, ATHENA has no inherent dependency on the number of initial validator nodes, the number of execution domains, or the number of parallel execution engines.
+For this reason, the AVP-DS capability is not limited to a specific number of initial validator nodes, execution domains, or parallel execution engines.
 
-Whenever the Host Protocol adds new processing capacity to the network, ATHENA can utilize that capacity—without any changes to its internal architecture—to route transactions more effectively.
+Whenever the Network Protocol adds new processing capacity to the network, AVP-DS can, through the addressing mechanism and the permits issued, utilize that capacity within parallel validation and execution paths.
 
-Therefore, ATHENA imposes no architectural ceiling on the expansion of processing paths.
+Therefore, AVP-DS imposes no fixed ceiling on the expansion of validation and execution paths.
 
-As network capacity grows, ATHENA can dynamically, balanced, and purposefully harness that capacity in the transaction routing process—without requiring any redesign or modification to its core logic.
+As network capacity grows, the possibility of dynamic and targeted expansion of parallel validation paths — through the use of additional parallel execution engines within the same domain — is provided, and this new capacity is used, based on the issued permits, to route transactions, without any need to rework the logic or base design of the network.
 
-### Intelligent Addressing: The Core of ATHENA
+### Intelligent Addressing: The Core of AVP-DS
 
-Although this architecture introduces concepts such as Execution Permits, execution domains, parallel engines, conflict management, behavior monitoring, and auditing, all of these capabilities are built upon a single foundational concept:
+Although this capability encompasses concepts such as the Execution Permit, execution domains, parallel execution engines, conflict management, and auditing, all of these capabilities rest on a single foundational concept:
 
-Intelligent transaction addressing before network entry.
+Intelligent addressing of the transaction, before it enters the network.
 
-In essence, ATHENA determines the optimal processing path for each transaction before it enters the network and then communicates that path to all network components through the Execution Permit.
+In essence, AVP-DS determines the execution path of each transaction before it enters the network — based on addressing and the permit issued by the Network Protocol — and communicates this path to the selected network components through the Execution Permit.
 
-From this perspective, the Execution Permit is not merely an admission authorization—it is the precise address and complete navigation map of the transaction within the network.
+From this perspective, the Execution Permit is the precise address of the transaction and the complete navigation map of its movement within the network.
 
-This single concept enables parallel validation and execution paths, conflict management, complete lifecycle auditing, and effective utilization of new network capacity.
+This foundational concept enables the creation of parallel validation and execution paths, conflict management, auditing, full coverage of the transaction lifecycle, and effective utilization of the network's new capacities.
 
-### Architectural Neutrality
+### The Principle of Neutrality
 
-ATHENA makes no changes to the consensus mechanism, governance model, ledger structure, account model, or native validation rules.
+The AVP-DS capability makes no change to the network's consensus mechanism, governance model, ledger structure, account model, or native validation rules.
 
-It also adds no new roles to network components.
+Furthermore, this capability imposes no new role on network components.
 
-All decisions regarding consensus, block production, Finality, and execution policies remain exclusively under the authority of the Host Protocol.
+All decisions regarding consensus, block production, finality, and the policies of transaction validation and execution remain exclusively under the authority of the Network Protocol.
 
-ATHENA's role is simply to determine the most appropriate processing path before the transaction enters the network and to keep all network components aligned with that path throughout the transaction lifecycle.
+The role of AVP-DS is to provide the ability to determine the appropriate execution path for each transaction before it enters the network, and to keep network components aligned with the determined path throughout the transaction's lifecycle.
 
-### The Architectural Motto
+### Why AVP-DS?
 
-ATHENA transforms transaction routing into a fundamental architectural component of blockchain systems.
+It is more rational, because instead of introducing new mechanisms, it relies on the native rules of the Network Protocol. The Execution Permit, addressing, and initial validation all operate within the framework of the network's existing policies, and no external component or new intermediary layer is imposed on the network. This means minimal implementation cost, maximal compatibility, and the elimination of any risk of incompatibility with existing mechanisms.
 
-Or, in other words:
+It is more intelligent, because the decision about each transaction's path is made before the transaction enters the network — not after entry, amid crowded queues and unnecessary competition. This means that, instead of "reacting to conditions," the network "predicts and determines conditions." As a result, architectural bottlenecks are removed, public queues are eliminated, and load is distributed based on addressing and actual capacity.
 
-ATHENA is the intelligent routing layer—not the execution layer.
+It is more scalable, because it is not tied to a specific number of nodes, domains, or engines. Whenever new capacity is added to the network, AVP-DS can utilize that capacity within parallel validation and execution paths without any change to its own logic. This means that the growth of network capacity and the growth of transaction confirmation capacity proceed simultaneously and in the same direction.
 
-All capabilities of this architecture—lifecycle management, parallel validation, execution domain selection, execution engine selection, conflict management, auditing, and behavior monitoring—are natural consequences of this foundational principle.
+It is more dynamic, because without any change to the consensus mechanism, ledger, account model, or native validation rules of the network, it forms parallel validation lanes dynamically, based on the volume of incoming transactions and from the current capacity of the network. This means that the number of active lanes is determined in real time, in proportion to the actual load of the network — not in advance or in a fixed manner. As a result, AVP-DS can, with any change in incoming volume, align its validation structure with the new conditions, without the need for redesign or rework.
 
-For this reason, the most important innovation of ATHENA is not the increase in parallel engines, but the introduction of an independent, intelligent, and scalable transaction routing layer that operates before the transaction enters the network—a layer that can evolve alongside Host Protocol capacity growth, without requiring any changes to the base architecture or consensus mechanism.
+### The AVP-DS capability means:
 
+Network growth,
+the addition of hardware and software capacity,
+and an increase in transaction confirmation capacity through parallel validation paths;
 
-**The true innovation of ATHENA is not parallel execution itself; it is making transaction routing a first-class architectural component of blockchain systems.
-ATHENA does not add capacity—it gives every transaction an address.
-As the network grows, ATHENA uses every resource by knowing exactly where to send each transaction.**
+all of this through the separation of the Decision Layer from the Execution Layer, without any change to the fundamental mechanisms of the network, and through the routing and addressing of each transaction based on the Execution Permit issued by the Network Protocol.
+___
+___
