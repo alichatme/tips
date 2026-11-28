@@ -1102,7 +1102,7 @@ This information may include the following:
 
 By collecting data related to the received request from network components and monitoring the real-time load of components, the Network Protocol assesses the actual and real-time state of the network, thereby providing a precise basis for its subsequent decision-making and operations.
 
-### Phase 6: Network Protocol: Preventing Exceptions and Conflicts, as well as Predicting Expected Behavior and Outcome
+### Phase 6: Network Protocol — Preventing Exceptions and Conflicts, and Predicting Expected Behavior and Outcome
 
 In this phase, the Network Protocol, by analyzing the information collected from the wallet (in the form of a transaction submission request) and network components — including the status of executing transactions, related transactions, and smart contracts — and after monitoring the real-time load of execution components, predicts and evaluates the probability of exceptions and conflicts for the new transaction. This evaluation is carried out relying on network policies and utilizing past analytical records. This evaluation specifically focuses on identifying potential dependencies with executing transactions.
 
@@ -1113,24 +1113,32 @@ The Network Protocol, considering the following inputs:
 - Network policies and rules
 - Experience and analytical reports prepared regarding how past conflicts were handled
 
-adopts the conflict prevention policy. This policy may include the following:
+adopts potential conflict prevention policies. These policies may include the following:
 
-- Determining the handling order for related transactions (to prevent the simultaneous execution of incompatible operations)
-- Requiring the use of a "Shared Path" for transactions that access a shared state
-- Directing independent transactions to parallel paths to prevent the creation of queues and bottlenecks
+- Determining the handling order for related transactions (to prevent simultaneous execution of incompatible operations)
+- Requiring the use of a "Shared Path" for transactions that access a shared state and/or a transaction currently executing in the network
+- Directing independent transactions by determining components and based on the validation difficulty level to new or existing parallel validation paths with low processing load, to prevent the creation of queues and bottlenecks
 
-Based on this evaluation, the Network Protocol adopts a preventive policy appropriate to the specific conditions of that transaction; including determining whether the transaction operates on independent states or depends on a shared state or shared root (such as a high-traffic account like an exchange, a liquidity pool, or accounts related to a shared root).
+Based on this evaluation, the Network Protocol adopts preventive policies appropriate to the specific conditions of that transaction; including determining whether the transaction operates on independent states, or depends on a shared state, shared root, or a transaction whose outcome depends on the outcome of another transaction (such as a high-traffic exchange account, liquidity pool, and similar cases):
 
-After adopting conflict prevention policies, the Network Protocol determines and specifies the expected behavior and outcome for this transaction.
+- Transactions with independent state: Are distributed into new independent parallel validation lanes or lanes with low load to be validated without friction, queue creation, bottlenecks, or global locking.
+- Transactions related to a shared state, shared root, or a transaction whose outcome depends on another transaction: Are routed and directed with the requirement to use the roadmap and the "identical path." In these cases, by selecting an identical component combination for new transactions and the transactions under confirmation of the same account (with a shared state, shared root, or a transaction whose outcome depends on another transaction), the Network Protocol simulates the sequential validation behavior of conventional networks within a single validation lane. This approach causes the majority of conflicts — including conflicts resulting from the incorrect ordering of transaction submission requests related to an account with a shared root, shared state, or a transaction whose outcome depends on another transaction — to be predicted and prevented by the Network Protocol at the admission layer itself, prior to entering the execution layer.
 
-Expected behavior and outcome means predicting the final result of the transaction's validation and execution before it enters the network — a result expected to be achieved after the transaction is executed in the network. This result is predicted and defined by the Network Protocol based on the information received from the transaction submission request from the wallet, the transaction type, and the network's validation policies.
+After adopting conflict prevention policies, the Network Protocol determines and specifies the expected behavior and outcome for these transactions.
 
-Transactions are divided into two main groups based on the received requests and the certainty of the expected behavior and outcome:
+Expected behavior and outcome means predicting the final result of the transaction's validation and execution before it enters the network — a result expected to be achieved after the transaction is executed in the network.
 
-- Transactions whose expected behavior and outcome are simple, deterministic, and highly predictable; such as transferring an asset (e.g., 10 TRX) from the sender's address (transaction submission requester) to the receiver's address. In the above example, the Network Protocol predicts the expected behavior and outcome with high certainty. Consequently, the Network Protocol considers the minimum allowed difficulty for validating the requested transaction and uses the minimum allowed resources and minimum allowed hardware to validate this transaction.
-- Transactions whose expected behavior and outcome are more complex, more sensitive, or dependent on a shared state or shared root; such as a smart contract invocation. These cases are directed to validation paths with higher difficulty in accordance with the network's validation policies, and more hardware and resources are allocated to them.
+This result is predicted, defined, and determined by the Network Protocol based on the information received from the transaction submission request from the wallet, the transaction type, and the network's validation policies.
 
-The degree of certainty in predicting the validation result of the requested transaction (i.e., the expected behavior and outcome) — based on the network's validation policies, the information received in the form of a transaction submission request from the wallet, and the transaction type — provides the Network Protocol with the ability to perform "right-sized" and dynamic allocation of resources and hardware required for validation (on a per-transaction basis).
+Transactions are divided into the following groups based on the received requests and the degree of certainty in predicting the expected behavior and outcome:
+
+- Transactions whose expected behavior and outcome are predictable with certainty — such as transferring an asset (e.g., 10 TRX) from the sender's address (transaction submission requester) to the receiver's address. In this example, the Network Protocol predicts the expected behavior and outcome with high certainty. Consequently, if the requested transaction has an independent state, the Network Protocol considers the minimum allowed difficulty for its validation and allocates the minimum allowed resources and hardware to it.
+- Transactions whose expected behavior and outcome are more complex or sensitive and have an independent state — such as a smart contract invocation — are validated in validation paths with higher difficulty in accordance with network validation policies, and more hardware and resources are allocated to them.
+- Transactions whose outcome depends on the outcome of other transactions — or depend on a shared state or shared root — are routed and directed in accordance with conflict prevention policies, without determining new difficulty and without considering the degree of certainty in predicting the expected behavior and outcome, but with the requirement to use the roadmap, components, and the "shared and identical path" with the executing transactions of the same state in the network.
+
+The degree of certainty in predicting the validation result of the requested transactions (i.e., the expected behavior and outcome) — based on the network's validation policies, the information received in the form of a transaction submission request from the wallet, and the transaction type — provides the Network Protocol with the ability for "right-sized" and dynamic allocation of resources and hardware required for validation — only for transactions with an independent state — and on a per-transaction basis.
+
+For transactions with a shared state or shared root, or a transaction whose outcome depends on the outcome of another transaction, in accordance with conflict prevention policies, they are validated using the identical roadmap, path, and components — with the transaction having a shared state currently executing in the network.
 
 In addition to the above, the expected behavior and outcome provides a useful tool at the disposal of the Network Protocol for analyzing errors, improving policies, increasing validation transparency, and facilitating the investigation and identification of unexpected behaviors of network components during transaction execution.
 
