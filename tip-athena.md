@@ -1162,13 +1162,26 @@ For transactions with a shared state or shared root, or a transaction whose outc
 
 By identically selecting the roadmap, addressing, routing, and using identical components for new transactions and those with a shared state or shared root (or a transaction whose outcome depends on another), the Network Protocol causes the simulation of the sequential validation behavior of conventional networks within a single validation lane. This approach causes the majority of conflicts — including conflicts resulting from the incorrect ordering of requests of an account with a shared root or state, or a transaction whose outcome depends on the outcome of another transaction — to be identified and prevented at the admission layer itself, prior to entering the execution layer.
 
-### Phase 8: Routing the Transaction to the Execution Engine Designated in the Execution Permit
+### Phase 8: Network Protocol — Issuing the Execution Permit
 
-After completion of initial validation, the transaction is routed exactly in accordance with the Execution Permit to the designated execution domain and the specified execution engine.
+The Network Protocol, after identifying and determining the policies related to the transaction's state (whether it has an independent state — or its outcome depends on the outcome of an executing transaction):
 
-No new decision is made by any node at this stage.
+- If the requested transaction has an independent state: After determining the difficulty level, it forms new parallel software validation lanes using the least-loaded network components (prioritizing components with available validation capacity — or, in the absence of available capacity, using the least-loaded existing software lane) — including initial validation nodes and the least-loaded execution engine among the parallel engines of a domain — dynamically and on a per-transaction basis. Then, it issues the Execution Permit for the respective transaction submission request in two versions.
+- If the requested transaction has a shared state or shared root, or is a transaction whose outcome depends on the outcome of an executing transaction: The Network Protocol routes and directs the transaction by simulating sequential validation similar to conventional networks and requiring the use of the identical roadmap, identical components, and "shared path" with the executing transactions (having a shared state or root, or dependent on the outcome of an executing transaction) — without determining new difficulty, without considering the required difficulty level, and without creating a new validation lane. Then, it issues the Execution Permit in two versions.
 
-Network members are not authorized to make independent decisions at any stage of validation; all stages must be performed exactly in accordance with the Execution Permit.
+The Execution Permit is not merely a permit for network entry; rather, it is the dedicated roadmap of each transaction, in which the Network Protocol determines addressing, routing, and transaction direction — from the moment the wallet sends the transaction submission request to the Network Protocol until registration in the ledger. This permit is the interface between the Decision Layer and the Execution Layer and conveys the dedicated instructions of each transaction to the relevant components.
+
+The Execution Permit is issued on a per-transaction basis and based on conflict prevention policies and the required difficulty level, and includes the following:
+
+- The designated components responsible for validation on a per-transaction basis;
+- The determined difficulty level (only for transactions with an independent state);
+- Default exception and conflict management;
+- Designation of the permitted signature algorithm;
+- Expected behavior or outcome;
+- Utilization of designated components and not the entire available hardware capacity of the network, including initial validators, execution domain, and the least-loaded execution engine among the parallel engines of that domain;
+- And other required parameters based on Network Protocol requirements.
+
+The Execution Permit is the official document and dedicated roadmap of that transaction, in which the Network Protocol's decisions — based on conflict management policies and required difficulty, including designated components, validation path, addressing, and other necessary parameters — are recorded. This permit will be the basis for executing all subsequent phases of the transaction lifecycle in the network, and all designated components are required to act strictly in accordance with it.
 
 ### Phase 9: Transaction Execution
 
