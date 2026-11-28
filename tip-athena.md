@@ -1144,18 +1144,23 @@ In addition to the above, the expected behavior and outcome provides a useful to
 
 ### Phase 7: Network Protocol — Creating Parallel Software Validation Lanes and Determining the Validation Path
 
-After adopting the policy for preventing potential exceptions and conflicts, the Network Protocol enters the phase of creating parallel software validation lanes by selecting components and determining the transaction's validation path. In this phase, the Network Protocol forms parallel validation lanes in a software-driven, dynamic, and per-transaction state basis (including initial validation nodes, execution domain, and the least-loaded execution engine among the parallel engines of a domain), based on the volume and number of incoming transaction requests to the network, real-time load monitoring of network components, policies for preventing potential exceptions and conflicts, and utilizing past experiences.
+1. Creating Parallel Validation Lanes for Transactions with an "Independent State"
 
-The Network Protocol selects the components responsible for validation and execution exclusively for that transaction, and by this selection, determines the exact validation and routing path. Each transaction uses only the designated path and components (and not the entire hardware capacity of the network or a fixed, public path) for its validation.
+For transactions with an independent state, the Network Protocol determines the validation difficulty level on a per-transaction basis and based on the following criteria:
 
-The Network Protocol organizes parallel software validation lanes per transaction, considering the separation of independent state from shared state (or shared root):
+- The degree of certainty in predicting the validation result of the requested transaction (i.e., the expected behavior and outcome)
+- Network policies
+- The volume and number of incoming transaction requests to the network
+- Real-time load monitoring of network components
+- Past experiences and analytical reports
 
-- Transactions with independent state: Are distributed in independent parallel validation lanes to be validated without friction, queue creation, bottlenecks, or global locking.
-- Transactions related to shared state or shared root: Are routed and directed with the requirement to use the roadmap and "shared path." In these cases, by selecting the identical component combination for new transactions and the transactions under confirmation of the same account (or shared state), the Network Protocol causes the simulation of the sequential validation behavior of conventional networks within a single validation lane. This approach causes the majority of conflicts — including conflicts resulting from the incorrect ordering of requests of an account with a shared root, state, or dependency — to be identified and prevented at the admission layer itself, prior to entering the execution layer.
+Accordingly, transactions with an independent state are distributed into new or existing low-load parallel validation lanes to be validated without friction, queue creation, bottlenecks, or global locking. The Network Protocol selects the components responsible for validation and execution exclusively for that transaction, and through this selection, determines the exact validation and routing path of the transaction. Each transaction uses only the designated path and components (and not the entire hardware capacity of the network or a public and fixed path) for its validation.
 
-Maintaining logical order among dependent requests becomes important when we realize that the concurrent execution of related requests causes conflict and inconsistency in the network state and increases validation cost.
+2. Determining the Validation Path for Transactions with a "Shared State, Shared Root, or a Transaction Whose Outcome Depends on the Outcome of Another Transaction" — Without Creating a New Lane
 
-Parallel validation lanes are created in a software-driven, dynamic, and per-transaction manner — not in a hardware-driven and fixed manner. In this phase, validation components and the validation path are determined per transaction, in proportion to the number of incoming transaction requests to the network, real-time load monitoring of network components, and transactions under validation in the execution layer.
+For transactions with a shared state or shared root, or a transaction whose outcome depends on the outcome of another transaction, the Network Protocol routes and directs the transaction by simulating sequential validation similar to conventional networks and with the requirement to use the roadmap, components, and the "shared path" with the transactions under validation — without determining new difficulty, without considering the required difficulty level, and without creating a new validation lane.
+
+By identically selecting the roadmap, addressing, routing, and using identical components for new transactions and those with a shared state or shared root (or a transaction whose outcome depends on another), the Network Protocol causes the simulation of the sequential validation behavior of conventional networks within a single validation lane. This approach causes the majority of conflicts — including conflicts resulting from the incorrect ordering of requests of an account with a shared root or state, or a transaction whose outcome depends on the outcome of another transaction — to be identified and prevented at the admission layer itself, prior to entering the execution layer.
 
 ### Phase 8: Routing the Transaction to the Execution Engine Designated in the Execution Permit
 
